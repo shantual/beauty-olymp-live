@@ -249,6 +249,8 @@ export default function Dashboard() {
         values: { ...(prev[workId]?.values || {}), [criterionId]: Number(value) },
       },
     }));
+
+    setCriterionTitle('');
   }
 
   function setComment(workId, comment) {
