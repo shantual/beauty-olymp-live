@@ -11,16 +11,6 @@ const DEFAULT_CRITERIA = [
   { id: 'c3', title: 'Техническая сложность', min: 1, max: 10 },
 ];
 
-import { useEffect, useMemo, useState } from 'react';
-
-const STORAGE_KEY = 'beauty-olymp-v2';
-
-const DEFAULT_CRITERIA = [
-  { id: 'c1', title: 'Креативность', min: 1, max: 10 },
-  { id: 'c2', title: 'Качество исполнения', min: 1, max: 10 },
-  { id: 'c3', title: 'Техническая сложность', min: 1, max: 10 },
-];
-
 const DEFAULT_JUDGES = [
   {
     id: 'J-001',
