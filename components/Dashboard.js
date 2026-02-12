@@ -1,3 +1,16 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+const STORAGE_KEY = 'beauty-olymp-v2';
+const SESSION_KEY = 'beauty-olymp-session-v1';
+
+const CONTEST_OPTIONS = ['Эстетика Олимпа', 'Креатив Олимпа', 'Образ Олимпа', 'Империя Олимпа'];
+
+const DEFAULT_CRITERIA = [
+  { id: 'c1', title: 'Креативность', min: 1, max: 10 },
+  { id: 'c2', title: 'Качество исполнения', min: 1, max: 10 },
+  { id: 'c3', title: 'Техническая сложность', min: 1, max: 10 },
+];
+
 import { useEffect, useMemo, useState } from 'react';
 
 const STORAGE_KEY = 'beauty-olymp-v2';
@@ -23,7 +36,7 @@ const DEFAULT_JUDGES = [
 const DEFAULT_WORKS = [
   {
     id: 'EO-00001',
-    contest: 'Эстетика',
+    contest: 'Эстетика Олимпа',
     nomination: 'Маникюр',
     category: 'Мастер',
     title: 'Северное сияние',
@@ -46,6 +59,62 @@ function createDefaultState() {
     scores: [],
     adminUsers: [{ login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }],
   };
+}
+
+function normalizeState(rawState) {
+  const next = { ...createDefaultState(), ...(rawState || {}) };
+
+  // Миграция: исправляем старый неверный hash demo-пароля и отсутствие active.
+  next.judges = (next.judges || []).map((judge) => {
+    if (
+      judge.login === 'judge1' &&
+      judge.passwordHash === 'a5ceca62e47d0f6c0f56aa8198c75c5dc2e4f2f4903a06f5f5f7ff4f5d16fd5c'
+    ) {
+      return {
+        ...judge,
+        active: judge.active ?? true,
+        passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+      };
+    }
+    return { ...judge, active: judge.active ?? true };
+  });
+
+  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
+  const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
+  const demoJudge = {
+    id: 'J-001',
+    fullName: 'Судья Демонстрационный',
+    email: 'judge@demo.local',
+    login: 'judge1',
+    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+    active: true,
+  };
+
+  if (demoIndex === -1) {
+    next.judges.unshift(demoJudge);
+  } else {
+    next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
+  }
+
+  return next;
+}
+
+function normalizeSession(rawSession, normalizedState) {
+  if (!rawSession || !rawSession.role) return { role: null, id: null, login: null };
+
+  if (rawSession.role === 'admin') {
+    const adminExists = (normalizedState.adminUsers || []).some((admin) => admin.login === rawSession.login);
+    return adminExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  if (rawSession.role === 'judge') {
+    const judgeExists = (normalizedState.judges || []).some(
+      (judge) => judge.id === rawSession.id && judge.login === rawSession.login && judge.active
+    );
+    return judgeExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  return { role: null, id: null, login: null };
 }
 
 function parseList(value) {
@@ -77,12 +146,21 @@ function toCsv(rows) {
     .join('\n');
 }
 
+function safeParseJson(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 export default function Dashboard() {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
+  const [sessionReady, setSessionReady] = useState(false);
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
   const [workDraft, setWorkDraft] = useState({
-    contest: 'Эстетика',
+    contest: 'Эстетика Олимпа',
     nomination: '',
     category: 'Дебют',
     title: '',
@@ -96,17 +174,65 @@ export default function Dashboard() {
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [importText, setImportText] = useState('');
+  const [toast, setToast] = useState('');
+  const toastTimerRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setState(JSON.parse(saved));
+    const rawSession = localStorage.getItem(SESSION_KEY);
+
+    if (!saved) {
+      if (rawSession) {
+        localStorage.removeItem(SESSION_KEY);
+      }
+      setSessionReady(true);
+      return;
     }
+
+    const parsedState = safeParseJson(saved);
+    if (!parsedState) {
+      localStorage.removeItem(STORAGE_KEY);
+      if (rawSession) {
+        localStorage.removeItem(SESSION_KEY);
+      }
+      setSessionReady(true);
+      return;
+    }
+
+    const normalizedState = normalizeState(parsedState);
+    setState(normalizedState);
+
+    if (rawSession) {
+      const parsedSession = safeParseJson(rawSession);
+      if (parsedSession) {
+        setSession(normalizeSession(parsedSession, normalizedState));
+      } else {
+        localStorage.removeItem(SESSION_KEY);
+      }
+    }
+
+    setSessionReady(true);
   }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    if (session.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
+  }, [session, sessionReady]);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+  }, []);
 
   const judgeAssignments = useMemo(() => {
     if (session.role !== 'judge') return [];
@@ -157,10 +283,11 @@ export default function Dashboard() {
   }, [state.scores, state.works]);
 
   async function login() {
+    const normalizedLogin = loginForm.login.trim();
     const passwordHash = await sha256(loginForm.password);
 
     if (loginForm.role === 'admin') {
-      const admin = state.adminUsers.find((a) => a.login === loginForm.login && a.passwordHash === passwordHash);
+      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
       if (admin) {
         setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
         return;
@@ -169,7 +296,7 @@ export default function Dashboard() {
 
     if (loginForm.role === 'judge') {
       const judge = state.judges.find(
-        (j) => j.login === loginForm.login && j.passwordHash === passwordHash && j.active
+        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
       );
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
@@ -180,7 +307,21 @@ export default function Dashboard() {
     alert('Неверные данные для входа.');
   }
 
+
+  function showToast(message) {
+    setToast(message);
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
+  }
+
   function addWork() {
+    if (!workDraft.nomination.trim() || !workDraft.title.trim()) {
+      showToast('Заполните минимум номинацию и название работы');
+      return;
+    }
+
     const newWork = {
       id: generateWorkId(state.works),
       contest: workDraft.contest,
@@ -196,22 +337,35 @@ export default function Dashboard() {
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
     setWorkDraft({
-      contest: 'Эстетика', nomination: '', category: 'Дебют', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
+      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
+    showToast('Добавлено');
   }
 
   async function addJudge() {
+    if (!judgeDraft.fullName.trim() || !judgeDraft.login.trim() || !judgeDraft.password) {
+      showToast('Заполните ФИО, логин и пароль судьи');
+      return;
+    }
+
+    const duplicateLogin = state.judges.some((judge) => judge.login === judgeDraft.login.trim());
+    if (duplicateLogin) {
+      showToast('Судья с таким логином уже существует');
+      return;
+    }
+
     const passwordHash = await sha256(judgeDraft.password);
     const judge = {
       id: `J-${String(state.judges.length + 1).padStart(3, '0')}`,
       fullName: judgeDraft.fullName,
       email: judgeDraft.email,
-      login: judgeDraft.login,
+      login: judgeDraft.login.trim(),
       passwordHash,
       active: true,
     };
     setState((prev) => ({ ...prev, judges: [...prev.judges, judge] }));
     setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
+    showToast('Добавлено');
   }
 
   function addCriterion() {
@@ -249,8 +403,6 @@ export default function Dashboard() {
         values: { ...(prev[workId]?.values || {}), [criterionId]: Number(value) },
       },
     }));
-
-    setCriterionTitle('');
   }
 
   function setComment(workId, comment) {
@@ -261,6 +413,8 @@ export default function Dashboard() {
         comment,
       },
     }));
+
+    setCriterionTitle('');
   }
 
   function submitScore(workId) {
@@ -314,7 +468,7 @@ export default function Dashboard() {
 
     const imported = dataRows.map((row, idx) => ({
       id: generateWorkId([...state.works, ...Array(idx)]),
-      contest: row[0] || 'Эстетика',
+      contest: row[0] || 'Эстетика Олимпа',
       nomination: row[1] || 'Без номинации',
       category: row[2] || 'Дебют',
       title: row[3] || `Работа ${idx + 1}`,
@@ -369,6 +523,7 @@ export default function Dashboard() {
           <button onClick={login}>Войти</button>
           <small>Демо: admin/admin или judge1/password</small>
         </div>
+        {toast ? <div className="toast">{toast}</div> : null}
         <Styles />
       </div>
     );
@@ -380,7 +535,7 @@ export default function Dashboard() {
       <div className="layout">
         <div className="toolbar">
           <strong>Судья: {session.login}</strong>
-          <button onClick={() => setSession({ role: null })}>Выйти</button>
+          <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         </div>
         <div className="card">
           <h2>Прогресс</h2>
@@ -435,6 +590,7 @@ export default function Dashboard() {
             </div>
           );
         })}
+        {toast ? <div className="toast">{toast}</div> : null}
         <Styles />
       </div>
     );
@@ -448,7 +604,7 @@ export default function Dashboard() {
     <div className="layout">
       <div className="toolbar">
         <strong>Администратор: {session.login}</strong>
-        <button onClick={() => setSession({ role: null })}>Выйти</button>
+        <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       </div>
 
       <div className="card">
@@ -462,7 +618,9 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>Создание карточки работы</h3>
-        <input placeholder="Конкурс" value={workDraft.contest} onChange={(e) => setWorkDraft((p) => ({ ...p, contest: e.target.value }))} />
+        <select value={workDraft.contest} onChange={(e) => setWorkDraft((p) => ({ ...p, contest: e.target.value }))}>
+          {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+        </select>
         <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
         <input placeholder="Категория" value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))} />
         <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
@@ -527,6 +685,7 @@ export default function Dashboard() {
         <button onClick={exportScores}>Экспорт всех оценок CSV</button>
         <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
       </div>
+      {toast ? <div className="toast">{toast}</div> : null}
       <Styles />
     </div>
   );
@@ -545,6 +704,7 @@ function Styles() {
       .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
       .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
       .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .toast { position: fixed; right: 20px; bottom: 20px; background: #152238; color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
       @media (max-width: 768px) { .layout { padding: 12px; } }
