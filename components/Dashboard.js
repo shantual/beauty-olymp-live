@@ -713,6 +713,7 @@ export default function Dashboard() {
   if (!session.role) {
     return (
       <div className="layout">
+        <BrandHeader />
         <div className="card narrow">
           <h1>Beauty Olymp — система судейства</h1>
           <p>Вход для администратора или судьи.</p>
@@ -744,6 +745,7 @@ export default function Dashboard() {
     const done = judgeAssignments.filter((a) => a.status === 'оценено').length;
     return (
       <div className="layout">
+        <BrandHeader />
         <div className="toolbar">
           <strong>Судья: {session.login}</strong>
           <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
@@ -842,6 +844,7 @@ export default function Dashboard() {
 
   return (
     <div className="layout">
+      <BrandHeader />
       <div className="toolbar">
         <strong>Администратор: {session.login}</strong>
         <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
@@ -1154,29 +1157,73 @@ export default function Dashboard() {
   );
 }
 
+
+function BrandHeader() {
+  return (
+    <div className="brand-header">
+      <img src="/beauty-olymp-logo.png" alt="Association of Beauty Professionals | beauty olymp" className="brand-logo-image" />
+    </div>
+  );
+}
+
+
 function Styles() {
   return (
     <style jsx global>{`
-      body { margin: 0; font-family: Inter, Arial, sans-serif; background: #f5f7fb; }
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
+      body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #281C68; background: radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%), radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%), radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%), #fff; }
       .layout { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
-      .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); display: grid; gap: 8px; }
+      .brand-header { display: flex; justify-content: flex-start; margin-bottom: 4px; }
+      .brand-logo-image { width: min(360px, 65vw); height: auto; object-fit: contain; }
+      .card { background: rgba(255,255,255,0.94); border: 1px solid rgba(40,28,104,0.1); border-radius: 14px; padding: 16px; box-shadow: 0 12px 34px rgba(40,28,104,0.08); display: grid; gap: 8px; }
       .narrow { max-width: 420px; margin: 40px auto; }
-      .toolbar { display: flex; justify-content: space-between; align-items: center; }
-      input, textarea, select, button { padding: 10px; border-radius: 8px; border: 1px solid #d8deea; font-size: 14px; }
-      button { border: none; background: #3348ff; color: #fff; cursor: pointer; }
+      .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+      input, textarea, select, button { padding: 10px; border-radius: 10px; border: 1px solid rgba(40,28,104,0.2); font-size: 14px; }
+      input, textarea, select { background: rgba(255,255,255,0.94); color: #281C68; }
+      input:focus, textarea:focus, select:focus { outline: none; border-color: #FF025D; box-shadow: 0 0 0 3px rgba(255,2,93,0.14); }
+      button { border: none; background: linear-gradient(135deg, #FF025D 0%, #d90178 100%); color: #fff; cursor: pointer; box-shadow: none; transition: transform 0.15s ease, filter 0.15s ease; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; font-family: 'Roboto Condensed', Arial, sans-serif; }
+      button:hover { filter: brightness(1.05); transform: translateY(-1px); }
+      button:active { transform: translateY(0); }
       .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
       .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
       .row { display: flex; gap: 8px; flex-wrap: wrap; }
-      .toast { position: fixed; right: 20px; bottom: 20px; background: #152238; color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
+      .toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #281C68 0%, #FF025D 100%); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
       .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
       .image-modal { width: min(1100px, 100%); }
       .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
       .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
       .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
+      h1, h2, h3, h4 { margin: 0; color: #281C68; font-family: "Roboto Condensed", Arial, sans-serif; letter-spacing: 0.2px; }
+      strong { color: #281C68; }
+      small { color: #7b709e; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
-      @media (max-width: 768px) { .layout { padding: 12px; } }
+
+      @media (max-width: 1024px) {
+        .layout { padding: 14px; gap: 12px; }
+        .card { padding: 14px; }
+        .toolbar { gap: 10px; flex-wrap: wrap; }
+        .row { gap: 6px; }
+        table { display: block; overflow-x: auto; white-space: nowrap; }
+      }
+
+      @media (max-width: 768px) {
+        .brand-logo-image { width: min(250px, 78vw); }
+        .layout { padding: 10px; gap: 10px; }
+        .card { padding: 12px; border-radius: 10px; }
+        .toolbar { flex-direction: column; align-items: stretch; }
+        .toolbar > * { width: 100%; }
+        .row { flex-direction: column; }
+        .row > * { width: 100%; }
+        input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
+        .grid { grid-template-columns: 1fr; }
+        .media { min-height: 180px; }
+        .modal-overlay { padding: 8px; align-items: flex-end; }
+        .modal { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
+        .image-modal { border-radius: 14px; }
+        .toast { right: 10px; left: 10px; bottom: 10px; text-align: center; }
+      }
     `}</style>
   );
 }
