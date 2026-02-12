@@ -192,6 +192,7 @@ export default function Dashboard() {
   const [adminTab, setAdminTab] = useState('main');
   const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
   const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxVideo, setLightboxVideo] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
   const [judgeEditId, setJudgeEditId] = useState(null);
   const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
@@ -729,13 +730,25 @@ export default function Dashboard() {
         {lightboxImage ? (
         <div className="modal-overlay" onClick={() => setLightboxImage('')}>
           <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setLightboxImage('')}>Закрыть</button>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
             <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
           </div>
         </div>
       ) : null}
 
+      {lightboxVideo ? (
+        <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
+          <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
+            <div className="video-frame video-expanded">
+              <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {toast ? <div className="toast">{toast}</div> : null}
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
@@ -748,7 +761,7 @@ export default function Dashboard() {
         <BrandHeader />
         <div className="toolbar">
           <strong>Судья: {session.login}</strong>
-          <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
+          <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         </div>
         <div className="card">
           <h2>Прогресс</h2>
@@ -766,12 +779,14 @@ export default function Dashboard() {
               <p>{work.description}</p>
               <div className="grid">
                 {work.photos.map((photo, index) => (
-                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media" onClick={() => setLightboxImage(photo)} />
+                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                 ))}
               </div>
-              <div className="grid">
+              <div className="grid judge-video-grid">
                 {work.videos.map((video) => (
-                  <div key={video} className="video-frame"><iframe src={video} title={work.id} className="media" allow="autoplay; encrypted-media" /></div>
+                  <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                    <iframe src={video} title={work.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                  </div>
                 ))}
               </div>
 
@@ -826,13 +841,14 @@ export default function Dashboard() {
         {lightboxImage ? (
         <div className="modal-overlay" onClick={() => setLightboxImage('')}>
           <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setLightboxImage('')}>Закрыть</button>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
             <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
           </div>
         </div>
       ) : null}
 
       {toast ? <div className="toast">{toast}</div> : null}
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
@@ -847,11 +863,11 @@ export default function Dashboard() {
       <BrandHeader />
       <div className="toolbar">
         <strong>Администратор: {session.login}</strong>
-        <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
+        <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       </div>
 
       <div className="card row">
-        <button onClick={() => setAdminTab('main')}>Основная вкладка</button>
+        <button onClick={() => setAdminTab('main')}>Админка</button>
         <button onClick={() => setAdminTab('judges')}>Судьи</button>
         <button onClick={() => setAdminTab('works')}>Работы</button>
         <button onClick={() => setAdminTab('import')}>Импорт</button>
@@ -886,12 +902,12 @@ export default function Dashboard() {
         >
           {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
         </select>
+        <select value={workDraft.direction} onChange={(e) => setWorkDraft((p) => ({ ...p, direction: e.target.value }))}>
+          {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+        </select>
         <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
         <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
           {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-        </select>
-        <select value={workDraft.direction} onChange={(e) => setWorkDraft((p) => ({ ...p, direction: e.target.value }))}>
-          {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
         </select>
         <input placeholder="Фамилия и отчество участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
         <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
@@ -931,15 +947,18 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>Рейтинг по номинациям и категориям</h3>
-        <div className="row">
+        <div className="row rating-filters">
+          <label>Конкурсы</label>
           <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
             <option value="all">Все конкурсы</option>
             {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
           </select>
+          <label>Направления</label>
           <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
             <option value="all">Все направления</option>
             {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
           </select>
+          <label>Категории</label>
           <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
             <option value="all">Все категории</option>
             {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
@@ -969,7 +988,7 @@ export default function Dashboard() {
       {adminTab === 'judges' ? (
         <div className="card">
           <h3>Все судьи</h3>
-          <table>
+          <div className="admin-table-wrap"><table>
             <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Статус</th><th>Действия</th></tr></thead>
             <tbody>
               {state.judges.map((judge) => {
@@ -1017,7 +1036,7 @@ export default function Dashboard() {
                 );
               })}
             </tbody>
-          </table>
+          </table></div>
         </div>
       ) : null}
 
@@ -1033,7 +1052,7 @@ export default function Dashboard() {
       {adminTab === 'works' ? (
         <div className="card">
           <h3>Все загруженные работы</h3>
-          <table>
+          <div className="admin-table-wrap"><table className="works-table">
             <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
             <tbody>
               {state.works.map((work) => {
@@ -1066,7 +1085,7 @@ export default function Dashboard() {
                 );
               })}
             </tbody>
-          </table>
+          </table></div>
         </div>
       ) : null}
 
@@ -1145,13 +1164,14 @@ export default function Dashboard() {
       {lightboxImage ? (
         <div className="modal-overlay" onClick={() => setLightboxImage('')}>
           <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setLightboxImage('')}>Закрыть</button>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
             <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
           </div>
         </div>
       ) : null}
 
       {toast ? <div className="toast">{toast}</div> : null}
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       <Styles />
     </div>
   );
@@ -1171,7 +1191,7 @@ function Styles() {
   return (
     <style jsx global>{`
       @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
-      body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #281C68; background: radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%), radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%), radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%), #fff; }
+      body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #000; background: radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%), radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%), radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%), #fff; }
       .layout { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
       .brand-header { display: flex; justify-content: flex-start; margin-bottom: 4px; }
       .brand-logo-image { width: min(360px, 65vw); height: auto; object-fit: contain; }
@@ -1179,7 +1199,7 @@ function Styles() {
       .narrow { max-width: 420px; margin: 40px auto; }
       .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
       input, textarea, select, button { padding: 10px; border-radius: 10px; border: 1px solid rgba(40,28,104,0.2); font-size: 14px; }
-      input, textarea, select { background: rgba(255,255,255,0.94); color: #281C68; }
+      input, textarea, select { background: rgba(255,255,255,0.94); color: #000; }
       input:focus, textarea:focus, select:focus { outline: none; border-color: #FF025D; box-shadow: 0 0 0 3px rgba(255,2,93,0.14); }
       button { border: none; background: linear-gradient(135deg, #FF025D 0%, #d90178 100%); color: #fff; cursor: pointer; box-shadow: none; transition: transform 0.15s ease, filter 0.15s ease; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; font-family: 'Roboto Condensed', Arial, sans-serif; }
       button:hover { filter: brightness(1.05); transform: translateY(-1px); }
@@ -1187,16 +1207,32 @@ function Styles() {
       .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
       .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
       .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .rating-filters label { font-size: 13px; font-weight: 700; color: #281C68; }
+      .admin-table-wrap { overflow-x: auto; }
+      .admin-table-wrap table { min-width: 920px; }
+      .top-logout { display: inline-flex; }
+      .mobile-logout { display: none; background: #281C68; margin-top: 4px; }
       .toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #281C68 0%, #FF025D 100%); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
       .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
-      .image-modal { width: min(1100px, 100%); }
+      .image-modal { width: min(1100px, 100%); position: relative; }
+      .video-modal { width: min(1200px, 100%); position: relative; }
+      .icon-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border-radius: 999px; padding: 0; font-size: 28px; line-height: 1; display: grid; place-items: center; z-index: 2; }
       .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
       .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
       .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
+      .judge-video-grid { grid-template-columns: 1fr; }
+      .judge-video-thumb { cursor: zoom-in; }
+      .video-expanded { aspect-ratio: 16 / 9; min-height: 58vh; }
+      .clickable { cursor: pointer; }
+      .works-table { table-layout: fixed; }
+      .works-table th, .works-table td { vertical-align: middle; }
+      .works-table th { text-align: center; }
+      .works-table td { text-align: left; }
+      .works-table td > .row { justify-content: flex-start; }
       h1, h2, h3, h4 { margin: 0; color: #281C68; font-family: "Roboto Condensed", Arial, sans-serif; letter-spacing: 0.2px; }
-      strong { color: #281C68; }
-      small { color: #7b709e; }
+      strong { color: #000; }
+      p, label, li, td, th, small { color: #000; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
 
@@ -1214,6 +1250,8 @@ function Styles() {
         .card { padding: 12px; border-radius: 10px; }
         .toolbar { flex-direction: column; align-items: stretch; }
         .toolbar > * { width: 100%; }
+        .top-logout { display: none; }
+        .mobile-logout { display: block; position: sticky; bottom: 8px; z-index: 10; }
         .row { flex-direction: column; }
         .row > * { width: 100%; }
         input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
@@ -1222,6 +1260,8 @@ function Styles() {
         .modal-overlay { padding: 8px; align-items: flex-end; }
         .modal { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
         .image-modal { border-radius: 14px; }
+        .video-modal { border-radius: 14px; }
+        .video-expanded { min-height: 36vh; }
         .toast { right: 10px; left: 10px; bottom: 10px; text-align: center; }
       }
     `}</style>
