@@ -190,6 +190,8 @@ export default function Dashboard() {
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [adminTab, setAdminTab] = useState('main');
+  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
   const [judgeEditId, setJudgeEditId] = useState(null);
   const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
@@ -275,7 +277,13 @@ export default function Dashboard() {
           const work = state.works.find((w) => w.id === a.workId);
           return work ? { ...work, assignmentStatus: a.status } : null;
         })
-        .filter(Boolean),
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDone = a.assignmentStatus === 'оценено';
+          const bDone = b.assignmentStatus === 'оценено';
+          if (aDone === bDone) return a.id.localeCompare(b.id);
+          return aDone ? 1 : -1;
+        }),
     [judgeAssignments, state.works]
   );
 
@@ -554,7 +562,7 @@ export default function Dashboard() {
   function exportScores() {
     const criteriaColumns = state.criteria.map((criterion) => criterion.title);
     const rows = [[
-      'WorkID',
+      'Номер работы',
       'Contest',
       'Direction',
       'Nomination',
@@ -594,7 +602,7 @@ export default function Dashboard() {
   }
 
   function exportRatings() {
-    const rows = [['Group', 'Rank', 'WorkID', 'Title', 'Average']];
+    const rows = [['Group', 'Rank', 'Номер работы', 'Title', 'Average']];
     Object.entries(ratings).forEach(([group, list]) => {
       list.forEach((entry) => rows.push([group, entry.rank, entry.workId, entry.title, entry.avg]));
     });
@@ -717,7 +725,16 @@ export default function Dashboard() {
           <button onClick={login}>Войти</button>
           <small>Демо: admin/admin или judge1/password</small>
         </div>
-        {toast ? <div className="toast">{toast}</div> : null}
+        {lightboxImage ? (
+        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setLightboxImage('')}>Закрыть</button>
+            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast">{toast}</div> : null}
         <Styles />
       </div>
     );
@@ -742,22 +759,42 @@ export default function Dashboard() {
           const alreadyScored = state.scores.some((s) => s.workId === work.id && s.judgeId === session.id);
           return (
             <div className="card" key={work.id}>
-              <h3>{work.id}</h3>
+              <h3>Номер работы: {work.id}</h3>
               <p>{work.contest} / {work.nomination} / {work.category}</p>
               <p>{work.description}</p>
               <div className="grid">
                 {work.photos.map((photo, index) => (
-                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media" />
+                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media" onClick={() => setLightboxImage(photo)} />
                 ))}
               </div>
               <div className="grid">
                 {work.videos.map((video) => (
-                  <iframe key={video} src={video} title={work.id} className="media" allow="autoplay; encrypted-media" />
+                  <div key={video} className="video-frame"><iframe src={video} title={work.id} className="media" allow="autoplay; encrypted-media" /></div>
                 ))}
               </div>
 
               {alreadyScored ? (
-                <p><strong>Оценка отправлена. Редактирование закрыто.</strong></p>
+                <>
+                  <p><strong>Оценка отправлена. Редактирование закрыто.</strong></p>
+                  {(() => {
+                    const submitted = state.scores.find((s) => s.workId === work.id && s.judgeId === session.id);
+                    if (!submitted) return null;
+                    return (
+                      <div>
+                        <table>
+                          <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
+                          <tbody>
+                            {state.criteria.map((criterion) => (
+                              <tr key={criterion.id}><td>{criterion.title}</td><td>{submitted.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        <p><strong>Комментарий:</strong> {submitted.comment}</p>
+                        <p><strong>Итого:</strong> {submitted.total} / <strong>Среднее:</strong> {Number(submitted.avg).toFixed(2)}</p>
+                      </div>
+                    );
+                  })()}
+                </>
               ) : (
                 <>
                   <h4>Оценка</h4>
@@ -784,7 +821,16 @@ export default function Dashboard() {
             </div>
           );
         })}
-        {toast ? <div className="toast">{toast}</div> : null}
+        {lightboxImage ? (
+        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setLightboxImage('')}>Закрыть</button>
+            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast">{toast}</div> : null}
         <Styles />
       </div>
     );
@@ -805,6 +851,7 @@ export default function Dashboard() {
         <button onClick={() => setAdminTab('main')}>Основная вкладка</button>
         <button onClick={() => setAdminTab('judges')}>Судьи</button>
         <button onClick={() => setAdminTab('works')}>Работы</button>
+        <button onClick={() => setAdminTab('import')}>Импорт</button>
       </div>
 
       {adminTab === 'main' ? (
@@ -852,13 +899,6 @@ export default function Dashboard() {
       </div>
 
       <div className="card">
-        <h3>Импорт работ из CSV (;)</h3>
-        <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1;ФИО участника</p>
-        <textarea rows={5} value={importText} onChange={(e) => setImportText(e.target.value)} />
-        <button onClick={importWorksFromCsv}>Импортировать</button>
-      </div>
-
-      <div className="card">
         <h3>Управление критериями</h3>
         <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
         <input value={criterionTitle} onChange={(e) => setCriterionTitle(e.target.value)} placeholder="Новый критерий" />
@@ -868,7 +908,6 @@ export default function Dashboard() {
       <div className="card">
         <h3>Создание судьи</h3>
         <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
-        <input placeholder="Email" value={judgeDraft.email} onChange={(e) => setJudgeDraft((p) => ({ ...p, email: e.target.value }))} />
         <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
         <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
         <button onClick={addJudge}>Добавить судью</button>
@@ -907,7 +946,7 @@ export default function Dashboard() {
           <div key={group}>
             <h4>{group}</h4>
             <table>
-              <thead><tr><th>Место</th><th>WorkID</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr></thead>
+              <thead><tr><th>Место</th><th>Номер работы</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr></thead>
               <tbody>
                 {list.map((item) => <tr key={item.workId}><td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td><td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td></tr>)}
               </tbody>
@@ -965,7 +1004,7 @@ export default function Dashboard() {
                       {judgeViewId === judge.id ? (
                         <div>
                           <p><strong>Отсудил:</strong> {judged.length}</p>
-                          <ul>{judged.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
+                          <ul>{judged.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}><button onClick={() => setSelectedJudgeWork({ judgeId: judge.id, workId: a.workId })}>{a.workId} — {work?.title || 'Удалена'}</button></li>; })}</ul>
                           <p><strong>Не отсудил:</strong> {pending.length}</p>
                           <ul>{pending.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
                         </div>
@@ -976,6 +1015,15 @@ export default function Dashboard() {
               })}
             </tbody>
           </table>
+        </div>
+      ) : null}
+
+      {adminTab === 'import' ? (
+        <div className="card">
+          <h3>Импорт работ из CSV (;)</h3>
+          <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1;ФИО участника</p>
+          <textarea rows={8} value={importText} onChange={(e) => setImportText(e.target.value)} />
+          <button onClick={importWorksFromCsv}>Импортировать</button>
         </div>
       ) : null}
 
@@ -1019,11 +1067,45 @@ export default function Dashboard() {
         </div>
       ) : null}
 
+      {selectedJudgeWork ? (
+        <div className="modal-overlay" onClick={() => setSelectedJudgeWork(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="toolbar">
+              <h3>Оценка судьи по работе</h3>
+              <button onClick={() => setSelectedJudgeWork(null)}>Закрыть</button>
+            </div>
+            {(() => {
+              const score = state.scores.find((s) => s.workId === selectedJudgeWork.workId && s.judgeId === selectedJudgeWork.judgeId);
+              const judge = state.judges.find((j) => j.id === selectedJudgeWork.judgeId);
+              const work = state.works.find((w) => w.id === selectedJudgeWork.workId);
+              if (!score) return <p>По этой связке судья-работа оценка пока не отправлена.</p>;
+              return (
+                <div>
+                  <p><strong>Судья:</strong> {judge?.fullName || selectedJudgeWork.judgeId}</p>
+                  <p><strong>Номер работы:</strong> {work?.id}</p>
+                  <table>
+                    <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
+                    <tbody>
+                      {state.criteria.map((criterion) => (
+                        <tr key={criterion.id}><td>{criterion.title}</td><td>{score.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p><strong>Комментарий:</strong> {score.comment}</p>
+                  <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
+
       {selectedWork ? (
+
         <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="toolbar">
-              <h3>Результаты судейства: {selectedWork.id}</h3>
+              <h3>Результаты судейства: Номер работы {selectedWork.id}</h3>
               <button onClick={() => setSelectedWorkId(null)}>Закрыть</button>
             </div>
             <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
@@ -1057,6 +1139,15 @@ export default function Dashboard() {
         </div>
       ) : null}
 
+      {lightboxImage ? (
+        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setLightboxImage('')}>Закрыть</button>
+            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+          </div>
+        </div>
+      ) : null}
+
       {toast ? <div className="toast">{toast}</div> : null}
       <Styles />
     </div>
@@ -1079,6 +1170,10 @@ function Styles() {
       .toast { position: fixed; right: 20px; bottom: 20px; background: #152238; color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
       .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+      .image-modal { width: min(1100px, 100%); }
+      .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
+      .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
+      .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
       @media (max-width: 768px) { .layout { padding: 12px; } }
