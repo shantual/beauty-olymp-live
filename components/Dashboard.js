@@ -48,6 +48,7 @@ const DEFAULT_WORKS = [
     nomination: 'Маникюр',
     category: 'Дебют',
     direction: 'Nail',
+    participantName: 'Иванова Мария',
     title: 'Северное сияние',
     description: 'Градиентный дизайн с ручной прорисовкой.',
     photos: [
@@ -173,6 +174,7 @@ export default function Dashboard() {
     nomination: '',
     category: 'Дебют',
     direction: 'Nail',
+    participantName: '',
     title: '',
     description: '',
     photosText: '',
@@ -187,6 +189,12 @@ export default function Dashboard() {
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
   const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [adminTab, setAdminTab] = useState('main');
+  const [judgeViewId, setJudgeViewId] = useState(null);
+  const [judgeEditId, setJudgeEditId] = useState(null);
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [workEditId, setWorkEditId] = useState(null);
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
   const toastTimerRef = useRef(null);
   const categoryOptions = useMemo(
     () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
@@ -375,6 +383,7 @@ export default function Dashboard() {
       nomination: workDraft.nomination,
       category: workDraft.category,
       direction: workDraft.direction,
+      participantName: workDraft.participantName.trim(),
       title: workDraft.title,
       description: workDraft.description,
       photos: parseList(workDraft.photosText),
@@ -385,7 +394,7 @@ export default function Dashboard() {
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
     setWorkDraft({
-      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', direction: 'Nail', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
+      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', direction: 'Nail', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
     showToast('Добавлено');
   }
@@ -522,6 +531,7 @@ export default function Dashboard() {
       description: row[5] || '',
       photos: [row[6], row[7], row[8]].filter(Boolean),
       videos: [row[9]].filter(Boolean),
+      participantName: row[10] || '',
       status: 'Допущено',
       author: 'Скрыт',
     }));
@@ -549,6 +559,7 @@ export default function Dashboard() {
       'Direction',
       'Nomination',
       'Category',
+      'Participant',
       'JudgeID',
       'JudgeName',
       ...criteriaColumns,
@@ -568,6 +579,7 @@ export default function Dashboard() {
         work?.direction || '',
         work?.nomination || '',
         work?.category || '',
+        work?.participantName || '',
         score.judgeId,
         judge?.fullName || '',
         ...criteriaValues,
@@ -587,6 +599,107 @@ export default function Dashboard() {
       list.forEach((entry) => rows.push([group, entry.rank, entry.workId, entry.title, entry.avg]));
     });
     downloadCsv('ratings.csv', rows);
+  }
+
+  function startJudgeEdit(judge) {
+    setJudgeEditId(judge.id);
+    setJudgeEditDraft({
+      fullName: judge.fullName || '',
+      email: judge.email || '',
+      login: judge.login || '',
+      password: '',
+      active: Boolean(judge.active),
+    });
+  }
+
+  async function saveJudgeEdit() {
+    if (!judgeEditId) return;
+    const login = judgeEditDraft.login.trim();
+    if (!judgeEditDraft.fullName.trim() || !login) {
+      showToast('Укажите ФИО и логин судьи');
+      return;
+    }
+
+    const duplicate = state.judges.some((j) => j.id !== judgeEditId && j.login === login);
+    if (duplicate) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    let nextPasswordHash = null;
+    if (judgeEditDraft.password) {
+      nextPasswordHash = await sha256(judgeEditDraft.password);
+    }
+
+    setState((prev) => ({
+      ...prev,
+      judges: prev.judges.map((judge) => {
+        if (judge.id !== judgeEditId) return judge;
+        return {
+          ...judge,
+          fullName: judgeEditDraft.fullName.trim(),
+          email: judgeEditDraft.email,
+          login,
+          active: judgeEditDraft.active,
+          ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
+        };
+      }),
+    }));
+
+    setJudgeEditId(null);
+    showToast('Судья обновлен');
+  }
+
+  function deleteJudge(judgeId) {
+    setState((prev) => ({
+      ...prev,
+      judges: prev.judges.filter((judge) => judge.id !== judgeId),
+      assignments: prev.assignments.filter((assignment) => assignment.judgeId !== judgeId),
+      scores: prev.scores.filter((score) => score.judgeId !== judgeId),
+    }));
+
+    if (judgeViewId === judgeId) setJudgeViewId(null);
+    if (judgeEditId === judgeId) setJudgeEditId(null);
+    showToast('Судья удален');
+  }
+
+  function startWorkEdit(work) {
+    setWorkEditId(work.id);
+    setWorkEditDraft({
+      title: work.title || '',
+      participantName: work.participantName || '',
+      nomination: work.nomination || '',
+      category: work.category || '',
+      direction: work.direction || '',
+      status: work.status || 'Допущено',
+    });
+  }
+
+  function saveWorkEdit() {
+    if (!workEditId) return;
+    setState((prev) => ({
+      ...prev,
+      works: prev.works.map((work) =>
+        work.id === workEditId
+          ? { ...work, ...workEditDraft, title: workEditDraft.title.trim(), participantName: workEditDraft.participantName.trim() }
+          : work
+      ),
+    }));
+    setWorkEditId(null);
+    showToast('Работа обновлена');
+  }
+
+  function deleteWork(workId) {
+    setState((prev) => ({
+      ...prev,
+      works: prev.works.filter((work) => work.id !== workId),
+      assignments: prev.assignments.filter((assignment) => assignment.workId !== workId),
+      scores: prev.scores.filter((score) => score.workId !== workId),
+    }));
+
+    if (selectedWorkId === workId) setSelectedWorkId(null);
+    if (workEditId === workId) setWorkEditId(null);
+    showToast('Работа удалена');
   }
 
   if (!session.role) {
@@ -688,6 +801,14 @@ export default function Dashboard() {
         <button onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       </div>
 
+      <div className="card row">
+        <button onClick={() => setAdminTab('main')}>Основная вкладка</button>
+        <button onClick={() => setAdminTab('judges')}>Судьи</button>
+        <button onClick={() => setAdminTab('works')}>Работы</button>
+      </div>
+
+      {adminTab === 'main' ? (
+        <>
       <div className="card">
         <h2>Дашборд</h2>
         <p>Работ: {state.works.length}</p>
@@ -722,6 +843,7 @@ export default function Dashboard() {
         <select value={workDraft.direction} onChange={(e) => setWorkDraft((p) => ({ ...p, direction: e.target.value }))}>
           {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
         </select>
+        <input placeholder="Фамилия и отчество участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
         <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
         <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
         <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
@@ -731,7 +853,7 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>Импорт работ из CSV (;)</h3>
-        <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1</p>
+        <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1;ФИО участника</p>
         <textarea rows={5} value={importText} onChange={(e) => setImportText(e.target.value)} />
         <button onClick={importWorksFromCsv}>Импортировать</button>
       </div>
@@ -799,6 +921,104 @@ export default function Dashboard() {
         <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
       </div>
 
+      </>
+      ) : null}
+
+      {adminTab === 'judges' ? (
+        <div className="card">
+          <h3>Все судьи</h3>
+          <table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.judges.map((judge) => {
+                const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
+                const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено');
+                const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено');
+                const isEditing = judgeEditId === judge.id;
+                return (
+                  <tr key={judge.id}>
+                    <td>{judge.id}</td>
+                    <td>{isEditing ? <input value={judgeEditDraft.fullName} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : judge.fullName}</td>
+                    <td>{isEditing ? <input value={judgeEditDraft.login} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, login: e.target.value }))} /> : judge.login}</td>
+                    <td>{isEditing ? (
+                      <select value={String(judgeEditDraft.active)} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (judge.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={judgeEditDraft.password} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveJudgeEdit}>Сохранить</button>
+                            <button onClick={() => setJudgeEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => setJudgeViewId(judge.id)}>Просмотр</button>
+                            <button onClick={() => startJudgeEdit(judge)}>Редактировать</button>
+                            <button onClick={() => deleteJudge(judge.id)}>Удалить</button>
+                          </>
+                        )}
+                      </div>
+                      {judgeViewId === judge.id ? (
+                        <div>
+                          <p><strong>Отсудил:</strong> {judged.length}</p>
+                          <ul>{judged.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
+                          <p><strong>Не отсудил:</strong> {pending.length}</p>
+                          <ul>{pending.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
+                        </div>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {adminTab === 'works' ? (
+        <div className="card">
+          <h3>Все загруженные работы</h3>
+          <table>
+            <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.works.map((work) => {
+                const editing = workEditId === work.id;
+                return (
+                  <tr key={work.id}>
+                    <td>{work.id}</td>
+                    <td>{work.contest}</td>
+                    <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
+                    <td>{editing ? <input value={workEditDraft.category} onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))} /> : work.category}</td>
+                    <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
+                    <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
+                    <td>
+                      <div className="row">
+                        {editing ? (
+                          <>
+                            <button onClick={saveWorkEdit}>Сохранить</button>
+                            <button onClick={() => setWorkEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startWorkEdit(work)}>Редактировать</button>
+                            <button onClick={() => deleteWork(work.id)}>Удалить</button>
+                            <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
       {selectedWork ? (
         <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -807,6 +1027,7 @@ export default function Dashboard() {
               <button onClick={() => setSelectedWorkId(null)}>Закрыть</button>
             </div>
             <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
+            <p><strong>Участник:</strong> {selectedWork.participantName || 'не указан'}</p>
             {selectedWorkScores.length === 0 ? (
               <p>По этой работе пока нет отправленных оценок.</p>
             ) : (
