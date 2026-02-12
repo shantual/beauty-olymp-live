@@ -5,6 +5,13 @@ const SESSION_KEY = 'beauty-olymp-session-v1';
 
 const CONTEST_OPTIONS = ['Эстетика Олимпа', 'Креатив Олимпа', 'Образ Олимпа', 'Империя Олимпа'];
 
+const CATEGORY_OPTIONS_BY_CONTEST = {
+  'Эстетика Олимпа': ['Дебют', 'Мастер', 'Профи', 'Премиум'],
+  'Креатив Олимпа': ['Дебют', 'Мастер', 'Профи', 'Премиум'],
+  'Образ Олимпа': ['Beauty Vision', 'Design Couture', 'Grand Fusion'],
+  'Империя Олимпа': ['Start', 'Business', 'Empire'],
+};
+
 const DEFAULT_CRITERIA = [
   { id: 'c1', title: 'Креативность', min: 1, max: 10 },
   { id: 'c2', title: 'Качество исполнения', min: 1, max: 10 },
@@ -18,7 +25,7 @@ const DEFAULT_JUDGES = [
     email: 'judge@demo.local',
     login: 'judge1',
     passwordHash:
-      'a5ceca62e47d0f6c0f56aa8198c75c5dc2e4f2f4903a06f5f5f7ff4f5d16fd5c',
+      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
     active: true,
   },
 ];
@@ -28,7 +35,7 @@ const DEFAULT_WORKS = [
     id: 'EO-00001',
     contest: 'Эстетика Олимпа',
     nomination: 'Маникюр',
-    category: 'Мастер',
+    category: 'Дебют',
     title: 'Северное сияние',
     description: 'Градиентный дизайн с ручной прорисовкой.',
     photos: [
@@ -166,6 +173,11 @@ export default function Dashboard() {
   const [importText, setImportText] = useState('');
   const [toast, setToast] = useState('');
   const toastTimerRef = useRef(null);
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -403,8 +415,6 @@ export default function Dashboard() {
         comment,
       },
     }));
-
-    setCriterionTitle('');
   }
 
   function submitScore(workId) {
@@ -608,11 +618,20 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>Создание карточки работы</h3>
-        <select value={workDraft.contest} onChange={(e) => setWorkDraft((p) => ({ ...p, contest: e.target.value }))}>
+        <select
+          value={workDraft.contest}
+          onChange={(e) => {
+            const nextContest = e.target.value;
+            const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
+            setWorkDraft((p) => ({ ...p, contest: nextContest, category: nextCategories[0] }));
+          }}
+        >
           {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
         </select>
         <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
-        <input placeholder="Категория" value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))} />
+        <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
+          {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
         <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
         <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
         <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
