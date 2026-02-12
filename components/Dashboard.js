@@ -12,6 +12,17 @@ const CATEGORY_OPTIONS_BY_CONTEST = {
   'Империя Олимпа': ['Start', 'Business', 'Empire'],
 };
 
+const DIRECTION_OPTIONS_BY_CONTEST = {
+  'Эстетика Олимпа': ['Nail', 'Hair', 'Brow/lash', 'Makeup'],
+  'Креатив Олимпа': [
+    'Профессиональное креативное направление индустрии красоты',
+    'Творческо-креативное и хендмейд-направление',
+    'Постеры и фотографии',
+  ],
+  'Образ Олимпа': ['Общий зачет'],
+  'Империя Олимпа': ['Общий зачет'],
+};
+
 const DEFAULT_CRITERIA = [
   { id: 'c1', title: 'Креативность', min: 1, max: 10 },
   { id: 'c2', title: 'Качество исполнения', min: 1, max: 10 },
@@ -36,6 +47,7 @@ const DEFAULT_WORKS = [
     contest: 'Эстетика Олимпа',
     nomination: 'Маникюр',
     category: 'Дебют',
+    direction: 'Nail',
     title: 'Северное сияние',
     description: 'Градиентный дизайн с ручной прорисовкой.',
     photos: [
@@ -160,6 +172,7 @@ export default function Dashboard() {
     contest: 'Эстетика Олимпа',
     nomination: '',
     category: 'Дебют',
+    direction: 'Nail',
     title: '',
     description: '',
     photosText: '',
@@ -172,9 +185,15 @@ export default function Dashboard() {
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [importText, setImportText] = useState('');
   const [toast, setToast] = useState('');
+  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
   const toastTimerRef = useRef(null);
   const categoryOptions = useMemo(
     () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
     [workDraft.contest]
   );
 
@@ -258,6 +277,23 @@ export default function Dashboard() {
     return total ? Math.round((done / total) * 100) : 0;
   }, [state.assignments]);
 
+  const ratingFilterOptions = useMemo(() => {
+    const contests = [...new Set(state.works.map((w) => w.contest).filter(Boolean))];
+    const directions = [...new Set(state.works.map((w) => w.direction || 'Общий зачет').filter(Boolean))];
+    const categories = [...new Set(state.works.map((w) => w.category).filter(Boolean))];
+    return { contests, directions, categories };
+  }, [state.works]);
+
+  const selectedWork = useMemo(
+    () => state.works.find((work) => work.id === selectedWorkId) || null,
+    [selectedWorkId, state.works]
+  );
+
+  const selectedWorkScores = useMemo(
+    () => state.scores.filter((score) => score.workId === selectedWorkId),
+    [selectedWorkId, state.scores]
+  );
+
   const ratings = useMemo(() => {
     const grouped = {};
 
@@ -265,7 +301,7 @@ export default function Dashboard() {
       const scores = state.scores.filter((score) => score.workId === work.id);
       if (!scores.length) return;
       const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
-      const key = `${work.contest} | ${work.nomination} | ${work.category}`;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
     });
@@ -281,8 +317,17 @@ export default function Dashboard() {
       });
     });
 
-    return grouped;
-  }, [state.scores, state.works]);
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
 
   async function login() {
     const normalizedLogin = loginForm.login.trim();
@@ -329,6 +374,7 @@ export default function Dashboard() {
       contest: workDraft.contest,
       nomination: workDraft.nomination,
       category: workDraft.category,
+      direction: workDraft.direction,
       title: workDraft.title,
       description: workDraft.description,
       photos: parseList(workDraft.photosText),
@@ -339,7 +385,7 @@ export default function Dashboard() {
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
     setWorkDraft({
-      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
+      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', direction: 'Nail', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
     showToast('Добавлено');
   }
@@ -471,10 +517,11 @@ export default function Dashboard() {
       contest: row[0] || 'Эстетика Олимпа',
       nomination: row[1] || 'Без номинации',
       category: row[2] || 'Дебют',
-      title: row[3] || `Работа ${idx + 1}`,
-      description: row[4] || '',
-      photos: [row[5], row[6], row[7]].filter(Boolean),
-      videos: [row[8]].filter(Boolean),
+      direction: row[3] || (DIRECTION_OPTIONS_BY_CONTEST[row[0]]?.[0] || 'Общий зачет'),
+      title: row[4] || `Работа ${idx + 1}`,
+      description: row[5] || '',
+      photos: [row[6], row[7], row[8]].filter(Boolean),
+      videos: [row[9]].filter(Boolean),
       status: 'Допущено',
       author: 'Скрыт',
     }));
@@ -495,9 +542,43 @@ export default function Dashboard() {
   }
 
   function exportScores() {
-    const rows = [['WorkID', 'JudgeID', 'Comment', 'Total', 'Average', 'SubmittedAt']];
-    state.scores.forEach((s) => rows.push([s.workId, s.judgeId, s.comment, s.total, s.avg, s.submittedAt]));
-    downloadCsv('scores.csv', rows);
+    const criteriaColumns = state.criteria.map((criterion) => criterion.title);
+    const rows = [[
+      'WorkID',
+      'Contest',
+      'Direction',
+      'Nomination',
+      'Category',
+      'JudgeID',
+      'JudgeName',
+      ...criteriaColumns,
+      'Comment',
+      'Total',
+      'Average',
+      'SubmittedAt',
+    ]];
+
+    state.scores.forEach((score) => {
+      const work = state.works.find((item) => item.id === score.workId);
+      const judge = state.judges.find((item) => item.id === score.judgeId);
+      const criteriaValues = state.criteria.map((criterion) => score.criteriaScores?.[criterion.id] ?? '');
+      rows.push([
+        score.workId,
+        work?.contest || '',
+        work?.direction || '',
+        work?.nomination || '',
+        work?.category || '',
+        score.judgeId,
+        judge?.fullName || '',
+        ...criteriaValues,
+        score.comment,
+        score.total,
+        Number(score.avg).toFixed(2),
+        score.submittedAt,
+      ]);
+    });
+
+    downloadCsv('scores-detailed.csv', rows);
   }
 
   function exportRatings() {
@@ -623,7 +704,13 @@ export default function Dashboard() {
           onChange={(e) => {
             const nextContest = e.target.value;
             const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
-            setWorkDraft((p) => ({ ...p, contest: nextContest, category: nextCategories[0] }));
+            const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
+            setWorkDraft((p) => ({
+              ...p,
+              contest: nextContest,
+              category: nextCategories[0],
+              direction: nextDirections[0],
+            }));
           }}
         >
           {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
@@ -631,6 +718,9 @@ export default function Dashboard() {
         <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
         <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
           {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
+        <select value={workDraft.direction} onChange={(e) => setWorkDraft((p) => ({ ...p, direction: e.target.value }))}>
+          {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
         </select>
         <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
         <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
@@ -641,7 +731,7 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>Импорт работ из CSV (;)</h3>
-        <p>Колонки: Конкурс;Номинация;Категория;Название;Описание;Фото1;Фото2;Фото3;Видео1</p>
+        <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1</p>
         <textarea rows={5} value={importText} onChange={(e) => setImportText(e.target.value)} />
         <button onClick={importWorksFromCsv}>Импортировать</button>
       </div>
@@ -677,13 +767,27 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>Рейтинг по номинациям и категориям</h3>
+        <div className="row">
+          <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
+            <option value="all">Все конкурсы</option>
+            {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+          </select>
+          <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
+            <option value="all">Все направления</option>
+            {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+          </select>
+          <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
+            <option value="all">Все категории</option>
+            {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
+          </select>
+        </div>
         {Object.entries(ratings).map(([group, list]) => (
           <div key={group}>
             <h4>{group}</h4>
             <table>
-              <thead><tr><th>Место</th><th>WorkID</th><th>Название</th><th>Средний балл</th></tr></thead>
+              <thead><tr><th>Место</th><th>WorkID</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr></thead>
               <tbody>
-                {list.map((item) => <tr key={item.workId}><td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td></tr>)}
+                {list.map((item) => <tr key={item.workId}><td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td><td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td></tr>)}
               </tbody>
             </table>
           </div>
@@ -694,6 +798,44 @@ export default function Dashboard() {
         <button onClick={exportScores}>Экспорт всех оценок CSV</button>
         <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
       </div>
+
+      {selectedWork ? (
+        <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="toolbar">
+              <h3>Результаты судейства: {selectedWork.id}</h3>
+              <button onClick={() => setSelectedWorkId(null)}>Закрыть</button>
+            </div>
+            <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
+            {selectedWorkScores.length === 0 ? (
+              <p>По этой работе пока нет отправленных оценок.</p>
+            ) : (
+              selectedWorkScores.map((score) => {
+                const judge = state.judges.find((item) => item.id === score.judgeId);
+                return (
+                  <div key={`${score.workId}-${score.judgeId}-${score.submittedAt}`} className="card">
+                    <strong>{judge?.fullName || score.judgeId}</strong>
+                    <table>
+                      <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
+                      <tbody>
+                        {state.criteria.map((criterion) => (
+                          <tr key={criterion.id}>
+                            <td>{criterion.title}</td>
+                            <td>{score.criteriaScores?.[criterion.id] ?? '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p><strong>Комментарий:</strong> {score.comment}</p>
+                    <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      ) : null}
+
       {toast ? <div className="toast">{toast}</div> : null}
       <Styles />
     </div>
@@ -714,6 +856,8 @@ function Styles() {
       .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
       .row { display: flex; gap: 8px; flex-wrap: wrap; }
       .toast { position: fixed; right: 20px; bottom: 20px; background: #152238; color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
+      .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
       @media (max-width: 768px) { .layout { padding: 12px; } }
