@@ -11,6 +11,16 @@ const DEFAULT_CRITERIA = [
   { id: 'c3', title: 'Техническая сложность', min: 1, max: 10 },
 ];
 
+import { useEffect, useMemo, useState } from 'react';
+
+const STORAGE_KEY = 'beauty-olymp-v2';
+
+const DEFAULT_CRITERIA = [
+  { id: 'c1', title: 'Креативность', min: 1, max: 10 },
+  { id: 'c2', title: 'Качество исполнения', min: 1, max: 10 },
+  { id: 'c3', title: 'Техническая сложность', min: 1, max: 10 },
+];
+
 const DEFAULT_JUDGES = [
   {
     id: 'J-001',
@@ -18,7 +28,7 @@ const DEFAULT_JUDGES = [
     email: 'judge@demo.local',
     login: 'judge1',
     passwordHash:
-      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+      'a5ceca62e47d0f6c0f56aa8198c75c5dc2e4f2f4903a06f5f5f7ff4f5d16fd5c',
     active: true,
   },
 ];
@@ -403,6 +413,8 @@ export default function Dashboard() {
         comment,
       },
     }));
+
+    setCriterionTitle('');
   }
 
   function submitScore(workId) {
