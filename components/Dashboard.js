@@ -51,7 +51,7 @@ function createDefaultState() {
 function normalizeState(rawState) {
   const next = { ...createDefaultState(), ...(rawState || {}) };
 
-  // Миграция: в предыдущей версии был неверный hash demo-пароля судьи.
+  // Миграция: исправляем старый неверный hash demo-пароля и отсутствие active.
   next.judges = (next.judges || []).map((judge) => {
     if (
       judge.login === 'judge1' &&
@@ -59,11 +59,29 @@ function normalizeState(rawState) {
     ) {
       return {
         ...judge,
+        active: judge.active ?? true,
         passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
       };
     }
-    return judge;
+    return { ...judge, active: judge.active ?? true };
   });
+
+  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
+  const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
+  const demoJudge = {
+    id: 'J-001',
+    fullName: 'Судья Демонстрационный',
+    email: 'judge@demo.local',
+    login: 'judge1',
+    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+    active: true,
+  };
+
+  if (demoIndex === -1) {
+    next.judges.unshift(demoJudge);
+  } else {
+    next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
+  }
 
   return next;
 }
@@ -177,10 +195,11 @@ export default function Dashboard() {
   }, [state.scores, state.works]);
 
   async function login() {
+    const normalizedLogin = loginForm.login.trim();
     const passwordHash = await sha256(loginForm.password);
 
     if (loginForm.role === 'admin') {
-      const admin = state.adminUsers.find((a) => a.login === loginForm.login && a.passwordHash === passwordHash);
+      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
       if (admin) {
         setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
         return;
@@ -189,7 +208,7 @@ export default function Dashboard() {
 
     if (loginForm.role === 'judge') {
       const judge = state.judges.find(
-        (j) => j.login === loginForm.login && j.passwordHash === passwordHash && j.active
+        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
       );
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
