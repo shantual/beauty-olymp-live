@@ -15,7 +15,7 @@ const DEFAULT_JUDGES = [
     email: 'judge@demo.local',
     login: 'judge1',
     passwordHash:
-      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+      'a5ceca62e47d0f6c0f56aa8198c75c5dc2e4f2f4903a06f5f5f7ff4f5d16fd5c',
     active: true,
   },
 ];
@@ -46,44 +46,6 @@ function createDefaultState() {
     scores: [],
     adminUsers: [{ login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }],
   };
-}
-
-function normalizeState(rawState) {
-  const next = { ...createDefaultState(), ...(rawState || {}) };
-
-  // Миграция: исправляем старый неверный hash demo-пароля и отсутствие active.
-  next.judges = (next.judges || []).map((judge) => {
-    if (
-      judge.login === 'judge1' &&
-      judge.passwordHash === 'a5ceca62e47d0f6c0f56aa8198c75c5dc2e4f2f4903a06f5f5f7ff4f5d16fd5c'
-    ) {
-      return {
-        ...judge,
-        active: judge.active ?? true,
-        passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
-      };
-    }
-    return { ...judge, active: judge.active ?? true };
-  });
-
-  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
-  const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
-  const demoJudge = {
-    id: 'J-001',
-    fullName: 'Судья Демонстрационный',
-    email: 'judge@demo.local',
-    login: 'judge1',
-    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
-    active: true,
-  };
-
-  if (demoIndex === -1) {
-    next.judges.unshift(demoJudge);
-  } else {
-    next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
-  }
-
-  return next;
 }
 
 function parseList(value) {
@@ -138,7 +100,7 @@ export default function Dashboard() {
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      setState(normalizeState(JSON.parse(saved)));
+      setState(JSON.parse(saved));
     }
   }, []);
 
@@ -195,11 +157,10 @@ export default function Dashboard() {
   }, [state.scores, state.works]);
 
   async function login() {
-    const normalizedLogin = loginForm.login.trim();
     const passwordHash = await sha256(loginForm.password);
 
     if (loginForm.role === 'admin') {
-      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
+      const admin = state.adminUsers.find((a) => a.login === loginForm.login && a.passwordHash === passwordHash);
       if (admin) {
         setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
         return;
@@ -208,7 +169,7 @@ export default function Dashboard() {
 
     if (loginForm.role === 'judge') {
       const judge = state.judges.find(
-        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
+        (j) => j.login === loginForm.login && j.passwordHash === passwordHash && j.active
       );
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
