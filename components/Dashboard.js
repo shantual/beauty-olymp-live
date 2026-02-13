@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 const STORAGE_KEY = 'beauty-olymp-v2';
 const SESSION_KEY = 'beauty-olymp-session-v1';
+const CLOUD_ROW_ID = 'global-state';
+const CLOUD_TABLE = 'app_state';
 
 const CONTEST_OPTIONS = ['Эстетика Олимпа', 'Креатив Олимпа', 'Образ Олимпа', 'Империя Олимпа'];
 
@@ -200,6 +203,10 @@ export default function Dashboard() {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
   const [sessionReady, setSessionReady] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [cloudError, setCloudError] = useState('');
+  const lastCloudWriteRef = useRef('');
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
@@ -257,45 +264,96 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const rawSession = localStorage.getItem(SESSION_KEY);
+    let cancelled = false;
 
-    if (!saved) {
-      if (rawSession) {
-        localStorage.removeItem(SESSION_KEY);
+    async function bootstrapState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const rawSession = localStorage.getItem(SESSION_KEY);
+
+      let nextState = createDefaultState();
+      if (saved) {
+        const parsedState = safeParseJson(saved);
+        if (parsedState) {
+          nextState = normalizeState(parsedState);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
-      setSessionReady(true);
-      return;
-    }
 
-    const parsedState = safeParseJson(saved);
-    if (!parsedState) {
-      localStorage.removeItem(STORAGE_KEY);
-      if (rawSession) {
-        localStorage.removeItem(SESSION_KEY);
-      }
-      setSessionReady(true);
-      return;
-    }
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from(CLOUD_TABLE)
+            .select('state')
+            .eq('id', CLOUD_ROW_ID)
+            .maybeSingle();
 
-    const normalizedState = normalizeState(parsedState);
-    setState(normalizedState);
-
-    if (rawSession) {
-      const parsedSession = safeParseJson(rawSession);
-      if (parsedSession) {
-        setSession(normalizeSession(parsedSession, normalizedState));
+          if (error) {
+            setCloudError('Не удалось получить данные из облака');
+          } else if (data?.state) {
+            nextState = normalizeState(data.state);
+          }
+        } catch {
+          setCloudError('Ошибка подключения к облаку');
+        }
       } else {
-        localStorage.removeItem(SESSION_KEY);
+        setCloudError('Облако отключено: заполните NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY');
       }
+
+      if (cancelled) return;
+
+      setState(nextState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+
+      if (rawSession) {
+        const parsedSession = safeParseJson(rawSession);
+        if (parsedSession) {
+          setSession(normalizeSession(parsedSession, nextState));
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+
+      setCloudReady(true);
+      setSessionReady(true);
     }
 
-    setSessionReady(true);
+    bootstrapState();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    if (!sessionReady || !cloudReady || !supabase) return;
+
+    const serializedState = JSON.stringify(state);
+    if (lastCloudWriteRef.current === serializedState) return;
+
+    const timer = window.setTimeout(async () => {
+      setCloudSyncing(true);
+      const { error } = await supabase
+        .from(CLOUD_TABLE)
+        .upsert(
+          { id: CLOUD_ROW_ID, state, updated_at: new Date().toISOString() },
+          { onConflict: 'id' }
+        );
+
+      if (error) {
+        setCloudError('Не удалось сохранить состояние в облако');
+      } else {
+        lastCloudWriteRef.current = serializedState;
+        setCloudError('');
+      }
+      setCloudSyncing(false);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [state, sessionReady, cloudReady]);
 
   useEffect(() => {
     if (!sessionReady) return;
@@ -789,6 +847,70 @@ export default function Dashboard() {
     setState(normalized);
     setStateImportText('');
     showToast('Данные импортированы');
+  }
+
+  async function syncFromCloud() {
+    if (!supabase) {
+      showToast('Облако не настроено');
+      return;
+    }
+
+    setCloudSyncing(true);
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select('state')
+      .eq('id', CLOUD_ROW_ID)
+      .maybeSingle();
+
+    if (error) {
+      setCloudSyncing(false);
+      setCloudError('Не удалось загрузить данные из облака');
+      showToast('Ошибка синхронизации');
+      return;
+    }
+
+    if (!data?.state) {
+      setCloudSyncing(false);
+      showToast('Облачное состояние пока пустое');
+      return;
+    }
+
+    const normalized = normalizeState(data.state);
+    const serializedState = JSON.stringify(normalized);
+    setState(normalized);
+    localStorage.setItem(STORAGE_KEY, serializedState);
+    lastCloudWriteRef.current = serializedState;
+    setCloudSyncing(false);
+    setCloudError('');
+    showToast('Данные загружены из облака');
+  }
+
+  async function syncToCloud() {
+    if (!supabase) {
+      showToast('Облако не настроено');
+      return;
+    }
+
+    setCloudSyncing(true);
+    const serializedState = JSON.stringify(state);
+    const { error } = await supabase
+      .from(CLOUD_TABLE)
+      .upsert(
+        { id: CLOUD_ROW_ID, state, updated_at: new Date().toISOString() },
+        { onConflict: 'id' }
+      );
+
+    setCloudSyncing(false);
+
+    if (error) {
+      setCloudError('Не удалось сохранить данные в облако');
+      showToast('Ошибка выгрузки в облако');
+      return;
+    }
+
+    lastCloudWriteRef.current = serializedState;
+    setCloudError('');
+    showToast('Данные сохранены в облако');
   }
 
   function downloadCsv(filename, rows) {
@@ -1345,8 +1467,16 @@ export default function Dashboard() {
           <button onClick={importWorksFromCsv}>Импортировать</button>
 
           <h3>Синхронизация данных между устройствами</h3>
-          <p>Данные хранятся локально в браузере. Чтобы мобильная версия показала то же, что на компьютере, экспортируйте состояние на ПК и импортируйте его на телефоне.</p>
+          <p>
+            Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.
+          </p>
+          <p>
+            Статус облака: {supabase ? (cloudSyncing ? 'идет синхронизация…' : 'подключено') : 'не настроено'}
+            {cloudError ? ` — ${cloudError}` : ''}
+          </p>
           <div className="row">
+            <button onClick={syncFromCloud}>Загрузить из облака</button>
+            <button onClick={syncToCloud}>Сохранить в облако</button>
             <button onClick={exportAppState}>Экспорт JSON состояния</button>
           </div>
           <textarea rows={6} placeholder="Вставьте JSON состояния сюда" value={stateImportText} onChange={(e) => setStateImportText(e.target.value)} />
