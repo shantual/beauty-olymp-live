@@ -684,40 +684,7 @@ export default function Dashboard() {
     return { canManageWorks: false, canManageJudges: false, canExportScores: false };
   }, [session.role, currentModerator]);
 
-  const ratings = useMemo(() => {
-    const grouped = {};
-
-    state.works.forEach((work) => {
-      const scores = state.scores.filter((score) => score.workId === work.id);
-      if (!scores.length) return;
-      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
-      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
-    });
-
-    Object.values(grouped).forEach((list) => {
-      list.sort((a, b) => b.avg - a.avg);
-      let rank = 1;
-      list.forEach((entry, index) => {
-        if (index > 0 && entry.avg < list[index - 1].avg) {
-          rank = index + 1;
-        }
-        entry.rank = rank;
-      });
-    });
-
-    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
-      const [contest, direction, _nomination, category] = group.split(' | ');
-      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
-      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
-      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
-      acc[group] = list;
-      return acc;
-    }, {});
-
-    return filtered;
-  }, [state.scores, state.works, ratingFilter]);
+  
   useEffect(() => {
     if (session.role === 'judge') return;
     const allowedTabs = ['main'];
