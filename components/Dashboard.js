@@ -60,6 +60,21 @@ const DEFAULT_WORKS = [
   },
 ];
 
+const MODERATOR_PERMISSIONS = [
+  { key: 'canManageWorks', label: 'Добавление и импорт работ' },
+  { key: 'canManageJudges', label: 'Добавление судей' },
+  { key: 'canExportScores', label: 'Выгрузка оценок и рейтингов' },
+];
+
+function normalizeModeratorPermissions(rawPermissions) {
+  const source = rawPermissions || {};
+  return {
+    canManageWorks: Boolean(source.canManageWorks),
+    canManageJudges: Boolean(source.canManageJudges),
+    canExportScores: Boolean(source.canExportScores),
+  };
+}
+
 function createDefaultState() {
   return {
     criteria: DEFAULT_CRITERIA,
@@ -67,6 +82,7 @@ function createDefaultState() {
     judges: DEFAULT_JUDGES,
     assignments: [{ workId: 'EO-00001', judgeId: 'J-001', status: 'не начато', assignedAt: new Date().toISOString() }],
     scores: [],
+    moderators: [],
     adminUsers: [{ login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }],
   };
 }
@@ -106,6 +122,15 @@ function normalizeState(rawState) {
     next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
   }
 
+  next.moderators = (next.moderators || []).map((moderator, index) => ({
+    id: moderator.id || `M-${String(index + 1).padStart(3, '0')}`,
+    fullName: moderator.fullName || '',
+    login: moderator.login || '',
+    passwordHash: moderator.passwordHash || '',
+    active: moderator.active ?? true,
+    permissions: normalizeModeratorPermissions(moderator.permissions),
+  }));
+
   return next;
 }
 
@@ -122,6 +147,13 @@ function normalizeSession(rawSession, normalizedState) {
       (judge) => judge.id === rawSession.id && judge.login === rawSession.login && judge.active
     );
     return judgeExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  if (rawSession.role === 'moderator') {
+    const moderatorExists = (normalizedState.moderators || []).some(
+      (moderator) => moderator.id === rawSession.id && moderator.login === rawSession.login && moderator.active
+    );
+    return moderatorExists ? rawSession : { role: null, id: null, login: null };
   }
 
   return { role: null, id: null, login: null };
@@ -182,10 +214,17 @@ export default function Dashboard() {
     status: 'Допущено',
   });
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [moderatorDraft, setModeratorDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    permissions: normalizeModeratorPermissions({}),
+  });
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [importText, setImportText] = useState('');
+  const [stateImportText, setStateImportText] = useState('');
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
   const [selectedWorkId, setSelectedWorkId] = useState(null);
@@ -194,6 +233,14 @@ export default function Dashboard() {
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
+  const [moderatorEditId, setModeratorEditId] = useState(null);
+  const [moderatorEditDraft, setModeratorEditDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    active: true,
+    permissions: normalizeModeratorPermissions({}),
+  });
   const [judgeEditId, setJudgeEditId] = useState(null);
   const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
   const [workEditId, setWorkEditId] = useState(null);
@@ -311,6 +358,21 @@ export default function Dashboard() {
     [selectedWorkId, state.scores]
   );
 
+  const currentModerator = useMemo(() => {
+    if (session.role !== 'moderator') return null;
+    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
+  }, [session, state.moderators]);
+
+  const access = useMemo(() => {
+    if (session.role === 'admin') {
+      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
+    }
+    if (session.role === 'moderator') {
+      return normalizeModeratorPermissions(currentModerator?.permissions);
+    }
+    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
+  }, [session.role, currentModerator]);
+
   const ratings = useMemo(() => {
     const grouped = {};
 
@@ -345,6 +407,17 @@ export default function Dashboard() {
 
     return filtered;
   }, [state.scores, state.works, ratingFilter]);
+  useEffect(() => {
+    if (session.role === 'judge') return;
+    const allowedTabs = ['main'];
+    if (access.canManageJudges) allowedTabs.push('judges');
+    if (access.canManageWorks) allowedTabs.push('works', 'import');
+    if (session.role === 'admin') allowedTabs.push('moderators');
+    if (!allowedTabs.includes(adminTab)) {
+      setAdminTab('main');
+    }
+  }, [adminTab, access, session.role]);
+
 
   async function login() {
     const normalizedLogin = loginForm.login.trim();
@@ -364,6 +437,16 @@ export default function Dashboard() {
       );
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
+        return;
+      }
+    }
+
+    if (loginForm.role === 'moderator') {
+      const moderator = state.moderators.find(
+        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
+      );
+      if (moderator) {
+        setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
         return;
       }
     }
@@ -414,7 +497,11 @@ export default function Dashboard() {
       return;
     }
 
-    const duplicateLogin = state.judges.some((judge) => judge.login === judgeDraft.login.trim());
+    const login = judgeDraft.login.trim();
+    const duplicateLogin =
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
     if (duplicateLogin) {
       showToast('Судья с таким логином уже существует');
       return;
@@ -425,7 +512,7 @@ export default function Dashboard() {
       id: `J-${String(state.judges.length + 1).padStart(3, '0')}`,
       fullName: judgeDraft.fullName,
       email: judgeDraft.email,
-      login: judgeDraft.login.trim(),
+      login,
       passwordHash,
       active: true,
     };
@@ -433,6 +520,130 @@ export default function Dashboard() {
     setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
     showToast('Добавлено');
   }
+
+  function toggleDraftPermission(key) {
+    setModeratorDraft((prev) => ({
+      ...prev,
+      permissions: { ...prev.permissions, [key]: !prev.permissions[key] },
+    }));
+  }
+
+  function toggleEditPermission(key) {
+    setModeratorEditDraft((prev) => ({
+      ...prev,
+      permissions: { ...prev.permissions, [key]: !prev.permissions[key] },
+    }));
+  }
+
+  async function addModerator() {
+    if (!moderatorDraft.fullName.trim() || !moderatorDraft.login.trim() || !moderatorDraft.password) {
+      showToast('Заполните ФИО, логин и пароль модератора');
+      return;
+    }
+
+    const login = moderatorDraft.login.trim();
+    const duplicateLogin =
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
+
+    if (duplicateLogin) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    const passwordHash = await sha256(moderatorDraft.password);
+    const moderator = {
+      id: `M-${String(state.moderators.length + 1).padStart(3, '0')}`,
+      fullName: moderatorDraft.fullName.trim(),
+      login,
+      passwordHash,
+      active: true,
+      permissions: normalizeModeratorPermissions(moderatorDraft.permissions),
+    };
+
+    setState((prev) => ({ ...prev, moderators: [...prev.moderators, moderator] }));
+    setModeratorDraft({
+      fullName: '',
+      login: '',
+      password: '',
+      permissions: normalizeModeratorPermissions({}),
+    });
+    showToast('Модератор добавлен');
+  }
+
+  function startModeratorEdit(moderator) {
+    setModeratorEditId(moderator.id);
+    setModeratorEditDraft({
+      fullName: moderator.fullName || '',
+      login: moderator.login || '',
+      password: '',
+      active: moderator.active ?? true,
+      permissions: normalizeModeratorPermissions(moderator.permissions),
+    });
+  }
+
+  async function saveModeratorEdit() {
+    if (!moderatorEditId) return;
+    const login = moderatorEditDraft.login.trim();
+
+    if (!moderatorEditDraft.fullName.trim() || !login) {
+      showToast('Укажите ФИО и логин модератора');
+      return;
+    }
+
+    const duplicate =
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.id !== moderatorEditId && moderator.login === login);
+
+    if (duplicate) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    let nextPasswordHash = null;
+    if (moderatorEditDraft.password) {
+      nextPasswordHash = await sha256(moderatorEditDraft.password);
+    }
+
+    setState((prev) => ({
+      ...prev,
+      moderators: prev.moderators.map((moderator) => {
+        if (moderator.id !== moderatorEditId) return moderator;
+        return {
+          ...moderator,
+          fullName: moderatorEditDraft.fullName.trim(),
+          login,
+          active: moderatorEditDraft.active,
+          permissions: normalizeModeratorPermissions(moderatorEditDraft.permissions),
+          ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
+        };
+      }),
+    }));
+
+    if (session.role === 'moderator' && session.id === moderatorEditId) {
+      setSession((prev) => ({ ...prev, login }));
+    }
+
+    setModeratorEditId(null);
+    showToast('Модератор обновлен');
+  }
+
+  function deleteModerator(moderatorId) {
+    setState((prev) => ({
+      ...prev,
+      moderators: prev.moderators.filter((moderator) => moderator.id !== moderatorId),
+    }));
+
+    if (moderatorEditId === moderatorId) setModeratorEditId(null);
+    if (session.role === 'moderator' && session.id === moderatorId) {
+      setSession({ role: null, id: null, login: null });
+    }
+
+    showToast('Модератор удален');
+  }
+
 
   function addCriterion() {
     if (!criterionTitle.trim()) return;
@@ -549,6 +760,37 @@ export default function Dashboard() {
     setImportText('');
   }
 
+
+  function exportAppState() {
+    const payload = JSON.stringify(state, null, 2);
+    const blob = new Blob([payload], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'beauty-olymp-state.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('Данные экспортированы');
+  }
+
+  function importAppState() {
+    if (!stateImportText.trim()) {
+      showToast('Вставьте JSON состояния');
+      return;
+    }
+
+    const parsed = safeParseJson(stateImportText);
+    if (!parsed) {
+      showToast('Некорректный JSON');
+      return;
+    }
+
+    const normalized = normalizeState(parsed);
+    setState(normalized);
+    setStateImportText('');
+    showToast('Данные импортированы');
+  }
+
   function downloadCsv(filename, rows) {
     const csv = toCsv(rows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -629,7 +871,10 @@ export default function Dashboard() {
       return;
     }
 
-    const duplicate = state.judges.some((j) => j.id !== judgeEditId && j.login === login);
+    const duplicate =
+      state.judges.some((j) => j.id !== judgeEditId && j.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
     if (duplicate) {
       showToast('Логин уже используется');
       return;
@@ -717,10 +962,11 @@ export default function Dashboard() {
         <BrandHeader />
         <div className="card narrow">
           <h1>Beauty Olymp — система судейства</h1>
-          <p>Вход для администратора или судьи.</p>
+          <p>Вход для администратора, модератора или судьи.</p>
           <select value={loginForm.role} onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}>
             <option value="judge">Судья</option>
             <option value="admin">Администратор</option>
+            <option value="moderator">Модератор</option>
           </select>
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
@@ -857,20 +1103,22 @@ export default function Dashboard() {
   const notStartedJudges = state.judges.filter((judge) =>
     state.assignments.some((a) => a.judgeId === judge.id && a.status !== 'оценено')
   );
+  const isAdmin = session.role === 'admin';
 
   return (
     <div className="layout">
       <BrandHeader />
       <div className="toolbar">
-        <strong>Администратор: {session.login}</strong>
+        <strong>{isAdmin ? `Администратор: ${session.login}` : `Модератор: ${session.login}`}</strong>
         <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       </div>
 
       <div className="card row">
         <button onClick={() => setAdminTab('main')}>Админка</button>
-        <button onClick={() => setAdminTab('judges')}>Судьи</button>
-        <button onClick={() => setAdminTab('works')}>Работы</button>
-        <button onClick={() => setAdminTab('import')}>Импорт</button>
+        {access.canManageJudges ? <button onClick={() => setAdminTab('judges')}>Судьи</button> : null}
+        {access.canManageWorks ? <button onClick={() => setAdminTab('works')}>Работы</button> : null}
+        {access.canManageWorks ? <button onClick={() => setAdminTab('import')}>Импорт</button> : null}
+        {isAdmin ? <button onClick={() => setAdminTab('moderators')}>Модераторы</button> : null}
       </div>
 
       {adminTab === 'main' ? (
@@ -884,6 +1132,7 @@ export default function Dashboard() {
         <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
       </div>
 
+      {access.canManageWorks ? (
       <div className="card">
         <h3>Создание карточки работы</h3>
         <select
@@ -916,7 +1165,10 @@ export default function Dashboard() {
         <textarea placeholder="Видео (по 1 ссылке на строку)" value={workDraft.videosText} onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))} />
         <button onClick={addWork}>Сохранить работу</button>
       </div>
+      ) : null}
 
+      {access.canManageJudges ? (
+      <>
       <div className="card">
         <h3>Управление критериями</h3>
         <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
@@ -932,6 +1184,28 @@ export default function Dashboard() {
         <button onClick={addJudge}>Добавить судью</button>
       </div>
 
+      {isAdmin ? (
+      <div className="card">
+        <h3>Создание модератора</h3>
+        <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
+        <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
+        <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
+        <div>
+          {MODERATOR_PERMISSIONS.map((permission) => (
+            <label key={permission.key} style={{ display: 'block' }}>
+              <input
+                type="checkbox"
+                checked={moderatorDraft.permissions[permission.key]}
+                onChange={() => toggleDraftPermission(permission.key)}
+              />{' '}
+              {permission.label}
+            </label>
+          ))}
+        </div>
+        <button onClick={addModerator}>Добавить модератора</button>
+      </div>
+      ) : null}
+
       <div className="card">
         <h3>Назначение работ</h3>
         <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
@@ -944,7 +1218,11 @@ export default function Dashboard() {
         </select>
         <button onClick={assignWork}>Назначить</button>
       </div>
+      </>
+      ) : null}
 
+      {access.canExportScores ? (
+      <>
       <div className="card">
         <h3>Рейтинг по номинациям и категориям</h3>
         <div className="row rating-filters">
@@ -981,11 +1259,13 @@ export default function Dashboard() {
         <button onClick={exportScores}>Экспорт всех оценок CSV</button>
         <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
       </div>
+      </>
+      ) : null}
 
       </>
       ) : null}
 
-      {adminTab === 'judges' ? (
+      {adminTab === 'judges' && access.canManageJudges ? (
         <div className="card">
           <h3>Все судьи</h3>
           <div className="admin-table-wrap"><table>
@@ -1037,19 +1317,44 @@ export default function Dashboard() {
               })}
             </tbody>
           </table></div>
+
+          <div className="mobile-only-list">
+            {state.judges.map((judge) => {
+              const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
+              const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено').length;
+              const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено').length;
+              return (
+                <div key={`mobile-${judge.id}`} className="card compact-card">
+                  <h4>{judge.fullName}</h4>
+                  <p><strong>ID:</strong> {judge.id}</p>
+                  <p><strong>Логин:</strong> {judge.login}</p>
+                  <p><strong>Статус:</strong> {judge.active ? 'Активен' : 'Неактивен'}</p>
+                  <p><strong>Отсудил:</strong> {judged} · <strong>Не отсудил:</strong> {pending}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : null}
 
-      {adminTab === 'import' ? (
+      {adminTab === 'import' && access.canManageWorks ? (
         <div className="card">
           <h3>Импорт работ из CSV (;)</h3>
           <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1;ФИО участника</p>
           <textarea rows={8} value={importText} onChange={(e) => setImportText(e.target.value)} />
           <button onClick={importWorksFromCsv}>Импортировать</button>
+
+          <h3>Синхронизация данных между устройствами</h3>
+          <p>Данные хранятся локально в браузере. Чтобы мобильная версия показала то же, что на компьютере, экспортируйте состояние на ПК и импортируйте его на телефоне.</p>
+          <div className="row">
+            <button onClick={exportAppState}>Экспорт JSON состояния</button>
+          </div>
+          <textarea rows={6} placeholder="Вставьте JSON состояния сюда" value={stateImportText} onChange={(e) => setStateImportText(e.target.value)} />
+          <button onClick={importAppState}>Импорт JSON состояния</button>
         </div>
       ) : null}
 
-      {adminTab === 'works' ? (
+      {adminTab === 'works' && access.canManageWorks ? (
         <div className="card">
           <h3>Все загруженные работы</h3>
           <div className="admin-table-wrap"><table className="works-table">
@@ -1077,6 +1382,78 @@ export default function Dashboard() {
                             <button onClick={() => startWorkEdit(work)}>Редактировать</button>
                             <button onClick={() => deleteWork(work.id)}>Удалить</button>
                             <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
+
+          <div className="mobile-only-list">
+            {state.works.map((work) => (
+              <div key={`mobile-work-${work.id}`} className="card compact-card">
+                <h4>{work.title}</h4>
+                <p><strong>Номер:</strong> {work.id}</p>
+                <p><strong>Конкурс:</strong> {work.contest}</p>
+                <p><strong>Направление:</strong> {work.direction || '—'}</p>
+                <p><strong>Категория:</strong> {work.category}</p>
+                <p><strong>Участник:</strong> {work.participantName || '—'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {adminTab === 'moderators' && isAdmin ? (
+        <div className="card">
+          <h3>Модераторы</h3>
+          <div className="admin-table-wrap"><table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.moderators.map((moderator) => {
+                const isEditing = moderatorEditId === moderator.id;
+                return (
+                  <tr key={moderator.id}>
+                    <td>{moderator.id}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.fullName} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : moderator.fullName}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.login} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))} /> : moderator.login}</td>
+                    <td>
+                      {isEditing ? (
+                        <div>
+                          {MODERATOR_PERMISSIONS.map((permission) => (
+                            <label key={permission.key} style={{ display: 'block' }}>
+                              <input
+                                type="checkbox"
+                                checked={moderatorEditDraft.permissions[permission.key]}
+                                onChange={() => toggleEditPermission(permission.key)}
+                              />{' '}
+                              {permission.label}
+                            </label>
+                          ))}
+                        </div>
+                      ) : MODERATOR_PERMISSIONS.filter((permission) => moderator.permissions?.[permission.key]).map((permission) => permission.label).join(', ') || 'Нет прав'}
+                    </td>
+                    <td>{isEditing ? (
+                      <select value={String(moderatorEditDraft.active)} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (moderator.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={moderatorEditDraft.password} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveModeratorEdit}>Сохранить</button>
+                            <button onClick={() => setModeratorEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startModeratorEdit(moderator)}>Редактировать</button>
+                            <button onClick={() => deleteModerator(moderator.id)}>Удалить</button>
                           </>
                         )}
                       </div>
@@ -1210,6 +1587,8 @@ function Styles() {
       .rating-filters label { font-size: 13px; font-weight: 700; color: #281C68; }
       .admin-table-wrap { overflow-x: auto; }
       .admin-table-wrap table { min-width: 920px; }
+      .mobile-only-list { display: none; }
+      .compact-card { padding: 10px 12px; gap: 4px; }
       .top-logout { display: inline-flex; }
       .mobile-logout { display: none; background: #281C68; margin-top: 4px; }
       .toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #281C68 0%, #FF025D 100%); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
@@ -1253,6 +1632,8 @@ function Styles() {
         .top-logout { display: none; }
         .mobile-logout { display: block; position: sticky; bottom: 8px; z-index: 10; }
         .row { flex-direction: column; }
+        .admin-table-wrap { display: none; }
+        .mobile-only-list { display: grid; gap: 8px; }
         .row > * { width: 100%; }
         input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
         .grid { grid-template-columns: 1fr; }
