@@ -16,7 +16,16 @@ const CATEGORY_OPTIONS_BY_CONTEST = {
 };
 
 const DIRECTION_OPTIONS_BY_CONTEST = {
-  'Эстетика Олимпа': ['Nail', 'Hair', 'Brow/lash', 'Makeup'],
+  'Эстетика Олимпа': [
+    'Роспись на салонных типсах',
+    'Маникюр',
+    'Моделирование',
+    'Педикюр и подология',
+    'Перманент',
+    'Макияж',
+    'Ресницы и брови',
+    'Парикмахеры',
+  ],
   'Креатив Олимпа': [
     'Профессиональное креативное направление индустрии красоты',
     'Творческо-креативное и хендмейд-направление',
@@ -25,6 +34,84 @@ const DIRECTION_OPTIONS_BY_CONTEST = {
   'Образ Олимпа': ['Общий зачет'],
   'Империя Олимпа': ['Общий зачет'],
 };
+
+const NOMINATION_OPTIONS_BY_CONTEST_AND_DIRECTION = {
+  'Эстетика Олимпа': {
+    'Роспись на салонных типсах': [
+      '200.1 Художественная роспись на типсах, салонный дизайн. Тема — Свободная',
+      '200.2 Художественная роспись на типсах, салонный дизайн. Тема — Детское пространство',
+      '200.3 Акварель на маникюрных типсах, салонный дизайн. Тема — Свободная',
+      '200.4 Художественная роспись на педикюрных типсах (краски, гель-краски, гель-лаки). Тема — Свободная',
+      '200.5 Роспись на педикюрных типсах. Тема — Детское пространство',
+      '200.6 Роспись на педикюрных типсах. Тема — Цветочная фантазия',
+      '200.7 Монохромная роспись на педикюрных типсах. Тема — Свободная',
+      '200.8 Китайская роспись на педикюрных типсах. Тема — Свободная',
+      '200.9 Жостовская роспись на педикюрных типсах',
+      '200.10 Акварель на педикюрных типсах. Тема — Свободная',
+      '200.11 Роспись на педикюрных типсах. Тема — Абстракция и геометрия',
+    ],
+    Маникюр: [
+      '201.1 Маникюр и покрытие в один тон на натуральных ногтях (гель-лак)',
+      '201.2 Маникюр с покрытием и дизайном',
+      '201.3 Маникюр без покрытия женский',
+      '201.4 Маникюр без покрытия мужской',
+    ],
+    Моделирование: [
+      '202.1 Салонное моделирование ногтей с дизайном',
+      '202.2 Салонное моделирование ногтей «выкладной френч»',
+      '202.3 Салонное моделирование ногтей: верхние формы, классическая архитектура. Постановка «под лак».',
+      '202.4 Салонное моделирование ногтей с покрытием в один тон',
+    ],
+    'Педикюр и подология': [
+      '210.1 Педикюр подологический',
+      '210.2 Салонный педикюр без покрытия',
+      '210.3 Гигиенический педикюр с цветным покрытием или салонным дизайном',
+      '210.4 Салонный педикюр только пальцев ног с цветным покрытием или салонным дизайном',
+      '210.5 Решение подологической проблемы одной зоны',
+    ],
+    Перманент: [
+      '220.1 Пудровое напыление бровей (до/после)',
+      '220.2 Брови в аппаратной волосковой технике (до/после)',
+      '220.3 Глаза — классическая стрелка (до/после)',
+      '220.4 Глаза — стрелка с растушёвкой (до/после)',
+      '220.5 Перманентный макияж: губы в акварельной технике (до/после)',
+      '220.6 Перманентный макияж: губы — помадный прокрас (до/после)',
+    ],
+    Макияж: [
+      '230.1 Преображение модели — модный трендовый образ (до/после)',
+      '230.2 Свадебный макияж — современный клиентский образ невесты',
+      '230.3 Smoky-eyes — современный клиентский вечерний образ',
+    ],
+    'Ресницы и брови': [
+      '240.1 Классическое наращивание ресниц (до/после)',
+      '240.2 Объемное наращивание ресниц 2-4D (до/после)',
+      '240.3 Гиперобъем — наращивание ресниц 6-10D (до/после)',
+      '240.4 Наращивание ресниц с современным эффектом (до/после)',
+      '240.5 Колорирование ресниц (до/после)',
+      '240.6 Оформление бровей краской (до/после)',
+      '240.7 Оформление бровей хной (до/после)',
+      '240.8 Ламинирование бровей (до/после)',
+    ],
+    Парикмахеры: [
+      '250.1 Салонный женский образ: стрижка',
+      '250.2 Салонный женский образ: окрашивание',
+      '250.3 Салонный женский образ: окрашивание/стрижка/укладка',
+      '250.4 Современная стильная прическа',
+      '250.5 Свадебная прическа',
+      '250.6 Салонный мужской образ: стрижка',
+      '250.7 Салонный мужской образ: окрашивание',
+      '250.8 Салонный мужской образ: окрашивание/стрижка/укладка',
+      '250.9 Барберинг: мужская стрижка',
+      '250.10 Барберинг: моделирование бороды',
+      '250.11 Барберинг: стрижка + моделирование бороды',
+      '250.12 Барберинг: детская стрижка (мальчик/подросток)',
+    ],
+  },
+};
+
+function getNominationOptions(contest, direction) {
+  return NOMINATION_OPTIONS_BY_CONTEST_AND_DIRECTION?.[contest]?.[direction] || [];
+}
 
 const DEFAULT_CRITERIA = [
   { id: 'c1', title: 'Креативность', min: 1, max: 10 },
@@ -38,7 +125,8 @@ const DEFAULT_JUDGES = [
     fullName: 'Судья Демонстрационный',
     email: 'judge@demo.local',
     login: 'judge1',
-    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', // password
+    passwordHash:
+      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
     active: true,
   },
 ];
@@ -47,9 +135,9 @@ const DEFAULT_WORKS = [
   {
     id: 'EO-00001',
     contest: 'Эстетика Олимпа',
-    nomination: 'Маникюр',
+    nomination: '200.1 Художественная роспись на типсах, салонный дизайн. Тема — Свободная',
     category: 'Дебют',
-    direction: 'Nail',
+    direction: 'Роспись на салонных типсах',
     participantName: 'Иванова Мария',
     title: 'Северное сияние',
     description: 'Градиентный дизайн с ручной прорисовкой.',
@@ -82,14 +170,10 @@ function createDefaultState() {
     criteria: DEFAULT_CRITERIA,
     works: DEFAULT_WORKS,
     judges: DEFAULT_JUDGES,
-    assignments: [
-      { workId: 'EO-00001', judgeId: 'J-001', status: 'не начато', assignedAt: new Date().toISOString() },
-    ],
+    assignments: [{ workId: 'EO-00001', judgeId: 'J-001', status: 'не начато', assignedAt: new Date().toISOString() }],
     scores: [],
     moderators: [],
-    adminUsers: [
-      { login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }, // admin
-    ],
+    adminUsers: [{ login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }],
   };
 }
 
@@ -166,14 +250,14 @@ function normalizeSession(rawSession, normalizedState) {
 }
 
 function parseList(value) {
-  return String(value || '')
+  return value
     .split('\n')
     .map((v) => v.trim())
     .filter(Boolean);
 }
 
 function generateWorkId(existingWorks) {
-  const next = (existingWorks?.length || 0) + 1;
+  const next = existingWorks.length + 1;
   return `EO-${String(next).padStart(5, '0')}`;
 }
 
@@ -186,17 +270,14 @@ async function sha256(text) {
 
 function toCsv(rows) {
   return rows
-    .map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(','))
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
+        .join(',')
+    )
     .join('\n');
 }
 
-function safeParseJson(value) {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
-}
 
 function isUuidInputError(message) {
   const text = String(message || '').toLowerCase();
@@ -207,25 +288,30 @@ function buildCloudRequestPreview(table, payload) {
   return `supabase.from('${table}').upsert({ id: '${payload.id}', state: <json> }, { onConflict: 'id' })`;
 }
 
+function safeParseJson(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 export default function Dashboard() {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
   const [sessionReady, setSessionReady] = useState(false);
-
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSyncing, setCloudSyncing] = useState(false);
   const [cloudError, setCloudError] = useState('');
   const [cloudDebug, setCloudDebug] = useState({ lastRequest: '', lastError: '' });
   const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
   const lastCloudWriteRef = useRef('');
-
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
-
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
-    nomination: '',
+    nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
     category: 'Дебют',
-    direction: 'Nail',
+    direction: 'Роспись на салонных типсах',
     participantName: '',
     title: '',
     description: '',
@@ -233,38 +319,27 @@ export default function Dashboard() {
     videosText: '',
     status: 'Допущено',
   });
-
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
-
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
     login: '',
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
-
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
-
   const [scoreDrafts, setScoreDrafts] = useState({});
   const [importText, setImportText] = useState('');
   const [stateImportText, setStateImportText] = useState('');
-
   const [toast, setToast] = useState('');
-  const toastTimerRef = useRef(null);
-
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
-
   const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
   const [adminTab, setAdminTab] = useState('main');
-
   const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
-
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
-
   const [judgeViewId, setJudgeViewId] = useState(null);
-
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
     fullName: '',
@@ -273,25 +348,24 @@ export default function Dashboard() {
     active: true,
     permissions: normalizeModeratorPermissions({}),
   });
-
   const [judgeEditId, setJudgeEditId] = useState(null);
-  const [judgeEditDraft, setJudgeEditDraft] = useState({
-    fullName: '',
-    email: '',
-    login: '',
-    password: '',
-    active: true,
-  });
-
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
   const [workEditId, setWorkEditId] = useState(null);
-  const [workEditDraft, setWorkEditDraft] = useState({
-    title: '',
-    participantName: '',
-    nomination: '',
-    category: '',
-    direction: '',
-    status: 'Допущено',
-  });
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const toastTimerRef = useRef(null);
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+  const nominationOptions = useMemo(
+    () => getNominationOptions(workDraft.contest, workDraft.direction),
+    [workDraft.contest, workDraft.direction]
+  );
+
 
   const categoryOptions = useMemo(
     () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
@@ -312,7 +386,6 @@ export default function Dashboard() {
       const rawSession = localStorage.getItem(SESSION_KEY);
 
       let nextState = createDefaultState();
-
       if (saved) {
         const parsedState = safeParseJson(saved);
         if (parsedState) {
@@ -357,7 +430,9 @@ export default function Dashboard() {
             setCloudError(`Не удалось получить данные из облака: ${cloudReadError.message || 'unknown error'}`);
           } else if (cloudData?.state) {
             nextState = normalizeState(cloudData.state);
-            if (cloudData.id) setCloudRowId(cloudData.id);
+            if (cloudData.id) {
+              setCloudRowId(cloudData.id);
+            }
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
@@ -386,19 +461,15 @@ export default function Dashboard() {
     }
 
     bootstrapState();
-
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Persist local state
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  // Auto sync to cloud (debounced)
   useEffect(() => {
     if (!sessionReady || !cloudReady || !supabase) return;
 
@@ -412,18 +483,22 @@ export default function Dashboard() {
       setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
 
       try {
-        let { error } = await supabase.from(CLOUD_TABLE).upsert(payload, { onConflict: 'id' });
+        let { error } = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(payload, { onConflict: 'id' });
 
         if (error && isUuidInputError(error.message)) {
           const fallbackId = crypto.randomUUID();
           const fallbackPayload = { id: fallbackId, state };
           const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
           setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
-
-          const retry = await supabase.from(CLOUD_TABLE).upsert(fallbackPayload, { onConflict: 'id' });
+          const retry = await supabase
+            .from(CLOUD_TABLE)
+            .upsert(fallbackPayload, { onConflict: 'id' });
           error = retry.error;
-
-          if (!error) setCloudRowId(fallbackId);
+          if (!error) {
+            setCloudRowId(fallbackId);
+          }
         }
 
         if (error) {
@@ -449,7 +524,6 @@ export default function Dashboard() {
     return () => window.clearTimeout(timer);
   }, [state, sessionReady, cloudReady, cloudRowId]);
 
-  // Persist session
   useEffect(() => {
     if (!sessionReady) return;
 
@@ -460,11 +534,10 @@ export default function Dashboard() {
     localStorage.removeItem(SESSION_KEY);
   }, [session, sessionReady]);
 
-  // Toast cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
   }, []);
 
   const judgeAssignments = useMemo(() => {
@@ -488,6 +561,40 @@ export default function Dashboard() {
         }),
     [judgeAssignments, state.works]
   );
+  const judgeWorkGroups = useMemo(() => {
+    const grouped = {};
+    judgeWorks.forEach((work) => {
+      const groupKey = [
+        work.contest || 'Без конкурса',
+        work.direction || 'Общий зачет',
+        work.nomination || 'Без номинации',
+        work.category || 'Без категории',
+      ].join(' | ');
+
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = {
+          contest: work.contest || 'Без конкурса',
+          direction: work.direction || 'Общий зачет',
+          nomination: work.nomination || 'Без номинации',
+          category: work.category || 'Без категории',
+          works: [],
+        };
+      }
+      grouped[groupKey].works.push(work);
+    });
+
+    return Object.values(grouped).map((group) => ({
+      ...group,
+      works: group.works.sort((a, b) => a.id.localeCompare(b.id)),
+    }));
+  }, [judgeWorks]);
+
+  const judgeSelectedWork = useMemo(
+    () => judgeWorks.find((work) => work.id === judgeSelectedWorkId) || null,
+    [judgeSelectedWorkId, judgeWorks]
+  );
+
+
 
   const progress = useMemo(() => {
     const total = state.assignments.length;
@@ -533,10 +640,8 @@ export default function Dashboard() {
     state.works.forEach((work) => {
       const scores = state.scores.filter((score) => score.workId === work.id);
       if (!scores.length) return;
-
       const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
       const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
-
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
     });
@@ -563,23 +668,17 @@ export default function Dashboard() {
 
     return filtered;
   }, [state.scores, state.works, ratingFilter]);
-
   useEffect(() => {
     if (session.role === 'judge') return;
-
     const allowedTabs = ['main'];
     if (access.canManageJudges) allowedTabs.push('judges');
     if (access.canManageWorks) allowedTabs.push('works', 'import');
     if (session.role === 'admin') allowedTabs.push('moderators');
-
-    if (!allowedTabs.includes(adminTab)) setAdminTab('main');
+    if (!allowedTabs.includes(adminTab)) {
+      setAdminTab('main');
+    }
   }, [adminTab, access, session.role]);
 
-  function showToast(message) {
-    setToast(message);
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
-  }
 
   async function login() {
     const normalizedLogin = loginForm.login.trim();
@@ -594,7 +693,9 @@ export default function Dashboard() {
     }
 
     if (loginForm.role === 'judge') {
-      const judge = state.judges.find((j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active);
+      const judge = state.judges.find(
+        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
+      );
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
         return;
@@ -612,6 +713,15 @@ export default function Dashboard() {
     }
 
     alert('Неверные данные для входа.');
+  }
+
+
+  function showToast(message) {
+    setToast(message);
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
   }
 
   function addWork() {
@@ -637,16 +747,7 @@ export default function Dashboard() {
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
     setWorkDraft({
-      contest: 'Эстетика Олимпа',
-      nomination: '',
-      category: 'Дебют',
-      direction: 'Nail',
-      participantName: '',
-      title: '',
-      description: '',
-      photosText: '',
-      videosText: '',
-      status: 'Допущено',
+      contest: 'Эстетика Олимпа', nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '', category: 'Дебют', direction: 'Роспись на салонных типсах', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
     showToast('Добавлено');
   }
@@ -657,12 +758,11 @@ export default function Dashboard() {
       return;
     }
 
-    const loginValue = judgeDraft.login.trim();
+    const login = judgeDraft.login.trim();
     const duplicateLogin =
-      state.judges.some((judge) => judge.login === loginValue) ||
-      state.adminUsers.some((admin) => admin.login === loginValue) ||
-      state.moderators.some((moderator) => moderator.login === loginValue);
-
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
     if (duplicateLogin) {
       showToast('Судья с таким логином уже существует');
       return;
@@ -673,11 +773,10 @@ export default function Dashboard() {
       id: `J-${String(state.judges.length + 1).padStart(3, '0')}`,
       fullName: judgeDraft.fullName,
       email: judgeDraft.email,
-      login: loginValue,
+      login,
       passwordHash,
       active: true,
     };
-
     setState((prev) => ({ ...prev, judges: [...prev.judges, judge] }));
     setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
     showToast('Добавлено');
@@ -703,11 +802,11 @@ export default function Dashboard() {
       return;
     }
 
-    const loginValue = moderatorDraft.login.trim();
+    const login = moderatorDraft.login.trim();
     const duplicateLogin =
-      state.judges.some((judge) => judge.login === loginValue) ||
-      state.adminUsers.some((admin) => admin.login === loginValue) ||
-      state.moderators.some((moderator) => moderator.login === loginValue);
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
 
     if (duplicateLogin) {
       showToast('Логин уже используется');
@@ -718,7 +817,7 @@ export default function Dashboard() {
     const moderator = {
       id: `M-${String(state.moderators.length + 1).padStart(3, '0')}`,
       fullName: moderatorDraft.fullName.trim(),
-      login: loginValue,
+      login,
       passwordHash,
       active: true,
       permissions: normalizeModeratorPermissions(moderatorDraft.permissions),
@@ -747,17 +846,17 @@ export default function Dashboard() {
 
   async function saveModeratorEdit() {
     if (!moderatorEditId) return;
+    const login = moderatorEditDraft.login.trim();
 
-    const loginValue = moderatorEditDraft.login.trim();
-    if (!moderatorEditDraft.fullName.trim() || !loginValue) {
+    if (!moderatorEditDraft.fullName.trim() || !login) {
       showToast('Укажите ФИО и логин модератора');
       return;
     }
 
     const duplicate =
-      state.judges.some((judge) => judge.login === loginValue) ||
-      state.adminUsers.some((admin) => admin.login === loginValue) ||
-      state.moderators.some((moderator) => moderator.id !== moderatorEditId && moderator.login === loginValue);
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.id !== moderatorEditId && moderator.login === login);
 
     if (duplicate) {
       showToast('Логин уже используется');
@@ -776,7 +875,7 @@ export default function Dashboard() {
         return {
           ...moderator,
           fullName: moderatorEditDraft.fullName.trim(),
-          login: loginValue,
+          login,
           active: moderatorEditDraft.active,
           permissions: normalizeModeratorPermissions(moderatorEditDraft.permissions),
           ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
@@ -785,7 +884,7 @@ export default function Dashboard() {
     }));
 
     if (session.role === 'moderator' && session.id === moderatorEditId) {
-      setSession((prev) => ({ ...prev, login: loginValue }));
+      setSession((prev) => ({ ...prev, login }));
     }
 
     setModeratorEditId(null);
@@ -799,10 +898,13 @@ export default function Dashboard() {
     }));
 
     if (moderatorEditId === moderatorId) setModeratorEditId(null);
-    if (session.role === 'moderator' && session.id === moderatorId) setSession({ role: null, id: null, login: null });
+    if (session.role === 'moderator' && session.id === moderatorId) {
+      setSession({ role: null, id: null, login: null });
+    }
 
     showToast('Модератор удален');
   }
+
 
   function addCriterion() {
     if (!criterionTitle.trim()) return;
@@ -813,12 +915,10 @@ export default function Dashboard() {
 
   function assignWork() {
     if (!assignmentDraft.judgeId || !assignmentDraft.workId) return;
-
     const exists = state.assignments.some(
       (a) => a.judgeId === assignmentDraft.judgeId && a.workId === assignmentDraft.workId
     );
     if (exists) return;
-
     setState((prev) => ({
       ...prev,
       assignments: [
@@ -851,11 +951,17 @@ export default function Dashboard() {
         comment,
       },
     }));
+
+    if (session.role === 'judge' && session.id === judgeEditId) {
+      setSession((prev) => ({ ...prev, login: loginValue }));
+    }
+
+    setJudgeEditId(null);
+    showToast('Судья обновлен');
   }
 
   function submitScore(workId) {
     const draft = scoreDrafts[workId];
-
     if (!draft?.comment?.trim()) {
       alert('Комментарий обязателен.');
       return;
@@ -922,6 +1028,7 @@ export default function Dashboard() {
     setImportText('');
   }
 
+
   function exportAppState() {
     const payload = JSON.stringify(state, null, 2);
     const blob = new Blob([payload], { type: 'application/json;charset=utf-8;' });
@@ -959,8 +1066,11 @@ export default function Dashboard() {
     }
 
     setCloudSyncing(true);
-
-    const { data, error } = await supabase.from(CLOUD_TABLE).select('id,state').eq('id', cloudRowId).maybeSingle();
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select('state')
+      .eq('id', cloudRowId)
+      .maybeSingle();
 
     if (error) {
       setCloudSyncing(false);
@@ -977,13 +1087,9 @@ export default function Dashboard() {
 
     const normalized = normalizeState(data.state);
     const serializedState = JSON.stringify(normalized);
-
     setState(normalized);
     localStorage.setItem(STORAGE_KEY, serializedState);
     lastCloudWriteRef.current = serializedState;
-
-    if (data.id) setCloudRowId(data.id);
-
     setCloudSyncing(false);
     setCloudError('');
     showToast('Данные загружены из облака');
@@ -996,25 +1102,28 @@ export default function Dashboard() {
     }
 
     setCloudSyncing(true);
-
     const serializedState = JSON.stringify(state);
     const payload = { id: cloudRowId, state };
     const requestPreview = buildCloudRequestPreview(CLOUD_TABLE, payload);
     setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
 
     try {
-      let { error } = await supabase.from(CLOUD_TABLE).upsert(payload, { onConflict: 'id' });
+      let { error } = await supabase
+        .from(CLOUD_TABLE)
+        .upsert(payload, { onConflict: 'id' });
 
       if (error && isUuidInputError(error.message)) {
         const fallbackId = crypto.randomUUID();
         const fallbackPayload = { id: fallbackId, state };
         const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
         setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
-
-        const retry = await supabase.from(CLOUD_TABLE).upsert(fallbackPayload, { onConflict: 'id' });
+        const retry = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(fallbackPayload, { onConflict: 'id' });
         error = retry.error;
-
-        if (!error) setCloudRowId(fallbackId);
+        if (!error) {
+          setCloudRowId(fallbackId);
+        }
       }
 
       setCloudSyncing(false);
@@ -1055,23 +1164,21 @@ export default function Dashboard() {
 
   function exportScores() {
     const criteriaColumns = state.criteria.map((criterion) => criterion.title);
-    const rows = [
-      [
-        'Номер работы',
-        'Contest',
-        'Direction',
-        'Nomination',
-        'Category',
-        'Participant',
-        'JudgeID',
-        'JudgeName',
-        ...criteriaColumns,
-        'Comment',
-        'Total',
-        'Average',
-        'SubmittedAt',
-      ],
-    ];
+    const rows = [[
+      'Номер работы',
+      'Contest',
+      'Direction',
+      'Nomination',
+      'Category',
+      'Participant',
+      'JudgeID',
+      'JudgeName',
+      ...criteriaColumns,
+      'Comment',
+      'Total',
+      'Average',
+      'SubmittedAt',
+    ]];
 
     state.scores.forEach((score) => {
       const work = state.works.find((item) => item.id === score.workId);
@@ -1118,19 +1225,16 @@ export default function Dashboard() {
 
   async function saveJudgeEdit() {
     if (!judgeEditId) return;
-
-    const loginValue = judgeEditDraft.login.trim();
-
-    if (!judgeEditDraft.fullName.trim() || !loginValue) {
+    const login = judgeEditDraft.login.trim();
+    if (!judgeEditDraft.fullName.trim() || !login) {
       showToast('Укажите ФИО и логин судьи');
       return;
     }
 
     const duplicate =
-      state.judges.some((j) => j.id !== judgeEditId && j.login === loginValue) ||
-      state.adminUsers.some((admin) => admin.login === loginValue) ||
-      state.moderators.some((moderator) => moderator.login === loginValue);
-
+      state.judges.some((j) => j.id !== judgeEditId && j.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
     if (duplicate) {
       showToast('Логин уже используется');
       return;
@@ -1149,16 +1253,12 @@ export default function Dashboard() {
           ...judge,
           fullName: judgeEditDraft.fullName.trim(),
           email: judgeEditDraft.email,
-          login: loginValue,
+          login,
           active: judgeEditDraft.active,
           ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
         };
       }),
     }));
-
-    if (session.role === 'judge' && session.id === judgeEditId) {
-      setSession((prev) => ({ ...prev, login: loginValue }));
-    }
 
     setJudgeEditId(null);
     showToast('Судья обновлен');
@@ -1174,11 +1274,6 @@ export default function Dashboard() {
 
     if (judgeViewId === judgeId) setJudgeViewId(null);
     if (judgeEditId === judgeId) setJudgeEditId(null);
-
-    if (session.role === 'judge' && session.id === judgeId) {
-      setSession({ role: null, id: null, login: null });
-    }
-
     showToast('Судья удален');
   }
 
@@ -1196,21 +1291,14 @@ export default function Dashboard() {
 
   function saveWorkEdit() {
     if (!workEditId) return;
-
     setState((prev) => ({
       ...prev,
       works: prev.works.map((work) =>
         work.id === workEditId
-          ? {
-              ...work,
-              ...workEditDraft,
-              title: workEditDraft.title.trim(),
-              participantName: workEditDraft.participantName.trim(),
-            }
+          ? { ...work, ...workEditDraft, title: workEditDraft.title.trim(), participantName: workEditDraft.participantName.trim() }
           : work
       ),
     }));
-
     setWorkEditId(null);
     showToast('Работа обновлена');
   }
@@ -1225,79 +1313,48 @@ export default function Dashboard() {
 
     if (selectedWorkId === workId) setSelectedWorkId(null);
     if (workEditId === workId) setWorkEditId(null);
-
     showToast('Работа удалена');
   }
 
-  // ---------- UI ----------
   if (!session.role) {
     return (
       <div className="layout">
         <BrandHeader />
         <div className="card narrow">
-          <h1>Beauty Olymp - система судейства</h1>
+          <h1>Beauty Olymp — система судейства</h1>
           <p>Вход для администратора, модератора или судьи.</p>
-
-          <select
-            value={loginForm.role}
-            onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}
-          >
+          <select value={loginForm.role} onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}>
             <option value="judge">Судья</option>
             <option value="admin">Администратор</option>
             <option value="moderator">Модератор</option>
           </select>
-
-          <input
-            placeholder="Логин"
-            value={loginForm.login}
-            onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))}
-          />
-          <input
-            type="password"
-            placeholder="Пароль"
-            value={loginForm.password}
-            onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))}
-          />
-
+          <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
+          <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
           <button onClick={login}>Войти</button>
           <small>Демо: admin/admin или judge1/password</small>
         </div>
-
         {lightboxImage ? (
-          <div className="modal-overlay" onClick={() => setLightboxImage('')}>
-            <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-              <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">
-                ×
-              </button>
-              <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
+            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+          </div>
+        </div>
+      ) : null}
+
+      {lightboxVideo ? (
+        <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
+          <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
+            <div className="video-frame video-expanded">
+              <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
             </div>
           </div>
-        ) : null}
+        </div>
+      ) : null}
 
-        {lightboxVideo ? (
-          <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
-            <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
-              <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">
-                ×
-              </button>
-              <div className="video-frame video-expanded">
-                <iframe
-                  src={lightboxVideo}
-                  title="Увеличенное видео"
-                  className="media"
-                  allow="autoplay; encrypted-media; fullscreen"
-                  allowFullScreen
-                />
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {toast ? <div className="toast">{toast}</div> : null}
-        <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>
-          Выйти
-        </button>
-
+      {toast ? <div className="toast">{toast}</div> : null}
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
@@ -1305,16 +1362,17 @@ export default function Dashboard() {
 
   if (session.role === 'judge') {
     const done = judgeAssignments.filter((a) => a.status === 'оценено').length;
+    const selectedJudgeWork = judgeSelectedWork;
+    const alreadyScored = selectedJudgeWork
+      ? state.scores.some((score) => score.workId === selectedJudgeWork.id && score.judgeId === session.id)
+      : false;
 
     return (
       <div className="layout">
         <BrandHeader />
-
         <div className="toolbar">
           <strong>Судья: {session.login}</strong>
-          <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>
-            Выйти
-          </button>
+          <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         </div>
 
         <div className="card">
@@ -1324,77 +1382,71 @@ export default function Dashboard() {
           <p>Осталось: {judgeAssignments.length - done}</p>
         </div>
 
-        {judgeWorks.map((work) => {
-          const alreadyScored = state.scores.some((s) => s.workId === work.id && s.judgeId === session.id);
+        {judgeWorkGroups.map((group) => (
+          <div key={`${group.contest}-${group.direction}-${group.nomination}-${group.category}`} className="card">
+            <h3>{group.contest}</h3>
+            <p><strong>Направление:</strong> {group.direction}</p>
+            <p><strong>Номинация:</strong> {group.nomination}</p>
+            <p><strong>Категория:</strong> {group.category}</p>
+            <div className="judge-preview-grid">
+              {group.works.map((work) => (
+                <button key={work.id} className="judge-preview-card" onClick={() => setJudgeSelectedWorkId(work.id)}>
+                  <img
+                    src={work.photos?.[0] || 'https://via.placeholder.com/480x320?text=%D0%9D%D0%B5%D1%82+%D1%84%D0%BE%D1%82%D0%BE'}
+                    alt={`Превью ${work.id}`}
+                    className="judge-preview-image"
+                  />
+                  <span>{work.id}</span>
+                  <small>{work.title}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
 
-          return (
-            <div className="card" key={work.id}>
-              <h3>Номер работы: {work.id}</h3>
-              <p>
-                {work.contest} / {work.nomination} / {work.category}
-              </p>
-              <p>{work.description}</p>
+        {selectedJudgeWork ? (
+          <div className="modal-overlay" onClick={() => setJudgeSelectedWorkId(null)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <div className="toolbar">
+                <h3>Работа: {selectedJudgeWork.id}</h3>
+                <button onClick={() => setJudgeSelectedWorkId(null)}>Закрыть</button>
+              </div>
+              <p>{selectedJudgeWork.contest} / {selectedJudgeWork.direction || 'Общий зачет'} / {selectedJudgeWork.nomination} / {selectedJudgeWork.category}</p>
+              <p><strong>Участник:</strong> {selectedJudgeWork.participantName || 'не указан'}</p>
+              <p>{selectedJudgeWork.description}</p>
 
               <div className="grid">
-                {(work.photos || []).map((photo, index) => (
-                  <img
-                    key={`${photo}-${index}`}
-                    src={photo}
-                    alt={`Фото ${index + 1}`}
-                    className="media clickable"
-                    onClick={() => setLightboxImage(photo)}
-                  />
+                {(selectedJudgeWork.photos || []).map((photo, index) => (
+                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                 ))}
               </div>
 
               <div className="grid judge-video-grid">
-                {(work.videos || []).map((video) => (
+                {(selectedJudgeWork.videos || []).map((video) => (
                   <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
-                    <iframe
-                      src={video}
-                      title={work.id}
-                      className="media"
-                      allow="autoplay; encrypted-media; fullscreen"
-                      allowFullScreen
-                    />
+                    <iframe src={video} title={selectedJudgeWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
                   </div>
                 ))}
               </div>
 
               {alreadyScored ? (
                 <>
-                  <p>
-                    <strong>Оценка отправлена. Редактирование закрыто.</strong>
-                  </p>
+                  <p><strong>Оценка отправлена. Редактирование закрыто.</strong></p>
                   {(() => {
-                    const submitted = state.scores.find((s) => s.workId === work.id && s.judgeId === session.id);
+                    const submitted = state.scores.find((score) => score.workId === selectedJudgeWork.id && score.judgeId === session.id);
                     if (!submitted) return null;
-
                     return (
                       <div>
                         <table>
-                          <thead>
-                            <tr>
-                              <th>Критерий</th>
-                              <th>Оценка</th>
-                            </tr>
-                          </thead>
+                          <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
                           <tbody>
                             {state.criteria.map((criterion) => (
-                              <tr key={criterion.id}>
-                                <td>{criterion.title}</td>
-                                <td>{submitted.criteriaScores?.[criterion.id] ?? '-'}</td>
-                              </tr>
+                              <tr key={criterion.id}><td>{criterion.title}</td><td>{submitted.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
                             ))}
                           </tbody>
                         </table>
-                        <p>
-                          <strong>Комментарий:</strong> {submitted.comment}
-                        </p>
-                        <p>
-                          <strong>Итого:</strong> {submitted.total} / <strong>Среднее:</strong>{' '}
-                          {Number(submitted.avg).toFixed(2)}
-                        </p>
+                        <p><strong>Комментарий:</strong> {submitted.comment}</p>
+                        <p><strong>Итого:</strong> {submitted.total} / <strong>Среднее:</strong> {Number(submitted.avg).toFixed(2)}</p>
                       </div>
                     );
                   })()}
@@ -1402,55 +1454,57 @@ export default function Dashboard() {
               ) : (
                 <>
                   <h4>Оценка</h4>
-
                   {state.criteria.map((criterion) => (
                     <div key={criterion.id}>
-                      <label>
-                        {criterion.title}: {scoreDrafts[work.id]?.values?.[criterion.id] ?? criterion.min}
-                      </label>
+                      <label>{criterion.title}: {scoreDrafts[selectedJudgeWork.id]?.values?.[criterion.id] ?? 1}</label>
                       <input
                         type="range"
                         min={criterion.min}
                         max={criterion.max}
-                        value={scoreDrafts[work.id]?.values?.[criterion.id] ?? criterion.min}
-                        onChange={(e) => setScoreValue(work.id, criterion.id, e.target.value)}
+                        value={scoreDrafts[selectedJudgeWork.id]?.values?.[criterion.id] ?? criterion.min}
+                        onChange={(e) => setScoreValue(selectedJudgeWork.id, criterion.id, e.target.value)}
                       />
                     </div>
                   ))}
-
                   <textarea
                     placeholder="Обязательный комментарий судьи"
-                    value={scoreDrafts[work.id]?.comment || ''}
-                    onChange={(e) => setComment(work.id, e.target.value)}
+                    value={scoreDrafts[selectedJudgeWork.id]?.comment || ''}
+                    onChange={(e) => setComment(selectedJudgeWork.id, e.target.value)}
                   />
-
-                  <button onClick={() => submitScore(work.id)}>Отправить оценку</button>
+                  <button onClick={() => submitScore(selectedJudgeWork.id)}>Отправить оценку</button>
                 </>
               )}
             </div>
-          );
-        })}
+          </div>
+        ) : null}
 
         {lightboxImage ? (
           <div className="modal-overlay" onClick={() => setLightboxImage('')}>
             <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-              <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">
-                ×
-              </button>
+              <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
               <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
             </div>
           </div>
         ) : null}
 
-        {toast ? <div className="toast">{toast}</div> : null}
-        <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>
-          Выйти
-        </button>
+        {lightboxVideo ? (
+          <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
+            <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
+              <div className="video-frame video-expanded">
+                <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+              </div>
+            </div>
+          </div>
+        ) : null}
 
+        {toast ? <div className="toast">{toast}</div> : null}
+        <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
   }
+
 
   const notStartedJudges = state.judges.filter((judge) =>
     state.assignments.some((a) => a.judgeId === judge.id && a.status !== 'оценено')
@@ -1460,12 +1514,9 @@ export default function Dashboard() {
   return (
     <div className="layout">
       <BrandHeader />
-
       <div className="toolbar">
         <strong>{isAdmin ? `Администратор: ${session.login}` : `Модератор: ${session.login}`}</strong>
-        <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>
-          Выйти
-        </button>
+        <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       </div>
 
       <div className="card row">
@@ -1478,440 +1529,229 @@ export default function Dashboard() {
 
       {adminTab === 'main' ? (
         <>
-          <div className="card">
-            <h2>Дашборд</h2>
-            <p>Работ: {state.works.length}</p>
-            <p>Судей: {state.judges.length}</p>
-            <p>Завершено назначений: {progress}%</p>
-            <p>Работ без оценок: {state.works.filter((w) => !state.scores.some((s) => s.workId === w.id)).length}</p>
-            <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
+      <div className="card">
+        <h2>Дашборд</h2>
+        <p>Работ: {state.works.length}</p>
+        <p>Судей: {state.judges.length}</p>
+        <p>Завершено назначений: {progress}%</p>
+        <p>Работ без оценок: {state.works.filter((w) => !state.scores.some((s) => s.workId === w.id)).length}</p>
+        <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
+      </div>
+
+      {access.canManageWorks ? (
+      <div className="card">
+        <h3>Создание карточки работы</h3>
+        <select
+          value={workDraft.contest}
+          onChange={(e) => {
+            const nextContest = e.target.value;
+            const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
+            const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
+            const nextDirection = nextDirections[0];
+            const nextNominations = getNominationOptions(nextContest, nextDirection);
+            setWorkDraft((p) => ({
+              ...p,
+              contest: nextContest,
+              category: nextCategories[0],
+              direction: nextDirection,
+              nomination: nextNominations[0] || '',
+            }));
+          }}
+        >
+          {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+        </select>
+        <select
+          value={workDraft.direction}
+          onChange={(e) => {
+            const nextDirection = e.target.value;
+            const nextNominations = getNominationOptions(workDraft.contest, nextDirection);
+            setWorkDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
+          }}
+        >
+          {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+        </select>
+        {nominationOptions.length ? (
+          <select value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))}>
+            {nominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
+          </select>
+        ) : (
+          <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
+        )}
+        <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
+          {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
+        <input placeholder="Фамилия и отчество участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
+        <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
+        <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
+        <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
+        <textarea placeholder="Видео (по 1 ссылке на строку)" value={workDraft.videosText} onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))} />
+        <button onClick={addWork}>Сохранить работу</button>
+      </div>
+      ) : null}
+
+      {access.canManageJudges ? (
+      <>
+      <div className="card">
+        <h3>Управление критериями</h3>
+        <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
+        <input value={criterionTitle} onChange={(e) => setCriterionTitle(e.target.value)} placeholder="Новый критерий" />
+        <button onClick={addCriterion}>Добавить критерий</button>
+      </div>
+
+      <div className="card">
+        <h3>Создание судьи</h3>
+        <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
+        <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
+        <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
+        <button onClick={addJudge}>Добавить судью</button>
+      </div>
+
+      {isAdmin ? (
+      <div className="card">
+        <h3>Создание модератора</h3>
+        <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
+        <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
+        <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
+        <div>
+          {MODERATOR_PERMISSIONS.map((permission) => (
+            <label key={permission.key} style={{ display: 'block' }}>
+              <input
+                type="checkbox"
+                checked={moderatorDraft.permissions[permission.key]}
+                onChange={() => toggleDraftPermission(permission.key)}
+              />{' '}
+              {permission.label}
+            </label>
+          ))}
+        </div>
+        <button onClick={addModerator}>Добавить модератора</button>
+      </div>
+      ) : null}
+
+      <div className="card">
+        <h3>Назначение работ</h3>
+        <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
+          <option value="">Выберите судью</option>
+          {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} — {judge.fullName}</option>)}
+        </select>
+        <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
+          <option value="">Выберите работу</option>
+          {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} — {work.title}</option>)}
+        </select>
+        <button onClick={assignWork}>Назначить</button>
+      </div>
+      </>
+      ) : null}
+
+      {access.canExportScores ? (
+      <>
+      <div className="card">
+        <h3>Рейтинг по номинациям и категориям</h3>
+        <div className="row rating-filters">
+          <label>Конкурсы</label>
+          <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
+            <option value="all">Все конкурсы</option>
+            {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+          </select>
+          <label>Направления</label>
+          <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
+            <option value="all">Все направления</option>
+            {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+          </select>
+          <label>Категории</label>
+          <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
+            <option value="all">Все категории</option>
+            {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
+          </select>
+        </div>
+        {Object.entries(ratings).map(([group, list]) => (
+          <div key={group}>
+            <h4>{group}</h4>
+            <table>
+              <thead><tr><th>Место</th><th>Номер работы</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr></thead>
+              <tbody>
+                {list.map((item) => <tr key={item.workId}><td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td><td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td></tr>)}
+              </tbody>
+            </table>
           </div>
+        ))}
+      </div>
 
-          {access.canManageWorks ? (
-            <div className="card">
-              <h3>Создание карточки работы</h3>
+      <div className="card row">
+        <button onClick={exportScores}>Экспорт всех оценок CSV</button>
+        <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
+      </div>
+      </>
+      ) : null}
 
-              <select
-                value={workDraft.contest}
-                onChange={(e) => {
-                  const nextContest = e.target.value;
-                  const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
-                  const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
-                  setWorkDraft((p) => ({
-                    ...p,
-                    contest: nextContest,
-                    category: nextCategories[0],
-                    direction: nextDirections[0],
-                  }));
-                }}
-              >
-                {CONTEST_OPTIONS.map((contest) => (
-                  <option key={contest} value={contest}>
-                    {contest}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={workDraft.direction}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, direction: e.target.value }))}
-              >
-                {directionOptions.map((direction) => (
-                  <option key={direction} value={direction}>
-                    {direction}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                placeholder="Номинация"
-                value={workDraft.nomination}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))}
-              />
-
-              <select
-                value={workDraft.category}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}
-              >
-                {categoryOptions.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                placeholder="Фамилия и отчество участника"
-                value={workDraft.participantName}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))}
-              />
-
-              <input
-                placeholder="Название"
-                value={workDraft.title}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))}
-              />
-
-              <textarea
-                placeholder="Описание"
-                value={workDraft.description}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))}
-              />
-
-              <textarea
-                placeholder="Фото (по 1 ссылке на строку)"
-                value={workDraft.photosText}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))}
-              />
-
-              <textarea
-                placeholder="Видео (по 1 ссылке на строку)"
-                value={workDraft.videosText}
-                onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))}
-              />
-
-              <button onClick={addWork}>Сохранить работу</button>
-            </div>
-          ) : null}
-
-          {access.canManageJudges ? (
-            <>
-              <div className="card">
-                <h3>Управление критериями</h3>
-                <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
-                <input
-                  value={criterionTitle}
-                  onChange={(e) => setCriterionTitle(e.target.value)}
-                  placeholder="Новый критерий"
-                />
-                <button onClick={addCriterion}>Добавить критерий</button>
-              </div>
-
-              <div className="card">
-                <h3>Создание судьи</h3>
-                <input
-                  placeholder="ФИО"
-                  value={judgeDraft.fullName}
-                  onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))}
-                />
-                <input
-                  placeholder="Логин"
-                  value={judgeDraft.login}
-                  onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))}
-                />
-                <input
-                  type="password"
-                  placeholder="Пароль"
-                  value={judgeDraft.password}
-                  onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))}
-                />
-                <button onClick={addJudge}>Добавить судью</button>
-              </div>
-
-              {isAdmin ? (
-                <div className="card">
-                  <h3>Создание модератора</h3>
-                  <input
-                    placeholder="ФИО"
-                    value={moderatorDraft.fullName}
-                    onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))}
-                  />
-                  <input
-                    placeholder="Логин"
-                    value={moderatorDraft.login}
-                    onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))}
-                  />
-                  <input
-                    type="password"
-                    placeholder="Пароль"
-                    value={moderatorDraft.password}
-                    onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))}
-                  />
-
-                  <div>
-                    {MODERATOR_PERMISSIONS.map((permission) => (
-                      <label key={permission.key} style={{ display: 'block' }}>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(moderatorDraft.permissions[permission.key])}
-                          onChange={() => toggleDraftPermission(permission.key)}
-                        />{' '}
-                        {permission.label}
-                      </label>
-                    ))}
-                  </div>
-
-                  <button onClick={addModerator}>Добавить модератора</button>
-                </div>
-              ) : null}
-
-              <div className="card">
-                <h3>Назначение работ</h3>
-
-                <select
-                  value={assignmentDraft.judgeId}
-                  onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}
-                >
-                  <option value="">Выберите судью</option>
-                  {state.judges.map((judge) => (
-                    <option key={judge.id} value={judge.id}>
-                      {judge.id} - {judge.fullName}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={assignmentDraft.workId}
-                  onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}
-                >
-                  <option value="">Выберите работу</option>
-                  {state.works.map((work) => (
-                    <option key={work.id} value={work.id}>
-                      {work.id} - {work.title}
-                    </option>
-                  ))}
-                </select>
-
-                <button onClick={assignWork}>Назначить</button>
-              </div>
-            </>
-          ) : null}
-
-          {access.canExportScores ? (
-            <>
-              <div className="card">
-                <h3>Рейтинг по номинациям и категориям</h3>
-
-                <div className="row rating-filters">
-                  <label>Конкурсы</label>
-                  <select
-                    value={ratingFilter.contest}
-                    onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}
-                  >
-                    <option value="all">Все конкурсы</option>
-                    {ratingFilterOptions.contests.map((contest) => (
-                      <option key={contest} value={contest}>
-                        {contest}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label>Направления</label>
-                  <select
-                    value={ratingFilter.direction}
-                    onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}
-                  >
-                    <option value="all">Все направления</option>
-                    {ratingFilterOptions.directions.map((direction) => (
-                      <option key={direction} value={direction}>
-                        {direction}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label>Категории</label>
-                  <select
-                    value={ratingFilter.category}
-                    onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}
-                  >
-                    <option value="all">Все категории</option>
-                    {ratingFilterOptions.categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {Object.entries(ratings).map(([group, list]) => (
-                  <div key={group}>
-                    <h4>{group}</h4>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Место</th>
-                          <th>Номер работы</th>
-                          <th>Название</th>
-                          <th>Средний балл</th>
-                          <th>Действие</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {list.map((item) => (
-                          <tr key={item.workId}>
-                            <td>{item.rank}</td>
-                            <td>{item.workId}</td>
-                            <td>{item.title}</td>
-                            <td>{item.avg}</td>
-                            <td>
-                              <button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-
-              <div className="card row">
-                <button onClick={exportScores}>Экспорт всех оценок CSV</button>
-                <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
-              </div>
-            </>
-          ) : null}
-        </>
+      </>
       ) : null}
 
       {adminTab === 'judges' && access.canManageJudges ? (
         <div className="card">
           <h3>Все судьи</h3>
-
-          <div className="admin-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>ФИО</th>
-                  <th>Логин</th>
-                  <th>Статус</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {state.judges.map((judge) => {
-                  const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
-                  const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено');
-                  const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено');
-                  const isEditing = judgeEditId === judge.id;
-
-                  return (
-                    <tr key={judge.id}>
-                      <td>{judge.id}</td>
-
-                      <td>
+          <div className="admin-table-wrap"><table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.judges.map((judge) => {
+                const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
+                const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено');
+                const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено');
+                const isEditing = judgeEditId === judge.id;
+                return (
+                  <tr key={judge.id}>
+                    <td>{judge.id}</td>
+                    <td>{isEditing ? <input value={judgeEditDraft.fullName} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : judge.fullName}</td>
+                    <td>{isEditing ? <input value={judgeEditDraft.login} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, login: e.target.value }))} /> : judge.login}</td>
+                    <td>{isEditing ? (
+                      <select value={String(judgeEditDraft.active)} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (judge.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
                         {isEditing ? (
-                          <input
-                            value={judgeEditDraft.fullName}
-                            onChange={(e) => setJudgeEditDraft((p) => ({ ...p, fullName: e.target.value }))}
-                          />
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={judgeEditDraft.password} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveJudgeEdit}>Сохранить</button>
+                            <button onClick={() => setJudgeEditId(null)}>Отмена</button>
+                          </>
                         ) : (
-                          judge.fullName
+                          <>
+                            <button onClick={() => setJudgeViewId(judge.id)}>Просмотр</button>
+                            <button onClick={() => startJudgeEdit(judge)}>Редактировать</button>
+                            <button onClick={() => deleteJudge(judge.id)}>Удалить</button>
+                          </>
                         )}
-                      </td>
-
-                      <td>
-                        {isEditing ? (
-                          <input
-                            value={judgeEditDraft.login}
-                            onChange={(e) => setJudgeEditDraft((p) => ({ ...p, login: e.target.value }))}
-                          />
-                        ) : (
-                          judge.login
-                        )}
-                      </td>
-
-                      <td>
-                        {isEditing ? (
-                          <select
-                            value={String(judgeEditDraft.active)}
-                            onChange={(e) => setJudgeEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}
-                          >
-                            <option value="true">Активен</option>
-                            <option value="false">Неактивен</option>
-                          </select>
-                        ) : judge.active ? (
-                          'Активен'
-                        ) : (
-                          'Неактивен'
-                        )}
-                      </td>
-
-                      <td>
-                        <div className="row">
-                          {isEditing ? (
-                            <>
-                              <input
-                                type="password"
-                                placeholder="Новый пароль (опц.)"
-                                value={judgeEditDraft.password}
-                                onChange={(e) => setJudgeEditDraft((p) => ({ ...p, password: e.target.value }))}
-                              />
-                              <button onClick={saveJudgeEdit}>Сохранить</button>
-                              <button onClick={() => setJudgeEditId(null)}>Отмена</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => setJudgeViewId(judge.id)}>Просмотр</button>
-                              <button onClick={() => startJudgeEdit(judge)}>Редактировать</button>
-                              <button onClick={() => deleteJudge(judge.id)}>Удалить</button>
-                            </>
-                          )}
+                      </div>
+                      {judgeViewId === judge.id ? (
+                        <div>
+                          <p><strong>Отсудил:</strong> {judged.length}</p>
+                          <ul>{judged.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}><button onClick={() => setSelectedJudgeWork({ judgeId: judge.id, workId: a.workId })}>{a.workId} — {work?.title || 'Удалена'}</button></li>; })}</ul>
+                          <p><strong>Не отсудил:</strong> {pending.length}</p>
+                          <ul>{pending.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
                         </div>
-
-                        {judgeViewId === judge.id ? (
-                          <div>
-                            <p>
-                              <strong>Отсудил:</strong> {judged.length}
-                            </p>
-                            <ul>
-                              {judged.map((a) => {
-                                const work = state.works.find((w) => w.id === a.workId);
-                                return (
-                                  <li key={a.workId}>
-                                    <button onClick={() => setSelectedJudgeWork({ judgeId: judge.id, workId: a.workId })}>
-                                      {a.workId} - {work?.title || 'Удалена'}
-                                    </button>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-
-                            <p>
-                              <strong>Не отсудил:</strong> {pending.length}
-                            </p>
-                            <ul>
-                              {pending.map((a) => {
-                                const work = state.works.find((w) => w.id === a.workId);
-                                return (
-                                  <li key={a.workId}>
-                                    {a.workId} - {work?.title || 'Удалена'}
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        ) : null}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
 
           <div className="mobile-only-list">
             {state.judges.map((judge) => {
               const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
               const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено').length;
               const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено').length;
-
               return (
                 <div key={`mobile-${judge.id}`} className="card compact-card">
                   <h4>{judge.fullName}</h4>
-                  <p>
-                    <strong>ID:</strong> {judge.id}
-                  </p>
-                  <p>
-                    <strong>Логин:</strong> {judge.login}
-                  </p>
-                  <p>
-                    <strong>Статус:</strong> {judge.active ? 'Активен' : 'Неактивен'}
-                  </p>
-                  <p>
-                    <strong>Отсудил:</strong> {judged} · <strong>Не отсудил:</strong> {pending}
-                  </p>
+                  <p><strong>ID:</strong> {judge.id}</p>
+                  <p><strong>Логин:</strong> {judge.login}</p>
+                  <p><strong>Статус:</strong> {judge.active ? 'Активен' : 'Неактивен'}</p>
+                  <p><strong>Отсудил:</strong> {judged} · <strong>Не отсудил:</strong> {pending}</p>
                 </div>
               );
             })}
@@ -1927,41 +1767,22 @@ export default function Dashboard() {
           <button onClick={importWorksFromCsv}>Импортировать</button>
 
           <h3>Синхронизация данных между устройствами</h3>
-          <p>Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.</p>
-
+          <p>
+            Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.
+          </p>
           <p>
             Статус облака: {supabase ? (cloudSyncing ? 'идет синхронизация…' : 'подключено') : 'не настроено'}
-            {cloudError ? ` - ${cloudError}` : ''}
+            {cloudError ? ` — ${cloudError}` : ''}
           </p>
-
-          <small>
-            <strong>Текущий cloud row id:</strong> {cloudRowId}
-          </small>
-
-          {cloudDebug.lastRequest ? (
-            <small>
-              <strong>Последний запрос:</strong> {cloudDebug.lastRequest}
-            </small>
-          ) : null}
-
-          {cloudDebug.lastError ? (
-            <small>
-              <strong>Последний error.message:</strong> {cloudDebug.lastError}
-            </small>
-          ) : null}
-
+          <small><strong>Текущий cloud row id:</strong> {cloudRowId}</small>
+          {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
+          {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
           <div className="row">
             <button onClick={syncFromCloud}>Загрузить из облака</button>
             <button onClick={syncToCloud}>Сохранить в облако</button>
             <button onClick={exportAppState}>Экспорт JSON состояния</button>
           </div>
-
-          <textarea
-            rows={6}
-            placeholder="Вставьте JSON состояния сюда"
-            value={stateImportText}
-            onChange={(e) => setStateImportText(e.target.value)}
-          />
+          <textarea rows={6} placeholder="Вставьте JSON состояния сюда" value={stateImportText} onChange={(e) => setStateImportText(e.target.value)} />
           <button onClick={importAppState}>Импорт JSON состояния</button>
         </div>
       ) : null}
@@ -1969,116 +1790,50 @@ export default function Dashboard() {
       {adminTab === 'works' && access.canManageWorks ? (
         <div className="card">
           <h3>Все загруженные работы</h3>
-
-          <div className="admin-table-wrap">
-            <table className="works-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Конкурс</th>
-                  <th>Направление</th>
-                  <th>Категория</th>
-                  <th>Участник</th>
-                  <th>Название</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {state.works.map((work) => {
-                  const editing = workEditId === work.id;
-
-                  return (
-                    <tr key={work.id}>
-                      <td>{work.id}</td>
-                      <td>{work.contest}</td>
-
-                      <td>
+          <div className="admin-table-wrap"><table className="works-table">
+            <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.works.map((work) => {
+                const editing = workEditId === work.id;
+                return (
+                  <tr key={work.id}>
+                    <td>{work.id}</td>
+                    <td>{work.contest}</td>
+                    <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
+                    <td>{editing ? <input value={workEditDraft.category} onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))} /> : work.category}</td>
+                    <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
+                    <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
+                    <td>
+                      <div className="row">
                         {editing ? (
-                          <input
-                            value={workEditDraft.direction}
-                            onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))}
-                          />
+                          <>
+                            <button onClick={saveWorkEdit}>Сохранить</button>
+                            <button onClick={() => setWorkEditId(null)}>Отмена</button>
+                          </>
                         ) : (
-                          work.direction || '—'
+                          <>
+                            <button onClick={() => startWorkEdit(work)}>Редактировать</button>
+                            <button onClick={() => deleteWork(work.id)}>Удалить</button>
+                            <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
+                          </>
                         )}
-                      </td>
-
-                      <td>
-                        {editing ? (
-                          <input
-                            value={workEditDraft.category}
-                            onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))}
-                          />
-                        ) : (
-                          work.category
-                        )}
-                      </td>
-
-                      <td>
-                        {editing ? (
-                          <input
-                            value={workEditDraft.participantName}
-                            onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))}
-                          />
-                        ) : (
-                          work.participantName || '—'
-                        )}
-                      </td>
-
-                      <td>
-                        {editing ? (
-                          <input
-                            value={workEditDraft.title}
-                            onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))}
-                          />
-                        ) : (
-                          work.title
-                        )}
-                      </td>
-
-                      <td>
-                        <div className="row">
-                          {editing ? (
-                            <>
-                              <button onClick={saveWorkEdit}>Сохранить</button>
-                              <button onClick={() => setWorkEditId(null)}>Отмена</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => startWorkEdit(work)}>Редактировать</button>
-                              <button onClick={() => deleteWork(work.id)}>Удалить</button>
-                              <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
 
           <div className="mobile-only-list">
             {state.works.map((work) => (
               <div key={`mobile-work-${work.id}`} className="card compact-card">
                 <h4>{work.title}</h4>
-                <p>
-                  <strong>Номер:</strong> {work.id}
-                </p>
-                <p>
-                  <strong>Конкурс:</strong> {work.contest}
-                </p>
-                <p>
-                  <strong>Направление:</strong> {work.direction || '—'}
-                </p>
-                <p>
-                  <strong>Категория:</strong> {work.category}
-                </p>
-                <p>
-                  <strong>Участник:</strong> {work.participantName || '—'}
-                </p>
+                <p><strong>Номер:</strong> {work.id}</p>
+                <p><strong>Конкурс:</strong> {work.contest}</p>
+                <p><strong>Направление:</strong> {work.direction || '—'}</p>
+                <p><strong>Категория:</strong> {work.category}</p>
+                <p><strong>Участник:</strong> {work.participantName || '—'}</p>
               </div>
             ))}
           </div>
@@ -2088,114 +1843,59 @@ export default function Dashboard() {
       {adminTab === 'moderators' && isAdmin ? (
         <div className="card">
           <h3>Модераторы</h3>
-
-          <div className="admin-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>ФИО</th>
-                  <th>Логин</th>
-                  <th>Права</th>
-                  <th>Статус</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {state.moderators.map((moderator) => {
-                  const isEditing = moderatorEditId === moderator.id;
-
-                  return (
-                    <tr key={moderator.id}>
-                      <td>{moderator.id}</td>
-
-                      <td>
-                        {isEditing ? (
-                          <input
-                            value={moderatorEditDraft.fullName}
-                            onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))}
-                          />
-                        ) : (
-                          moderator.fullName
-                        )}
-                      </td>
-
-                      <td>
-                        {isEditing ? (
-                          <input
-                            value={moderatorEditDraft.login}
-                            onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))}
-                          />
-                        ) : (
-                          moderator.login
-                        )}
-                      </td>
-
-                      <td>
-                        {isEditing ? (
-                          <div>
-                            {MODERATOR_PERMISSIONS.map((permission) => (
-                              <label key={permission.key} style={{ display: 'block' }}>
-                                <input
-                                  type="checkbox"
-                                  checked={Boolean(moderatorEditDraft.permissions[permission.key])}
-                                  onChange={() => toggleEditPermission(permission.key)}
-                                />{' '}
-                                {permission.label}
-                              </label>
-                            ))}
-                          </div>
-                        ) : (
-                          MODERATOR_PERMISSIONS.filter((permission) => moderator.permissions?.[permission.key])
-                            .map((permission) => permission.label)
-                            .join(', ') || 'Нет прав'
-                        )}
-                      </td>
-
-                      <td>
-                        {isEditing ? (
-                          <select
-                            value={String(moderatorEditDraft.active)}
-                            onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}
-                          >
-                            <option value="true">Активен</option>
-                            <option value="false">Неактивен</option>
-                          </select>
-                        ) : moderator.active ? (
-                          'Активен'
-                        ) : (
-                          'Неактивен'
-                        )}
-                      </td>
-
-                      <td>
-                        <div className="row">
-                          {isEditing ? (
-                            <>
+          <div className="admin-table-wrap"><table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.moderators.map((moderator) => {
+                const isEditing = moderatorEditId === moderator.id;
+                return (
+                  <tr key={moderator.id}>
+                    <td>{moderator.id}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.fullName} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : moderator.fullName}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.login} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))} /> : moderator.login}</td>
+                    <td>
+                      {isEditing ? (
+                        <div>
+                          {MODERATOR_PERMISSIONS.map((permission) => (
+                            <label key={permission.key} style={{ display: 'block' }}>
                               <input
-                                type="password"
-                                placeholder="Новый пароль (опц.)"
-                                value={moderatorEditDraft.password}
-                                onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))}
-                              />
-                              <button onClick={saveModeratorEdit}>Сохранить</button>
-                              <button onClick={() => setModeratorEditId(null)}>Отмена</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => startModeratorEdit(moderator)}>Редактировать</button>
-                              <button onClick={() => deleteModerator(moderator.id)}>Удалить</button>
-                            </>
-                          )}
+                                type="checkbox"
+                                checked={moderatorEditDraft.permissions[permission.key]}
+                                onChange={() => toggleEditPermission(permission.key)}
+                              />{' '}
+                              {permission.label}
+                            </label>
+                          ))}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      ) : MODERATOR_PERMISSIONS.filter((permission) => moderator.permissions?.[permission.key]).map((permission) => permission.label).join(', ') || 'Нет прав'}
+                    </td>
+                    <td>{isEditing ? (
+                      <select value={String(moderatorEditDraft.active)} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (moderator.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={moderatorEditDraft.password} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveModeratorEdit}>Сохранить</button>
+                            <button onClick={() => setModeratorEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startModeratorEdit(moderator)}>Редактировать</button>
+                            <button onClick={() => deleteModerator(moderator.id)}>Удалить</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
         </div>
       ) : null}
 
@@ -2206,48 +1906,25 @@ export default function Dashboard() {
               <h3>Оценка судьи по работе</h3>
               <button onClick={() => setSelectedJudgeWork(null)}>Закрыть</button>
             </div>
-
             {(() => {
-              const score = state.scores.find(
-                (s) => s.workId === selectedJudgeWork.workId && s.judgeId === selectedJudgeWork.judgeId
-              );
+              const score = state.scores.find((s) => s.workId === selectedJudgeWork.workId && s.judgeId === selectedJudgeWork.judgeId);
               const judge = state.judges.find((j) => j.id === selectedJudgeWork.judgeId);
               const work = state.works.find((w) => w.id === selectedJudgeWork.workId);
-
               if (!score) return <p>По этой связке судья-работа оценка пока не отправлена.</p>;
-
               return (
                 <div>
-                  <p>
-                    <strong>Судья:</strong> {judge?.fullName || selectedJudgeWork.judgeId}
-                  </p>
-                  <p>
-                    <strong>Номер работы:</strong> {work?.id}
-                  </p>
-
+                  <p><strong>Судья:</strong> {judge?.fullName || selectedJudgeWork.judgeId}</p>
+                  <p><strong>Номер работы:</strong> {work?.id}</p>
                   <table>
-                    <thead>
-                      <tr>
-                        <th>Критерий</th>
-                        <th>Оценка</th>
-                      </tr>
-                    </thead>
+                    <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
                     <tbody>
                       {state.criteria.map((criterion) => (
-                        <tr key={criterion.id}>
-                          <td>{criterion.title}</td>
-                          <td>{score.criteriaScores?.[criterion.id] ?? '-'}</td>
-                        </tr>
+                        <tr key={criterion.id}><td>{criterion.title}</td><td>{score.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
                       ))}
                     </tbody>
                   </table>
-
-                  <p>
-                    <strong>Комментарий:</strong> {score.comment}
-                  </p>
-                  <p>
-                    <strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}
-                  </p>
+                  <p><strong>Комментарий:</strong> {score.comment}</p>
+                  <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
                 </div>
               );
             })()}
@@ -2256,21 +1933,15 @@ export default function Dashboard() {
       ) : null}
 
       {selectedWork ? (
+
         <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="toolbar">
               <h3>Результаты судейства: Номер работы {selectedWork.id}</h3>
               <button onClick={() => setSelectedWorkId(null)}>Закрыть</button>
             </div>
-
-            <p>
-              {selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} /{' '}
-              {selectedWork.category}
-            </p>
-            <p>
-              <strong>Участник:</strong> {selectedWork.participantName || 'не указан'}
-            </p>
-
+            <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
+            <p><strong>Участник:</strong> {selectedWork.participantName || 'не указан'}</p>
             {selectedWorkScores.length === 0 ? (
               <p>По этой работе пока нет отправленных оценок.</p>
             ) : (
@@ -2280,12 +1951,7 @@ export default function Dashboard() {
                   <div key={`${score.workId}-${score.judgeId}-${score.submittedAt}`} className="card">
                     <strong>{judge?.fullName || score.judgeId}</strong>
                     <table>
-                      <thead>
-                        <tr>
-                          <th>Критерий</th>
-                          <th>Оценка</th>
-                        </tr>
-                      </thead>
+                      <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
                       <tbody>
                         {state.criteria.map((criterion) => (
                           <tr key={criterion.id}>
@@ -2295,12 +1961,8 @@ export default function Dashboard() {
                         ))}
                       </tbody>
                     </table>
-                    <p>
-                      <strong>Комментарий:</strong> {score.comment}
-                    </p>
-                    <p>
-                      <strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}
-                    </p>
+                    <p><strong>Комментарий:</strong> {score.comment}</p>
+                    <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
                   </div>
                 );
               })
@@ -2312,396 +1974,112 @@ export default function Dashboard() {
       {lightboxImage ? (
         <div className="modal-overlay" onClick={() => setLightboxImage('')}>
           <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">
-              ×
-            </button>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
             <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
           </div>
         </div>
       ) : null}
 
       {toast ? <div className="toast">{toast}</div> : null}
-      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>
-        Выйти
-      </button>
-
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       <Styles />
     </div>
   );
 }
 
+
 function BrandHeader() {
   return (
     <div className="brand-header">
-      <img
-        src="/beauty-olymp-logo.png"
-        alt="Association of Beauty Professionals | beauty olymp"
-        className="brand-logo-image"
-      />
+      <img src="/beauty-olymp-logo.png" alt="Association of Beauty Professionals | beauty olymp" className="brand-logo-image" />
     </div>
   );
 }
+
 
 function Styles() {
   return (
     <style jsx global>{`
       @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
-      body {
-        margin: 0;
-        font-family: 'Open Sans', Arial, sans-serif;
-        color: #000;
-        background: radial-gradient(circle at 8% 10%, rgba(255, 2, 93, 0.14), transparent 40%),
-          radial-gradient(circle at 92% 20%, rgba(40, 28, 104, 0.14), transparent 44%),
-          radial-gradient(circle at 50% 100%, rgba(255, 2, 93, 0.1), transparent 35%), #fff;
-      }
-      .layout {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 20px;
-        display: grid;
-        gap: 16px;
-      }
-      .brand-header {
-        display: flex;
-        justify-content: flex-start;
-        margin-bottom: 4px;
-      }
-      .brand-logo-image {
-        width: min(360px, 65vw);
-        height: auto;
-        object-fit: contain;
-      }
-      .card {
-        background: rgba(255, 255, 255, 0.94);
-        border: 1px solid rgba(40, 28, 104, 0.1);
-        border-radius: 14px;
-        padding: 16px;
-        box-shadow: 0 12px 34px rgba(40, 28, 104, 0.08);
-        display: grid;
-        gap: 8px;
-      }
-      .narrow {
-        max-width: 420px;
-        margin: 40px auto;
-      }
-      .toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-      }
-      input,
-      textarea,
-      select,
-      button {
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid rgba(40, 28, 104, 0.2);
-        font-size: 14px;
-      }
-      input,
-      textarea,
-      select {
-        background: rgba(255, 255, 255, 0.94);
-        color: #000;
-      }
-      input:focus,
-      textarea:focus,
-      select:focus {
-        outline: none;
-        border-color: #ff025d;
-        box-shadow: 0 0 0 3px rgba(255, 2, 93, 0.14);
-      }
-      button {
-        border: none;
-        background: linear-gradient(135deg, #ff025d 0%, #d90178 100%);
-        color: #fff;
-        cursor: pointer;
-        box-shadow: none;
-        transition: transform 0.15s ease, filter 0.15s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        font-weight: 700;
-        font-family: 'Roboto Condensed', Arial, sans-serif;
-      }
-      button:hover {
-        filter: brightness(1.05);
-        transform: translateY(-1px);
-      }
-      button:active {
-        transform: translateY(0);
-      }
-      .grid {
-        display: grid;
-        gap: 8px;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      }
-      .media {
-        width: 100%;
-        min-height: 140px;
-        border-radius: 8px;
-        border: 1px solid #d8deea;
-      }
-      .row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .rating-filters label {
-        font-size: 13px;
-        font-weight: 700;
-        color: #281c68;
-      }
-      .admin-table-wrap {
-        overflow-x: auto;
-      }
-      .admin-table-wrap table {
-        min-width: 920px;
-      }
-      .mobile-only-list {
-        display: none;
-      }
-      .compact-card {
-        padding: 10px 12px;
-        gap: 4px;
-      }
-      .top-logout {
-        display: inline-flex;
-      }
-      .mobile-logout {
-        display: none;
-        background: #281c68;
-        margin-top: 4px;
-      }
-      .toast {
-        position: fixed;
-        right: 20px;
-        bottom: 20px;
-        background: linear-gradient(135deg, #281c68 0%, #ff025d 100%);
-        color: #fff;
-        padding: 10px 14px;
-        border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-        z-index: 30;
-      }
-      .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(10, 17, 35, 0.55);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        z-index: 25;
-      }
-      .modal {
-        width: min(920px, 100%);
-        max-height: 85vh;
-        overflow: auto;
-        background: #fff;
-        border-radius: 14px;
-        padding: 16px;
-        display: grid;
-        gap: 12px;
-      }
-      .image-modal {
-        width: min(1100px, 100%);
-        position: relative;
-      }
-      .video-modal {
-        width: min(1200px, 100%);
-        position: relative;
-      }
-      .icon-close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 44px;
-        height: 44px;
-        border-radius: 999px;
-        padding: 0;
-        font-size: 28px;
-        line-height: 1;
-        display: grid;
-        place-items: center;
-        z-index: 2;
-      }
-      .zoom-image {
-        width: 100%;
-        max-height: 75vh;
-        object-fit: contain;
-      }
-      .video-frame {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-      }
-      .video-frame .media {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        min-height: 0;
-      }
-      .judge-video-grid {
-        grid-template-columns: 1fr;
-      }
-      .judge-video-thumb {
-        cursor: zoom-in;
-      }
-      .video-expanded {
-        aspect-ratio: 16 / 9;
-        min-height: 58vh;
-      }
-      .clickable {
-        cursor: pointer;
-      }
-      .works-table {
-        table-layout: fixed;
-      }
-      .works-table th,
-      .works-table td {
-        vertical-align: middle;
-      }
-      .works-table th {
-        text-align: center;
-      }
-      .works-table td {
-        text-align: left;
-      }
-      .works-table td > .row {
-        justify-content: flex-start;
-      }
-      h1,
-      h2,
-      h3,
-      h4 {
-        margin: 0;
-        color: #281c68;
-        font-family: 'Roboto Condensed', Arial, sans-serif;
-        letter-spacing: 0.2px;
-      }
-      strong {
-        color: #000;
-      }
-      p,
-      label,
-      li,
-      td,
-      th,
-      small {
-        color: #000;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      td,
-      th {
-        border: 1px solid #e4e8f1;
-        padding: 8px;
-        text-align: left;
-      }
+      body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #000; background: radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%), radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%), radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%), #fff; }
+      .layout { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
+      .brand-header { display: flex; justify-content: flex-start; margin-bottom: 4px; }
+      .brand-logo-image { width: min(360px, 65vw); height: auto; object-fit: contain; }
+      .card { background: rgba(255,255,255,0.94); border: 1px solid rgba(40,28,104,0.1); border-radius: 14px; padding: 16px; box-shadow: 0 12px 34px rgba(40,28,104,0.08); display: grid; gap: 8px; }
+      .narrow { max-width: 420px; margin: 40px auto; }
+      .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+      input, textarea, select, button { padding: 10px; border-radius: 10px; border: 1px solid rgba(40,28,104,0.2); font-size: 14px; }
+      input, textarea, select { background: rgba(255,255,255,0.94); color: #000; }
+      input:focus, textarea:focus, select:focus { outline: none; border-color: #FF025D; box-shadow: 0 0 0 3px rgba(255,2,93,0.14); }
+      button { border: none; background: linear-gradient(135deg, #FF025D 0%, #d90178 100%); color: #fff; cursor: pointer; box-shadow: none; transition: transform 0.15s ease, filter 0.15s ease; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; font-family: 'Roboto Condensed', Arial, sans-serif; }
+      button:hover { filter: brightness(1.05); transform: translateY(-1px); }
+      button:active { transform: translateY(0); }
+      .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+      .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .rating-filters label { font-size: 13px; font-weight: 700; color: #281C68; }
+      .admin-table-wrap { overflow-x: auto; }
+      .admin-table-wrap table { min-width: 920px; }
+      .mobile-only-list { display: none; }
+      .compact-card { padding: 10px 12px; gap: 4px; }
+      .top-logout { display: inline-flex; }
+      .mobile-logout { display: none; background: #281C68; margin-top: 4px; }
+      .toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #281C68 0%, #FF025D 100%); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
+      .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+      .image-modal { width: min(1100px, 100%); position: relative; }
+      .video-modal { width: min(1200px, 100%); position: relative; }
+      .icon-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border-radius: 999px; padding: 0; font-size: 28px; line-height: 1; display: grid; place-items: center; z-index: 2; }
+      .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
+      .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
+      .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
+      .judge-video-grid { grid-template-columns: 1fr; }
+      .judge-video-thumb { cursor: zoom-in; }
+      .video-expanded { aspect-ratio: 16 / 9; min-height: 58vh; }
+      .clickable { cursor: pointer; }
+      .works-table { table-layout: fixed; }
+      .works-table th, .works-table td { vertical-align: middle; }
+      .works-table th { text-align: center; }
+      .works-table td { text-align: left; }
+      .works-table td > .row { justify-content: flex-start; }
+      .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+      .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
+      .judge-preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; border: 1px solid #d8deea; }
+      h1, h2, h3, h4 { margin: 0; color: #281C68; font-family: "Roboto Condensed", Arial, sans-serif; letter-spacing: 0.2px; }
+      strong { color: #000; }
+      p, label, li, td, th, small { color: #000; }
+      table { width: 100%; border-collapse: collapse; }
+      td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
 
       @media (max-width: 1024px) {
-        .layout {
-          padding: 14px;
-          gap: 12px;
-        }
-        .card {
-          padding: 14px;
-        }
-        .toolbar {
-          gap: 10px;
-          flex-wrap: wrap;
-        }
-        .row {
-          gap: 6px;
-        }
-        table {
-          display: block;
-          overflow-x: auto;
-          white-space: nowrap;
-        }
+        .layout { padding: 14px; gap: 12px; }
+        .card { padding: 14px; }
+        .toolbar { gap: 10px; flex-wrap: wrap; }
+        .row { gap: 6px; }
+        table { display: block; overflow-x: auto; white-space: nowrap; }
       }
 
       @media (max-width: 768px) {
-        .brand-logo-image {
-          width: min(250px, 78vw);
-        }
-        .layout {
-          padding: 10px;
-          gap: 10px;
-        }
-        .card {
-          padding: 12px;
-          border-radius: 10px;
-        }
-        .toolbar {
-          flex-direction: column;
-          align-items: stretch;
-        }
-        .toolbar > * {
-          width: 100%;
-        }
-        .top-logout {
-          display: none;
-        }
-        .mobile-logout {
-          display: block;
-          position: sticky;
-          bottom: 8px;
-          z-index: 10;
-        }
-        .row {
-          flex-direction: column;
-        }
-        .admin-table-wrap {
-          display: none;
-        }
-        .mobile-only-list {
-          display: grid;
-          gap: 8px;
-        }
-        .row > * {
-          width: 100%;
-        }
-        input,
-        textarea,
-        select,
-        button {
-          width: 100%;
-          box-sizing: border-box;
-          font-size: 16px;
-        }
-        .grid {
-          grid-template-columns: 1fr;
-        }
-        .media {
-          min-height: 180px;
-        }
-        .modal-overlay {
-          padding: 8px;
-          align-items: flex-end;
-        }
-        .modal {
-          width: 100%;
-          max-height: 92vh;
-          border-radius: 14px 14px 0 0;
-        }
-        .image-modal,
-        .video-modal {
-          border-radius: 14px;
-        }
-        .video-expanded {
-          min-height: 36vh;
-        }
-        .toast {
-          right: 10px;
-          left: 10px;
-          bottom: 10px;
-          text-align: center;
-        }
+        .brand-logo-image { width: min(250px, 78vw); }
+        .layout { padding: 10px; gap: 10px; }
+        .card { padding: 12px; border-radius: 10px; }
+        .toolbar { flex-direction: column; align-items: stretch; }
+        .toolbar > * { width: 100%; }
+        .top-logout { display: none; }
+        .mobile-logout { display: block; position: sticky; bottom: 8px; z-index: 10; }
+        .row { flex-direction: column; }
+        .admin-table-wrap { display: none; }
+        .mobile-only-list { display: grid; gap: 8px; }
+        .row > * { width: 100%; }
+        input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
+        .grid { grid-template-columns: 1fr; }
+        .media { min-height: 180px; }
+        .modal-overlay { padding: 8px; align-items: flex-end; }
+        .modal { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
+        .image-modal { border-radius: 14px; }
+        .video-modal { border-radius: 14px; }
+        .video-expanded { min-height: 36vh; }
+        .toast { right: 10px; left: 10px; bottom: 10px; text-align: center; }
       }
     `}</style>
   );
