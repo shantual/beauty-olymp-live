@@ -367,6 +367,28 @@ export default function Dashboard() {
   );
 
 
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
   useEffect(() => {
     let cancelled = false;
 
