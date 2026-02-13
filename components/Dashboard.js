@@ -435,6 +435,253 @@ export default function Dashboard() {
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current);
     }
+
+function normalizeSession(rawSession, normalizedState) {
+  if (!rawSession || !rawSession.role) return { role: null, id: null, login: null };
+
+  if (rawSession.role === 'admin') {
+    const adminExists = (normalizedState.adminUsers || []).some((admin) => admin.login === rawSession.login);
+    return adminExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  if (rawSession.role === 'judge') {
+    const judgeExists = (normalizedState.judges || []).some(
+      (judge) => judge.id === rawSession.id && judge.login === rawSession.login && judge.active
+    );
+    return judgeExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  if (rawSession.role === 'moderator') {
+    const moderatorExists = (normalizedState.moderators || []).some(
+      (moderator) => moderator.id === rawSession.id && moderator.login === rawSession.login && moderator.active
+    );
+    return moderatorExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  return { role: null, id: null, login: null };
+}
+
+function parseList(value) {
+  return value
+    .split('\n')
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function generateWorkId(existingWorks) {
+  const next = existingWorks.length + 1;
+  return `EO-${String(next).padStart(5, '0')}`;
+}
+
+async function sha256(text) {
+  const msgUint8 = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function toCsv(rows) {
+  return rows
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
+        .join(',')
+    )
+    .join('\n');
+}
+
+function safeParseJson(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+export default function Dashboard() {
+  const [state, setState] = useState(createDefaultState);
+  const [session, setSession] = useState({ role: null, id: null, login: null });
+  const [sessionReady, setSessionReady] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [cloudError, setCloudError] = useState('');
+  const [cloudDebug, setCloudDebug] = useState({ lastRequest: '', lastError: '' });
+  const lastCloudWriteRef = useRef('');
+  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+  const [workDraft, setWorkDraft] = useState({
+    contest: 'Эстетика Олимпа',
+    nomination: '',
+    category: 'Дебют',
+    direction: 'Nail',
+    participantName: '',
+    title: '',
+    description: '',
+    photosText: '',
+    videosText: '',
+    status: 'Допущено',
+  });
+  const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [moderatorDraft, setModeratorDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [criterionTitle, setCriterionTitle] = useState('');
+  const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
+  const [scoreDrafts, setScoreDrafts] = useState({});
+  const [importText, setImportText] = useState('');
+  const [stateImportText, setStateImportText] = useState('');
+  const [toast, setToast] = useState('');
+  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [adminTab, setAdminTab] = useState('main');
+  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxVideo, setLightboxVideo] = useState('');
+  const [judgeViewId, setJudgeViewId] = useState(null);
+  const [moderatorEditId, setModeratorEditId] = useState(null);
+  const [moderatorEditDraft, setModeratorEditDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    active: true,
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [judgeEditId, setJudgeEditId] = useState(null);
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [workEditId, setWorkEditId] = useState(null);
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const toastTimerRef = useRef(null);
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrapState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const rawSession = localStorage.getItem(SESSION_KEY);
+
+      let nextState = createDefaultState();
+      if (saved) {
+        const parsedState = safeParseJson(saved);
+        if (parsedState) {
+          nextState = normalizeState(parsedState);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from(CLOUD_TABLE)
+            .select('state')
+            .eq('id', CLOUD_ROW_ID)
+            .maybeSingle();
+
+          if (error) {
+            setCloudError('Не удалось получить данные из облака');
+          } else if (data?.state) {
+            nextState = normalizeState(data.state);
+          }
+        } catch {
+          setCloudError('Ошибка подключения к облаку');
+        }
+      } else {
+        setCloudError('Облако отключено: заполните NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      }
+
+      if (cancelled) return;
+
+      setState(nextState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+
+      if (rawSession) {
+        const parsedSession = safeParseJson(rawSession);
+        if (parsedSession) {
+          setSession(normalizeSession(parsedSession, nextState));
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+
+      setCloudReady(true);
+      setSessionReady(true);
+    }
+
+    bootstrapState();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  useEffect(() => {
+    if (!sessionReady || !cloudReady || !supabase) return;
+
+    const serializedState = JSON.stringify(state);
+    if (lastCloudWriteRef.current === serializedState) return;
+
+    const timer = window.setTimeout(async () => {
+      setCloudSyncing(true);
+      const payload = { id: CLOUD_ROW_ID, state };
+      const requestPreview = `supabase.from('${CLOUD_TABLE}').upsert(${JSON.stringify(payload)}, { onConflict: 'id' })`;
+      setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
+
+      try {
+        const { error } = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(payload, { onConflict: 'id' });
+
+        if (error) {
+          const message = error.message || 'unknown error';
+          setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+          setCloudDebug((prev) => ({ ...prev, lastError: message }));
+          console.error('[cloud-sync:auto] upsert failed', { requestPreview, error });
+        } else {
+          lastCloudWriteRef.current = serializedState;
+          setCloudError('');
+          setCloudDebug((prev) => ({ ...prev, lastError: '' }));
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+        setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:auto] upsert exception', { requestPreview, err });
+      }
+
+      setCloudSyncing(false);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [state, sessionReady, cloudReady]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    if (session.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
+  }, [session, sessionReady]);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
   }, []);
 
   const judgeAssignments = useMemo(() => {
@@ -775,7 +1022,409 @@ export default function Dashboard() {
     setState((prev) => ({ ...prev, criteria: [...prev.criteria, criterion] }));
     setCriterionTitle('');
   }
+}
 
+export default function Dashboard() {
+  const [state, setState] = useState(createDefaultState);
+  const [session, setSession] = useState({ role: null, id: null, login: null });
+  const [sessionReady, setSessionReady] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [cloudError, setCloudError] = useState('');
+  const lastCloudWriteRef = useRef('');
+  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+  const [workDraft, setWorkDraft] = useState({
+    contest: 'Эстетика Олимпа',
+    nomination: '',
+    category: 'Дебют',
+    direction: 'Nail',
+    participantName: '',
+    title: '',
+    description: '',
+    photosText: '',
+    videosText: '',
+    status: 'Допущено',
+  });
+  const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [moderatorDraft, setModeratorDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [criterionTitle, setCriterionTitle] = useState('');
+  const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
+  const [scoreDrafts, setScoreDrafts] = useState({});
+  const [importText, setImportText] = useState('');
+  const [stateImportText, setStateImportText] = useState('');
+  const [toast, setToast] = useState('');
+  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [adminTab, setAdminTab] = useState('main');
+  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxVideo, setLightboxVideo] = useState('');
+  const [judgeViewId, setJudgeViewId] = useState(null);
+  const [moderatorEditId, setModeratorEditId] = useState(null);
+  const [moderatorEditDraft, setModeratorEditDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    active: true,
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [judgeEditId, setJudgeEditId] = useState(null);
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [workEditId, setWorkEditId] = useState(null);
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const toastTimerRef = useRef(null);
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrapState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const rawSession = localStorage.getItem(SESSION_KEY);
+
+      let nextState = createDefaultState();
+      if (saved) {
+        const parsedState = safeParseJson(saved);
+        if (parsedState) {
+          nextState = normalizeState(parsedState);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from(CLOUD_TABLE)
+            .select('state')
+            .eq('id', CLOUD_ROW_ID)
+            .maybeSingle();
+
+          if (error) {
+            setCloudError('Не удалось получить данные из облака');
+          } else if (data?.state) {
+            nextState = normalizeState(data.state);
+          }
+        } catch {
+          setCloudError('Ошибка подключения к облаку');
+        }
+      } else {
+        setCloudError('Облако отключено: заполните NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      }
+
+      if (cancelled) return;
+
+      setState(nextState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+
+  const currentModerator = useMemo(() => {
+    if (session.role !== 'moderator') return null;
+    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
+  }, [session, state.moderators]);
+
+  const access = useMemo(() => {
+    if (session.role === 'admin') {
+      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
+    }
+    if (session.role === 'moderator') {
+      return normalizeModeratorPermissions(currentModerator?.permissions);
+    }
+    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
+  }, [session.role, currentModerator]);
+
+  const ratings = useMemo(() => {
+    const grouped = {};
+
+    state.works.forEach((work) => {
+      const scores = state.scores.filter((score) => score.workId === work.id);
+      if (!scores.length) return;
+      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
+    });
+
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
+  useEffect(() => {
+    if (session.role === 'judge') return;
+    const allowedTabs = ['main'];
+    if (access.canManageJudges) allowedTabs.push('judges');
+    if (access.canManageWorks) allowedTabs.push('works', 'import');
+    if (session.role === 'admin') allowedTabs.push('moderators');
+    if (!allowedTabs.includes(adminTab)) {
+      setAdminTab('main');
+    }
+  }, [adminTab, access, session.role]);
+
+
+  async function login() {
+    const normalizedLogin = loginForm.login.trim();
+    const passwordHash = await sha256(loginForm.password);
+
+    if (loginForm.role === 'admin') {
+      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
+      if (admin) {
+        setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
+        return;
+      }
+    }
+
+    if (loginForm.role === 'judge') {
+      const judge = state.judges.find(
+        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
+      );
+      if (judge) {
+        setSession({ role: 'judge', id: judge.id, login: judge.login });
+        return;
+      }
+    }
+
+    if (loginForm.role === 'moderator') {
+      const moderator = state.moderators.find(
+        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
+      );
+      if (moderator) {
+        setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
+        return;
+      }
+    }
+
+    alert('Неверные данные для входа.');
+  }
+
+
+  function showToast(message) {
+    setToast(message);
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
+  }
+
+  function addWork() {
+    if (!workDraft.nomination.trim() || !workDraft.title.trim()) {
+      showToast('Заполните минимум номинацию и название работы');
+      return;
+    }
+
+    const newWork = {
+      id: generateWorkId(state.works),
+      contest: workDraft.contest,
+      nomination: workDraft.nomination,
+      category: workDraft.category,
+      direction: workDraft.direction,
+      participantName: workDraft.participantName.trim(),
+      title: workDraft.title,
+      description: workDraft.description,
+      photos: parseList(workDraft.photosText),
+      videos: parseList(workDraft.videosText),
+      status: workDraft.status,
+      author: 'Скрыт',
+    };
+
+    setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
+    setWorkDraft({
+      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', direction: 'Nail', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
+    });
+    showToast('Добавлено');
+  }
+
+  async function addJudge() {
+    if (!judgeDraft.fullName.trim() || !judgeDraft.login.trim() || !judgeDraft.password) {
+      showToast('Заполните ФИО, логин и пароль судьи');
+      return;
+    }
+
+    const login = judgeDraft.login.trim();
+    const duplicateLogin =
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
+    if (duplicateLogin) {
+      showToast('Судья с таким логином уже существует');
+      return;
+    }
+
+    const passwordHash = await sha256(judgeDraft.password);
+    const judge = {
+      id: `J-${String(state.judges.length + 1).padStart(3, '0')}`,
+      fullName: judgeDraft.fullName,
+      email: judgeDraft.email,
+      login,
+      passwordHash,
+      active: true,
+    };
+    setState((prev) => ({ ...prev, judges: [...prev.judges, judge] }));
+    setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
+    showToast('Добавлено');
+  }
+
+  function toggleDraftPermission(key) {
+    setModeratorDraft((prev) => ({
+      ...prev,
+      permissions: { ...prev.permissions, [key]: !prev.permissions[key] },
+    }));
+  }
+
+  function toggleEditPermission(key) {
+    setModeratorEditDraft((prev) => ({
+      ...prev,
+      permissions: { ...prev.permissions, [key]: !prev.permissions[key] },
+    }));
+  }
+
+  async function addModerator() {
+    if (!moderatorDraft.fullName.trim() || !moderatorDraft.login.trim() || !moderatorDraft.password) {
+      showToast('Заполните ФИО, логин и пароль модератора');
+      return;
+    }
+
+    const login = moderatorDraft.login.trim();
+    const duplicateLogin =
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
+
+    if (duplicateLogin) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    const passwordHash = await sha256(moderatorDraft.password);
+    const moderator = {
+      id: `M-${String(state.moderators.length + 1).padStart(3, '0')}`,
+      fullName: moderatorDraft.fullName.trim(),
+      login,
+      passwordHash,
+      active: true,
+      permissions: normalizeModeratorPermissions(moderatorDraft.permissions),
+    };
+
+    setState((prev) => ({ ...prev, moderators: [...prev.moderators, moderator] }));
+    setModeratorDraft({
+      fullName: '',
+      login: '',
+      password: '',
+      permissions: normalizeModeratorPermissions({}),
+    });
+    showToast('Модератор добавлен');
+  }
+
+  function startModeratorEdit(moderator) {
+    setModeratorEditId(moderator.id);
+    setModeratorEditDraft({
+      fullName: moderator.fullName || '',
+      login: moderator.login || '',
+      password: '',
+      active: moderator.active ?? true,
+      permissions: normalizeModeratorPermissions(moderator.permissions),
+    });
+  }
+
+  async function saveModeratorEdit() {
+    if (!moderatorEditId) return;
+    const login = moderatorEditDraft.login.trim();
+
+    if (!moderatorEditDraft.fullName.trim() || !login) {
+      showToast('Укажите ФИО и логин модератора');
+      return;
+    }
+
+    const duplicate =
+      state.judges.some((judge) => judge.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.id !== moderatorEditId && moderator.login === login);
+
+    if (duplicate) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    let nextPasswordHash = null;
+    if (moderatorEditDraft.password) {
+      nextPasswordHash = await sha256(moderatorEditDraft.password);
+    }
+
+    setState((prev) => ({
+      ...prev,
+      moderators: prev.moderators.map((moderator) => {
+        if (moderator.id !== moderatorEditId) return moderator;
+        return {
+          ...moderator,
+          fullName: moderatorEditDraft.fullName.trim(),
+          login,
+          active: moderatorEditDraft.active,
+          permissions: normalizeModeratorPermissions(moderatorEditDraft.permissions),
+          ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
+        };
+      }),
+    }));
+
+    if (session.role === 'moderator' && session.id === moderatorEditId) {
+      setSession((prev) => ({ ...prev, login }));
+    }
+
+    setModeratorEditId(null);
+    showToast('Модератор обновлен');
+  }
+
+  function deleteModerator(moderatorId) {
+    setState((prev) => ({
+      ...prev,
+      moderators: prev.moderators.filter((moderator) => moderator.id !== moderatorId),
+    }));
+
+    if (moderatorEditId === moderatorId) setModeratorEditId(null);
+    if (session.role === 'moderator' && session.id === moderatorId) {
+      setSession({ role: null, id: null, login: null });
+    }
+
+    showToast('Модератор удален');
+  }
+
+
+  function addCriterion() {
+    if (!criterionTitle.trim()) return;
+    const criterion = { id: `c${Date.now()}`, title: criterionTitle.trim(), min: 1, max: 10 };
+    setState((prev) => ({ ...prev, criteria: [...prev.criteria, criterion] }));
+    setCriterionTitle('');
+  }
+
+>>>>>>> main
   function assignWork() {
     if (!assignmentDraft.judgeId || !assignmentDraft.workId) return;
     const exists = state.assignments.some(
@@ -803,6 +1452,290 @@ export default function Dashboard() {
         ...(prev[workId] || { values: {}, comment: '' }),
         values: { ...(prev[workId]?.values || {}), [criterionId]: Number(value) },
       },
+    }));
+  }
+
+  function setComment(workId, comment) {
+    setScoreDrafts((prev) => ({
+      ...prev,
+      [workId]: {
+        ...(prev[workId] || { values: {} }),
+        comment,
+      },
+    }));
+  }
+
+  function submitScore(workId) {
+    const draft = scoreDrafts[workId];
+    if (!draft?.comment?.trim()) {
+      alert('Комментарий обязателен.');
+      return;
+    }
+
+    const criteriaValues = state.criteria.map((criterion) => draft.values?.[criterion.id]).filter(Boolean);
+    if (criteriaValues.length !== state.criteria.length) {
+      alert('Оцените все критерии.');
+      return;
+    }
+
+    const total = criteriaValues.reduce((sum, v) => sum + v, 0);
+    const avg = total / criteriaValues.length;
+
+    setState((prev) => ({
+      ...prev,
+      scores: [
+        ...prev.scores.filter((s) => !(s.workId === workId && s.judgeId === session.id)),
+        {
+          workId,
+          judgeId: session.id,
+          criteriaScores: draft.values,
+          comment: draft.comment,
+          total,
+          avg,
+          submittedAt: new Date().toISOString(),
+          locked: true,
+        },
+      ],
+      assignments: prev.assignments.map((a) =>
+        a.workId === workId && a.judgeId === session.id
+          ? { ...a, status: 'оценено', finishedAt: new Date().toISOString() }
+          : a
+      ),
+    }));
+  }
+
+  function importWorksFromCsv() {
+    const rows = importText
+      .split('\n')
+      .map((r) => r.trim())
+      .filter(Boolean)
+      .map((r) => r.split(';'));
+
+    if (rows.length < 2) return;
+    const [, ...dataRows] = rows;
+
+    const imported = dataRows.map((row, idx) => ({
+      id: generateWorkId([...state.works, ...Array(idx)]),
+      contest: row[0] || 'Эстетика Олимпа',
+      nomination: row[1] || 'Без номинации',
+      category: row[2] || 'Дебют',
+      direction: row[3] || (DIRECTION_OPTIONS_BY_CONTEST[row[0]]?.[0] || 'Общий зачет'),
+      title: row[4] || `Работа ${idx + 1}`,
+      description: row[5] || '',
+      photos: [row[6], row[7], row[8]].filter(Boolean),
+      videos: [row[9]].filter(Boolean),
+      participantName: row[10] || '',
+      status: 'Допущено',
+      author: 'Скрыт',
+    }));
+
+    setState((prev) => ({ ...prev, works: [...prev.works, ...imported] }));
+    setImportText('');
+  }
+
+
+  function exportAppState() {
+    const payload = JSON.stringify(state, null, 2);
+    const blob = new Blob([payload], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'beauty-olymp-state.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('Данные экспортированы');
+  }
+
+  function importAppState() {
+    if (!stateImportText.trim()) {
+      showToast('Вставьте JSON состояния');
+      return;
+    }
+
+    const parsed = safeParseJson(stateImportText);
+    if (!parsed) {
+      showToast('Некорректный JSON');
+      return;
+    }
+
+    const normalized = normalizeState(parsed);
+    setState(normalized);
+    setStateImportText('');
+    showToast('Данные импортированы');
+  }
+
+  async function syncFromCloud() {
+    if (!supabase) {
+      showToast('Облако не настроено');
+      return;
+    }
+
+    setCloudSyncing(true);
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select('state')
+      .eq('id', CLOUD_ROW_ID)
+      .maybeSingle();
+
+    if (error) {
+      setCloudSyncing(false);
+      setCloudError('Не удалось загрузить данные из облака');
+      showToast('Ошибка синхронизации');
+      return;
+    }
+
+    if (!data?.state) {
+      setCloudSyncing(false);
+      showToast('Облачное состояние пока пустое');
+      return;
+    }
+
+    const normalized = normalizeState(data.state);
+    const serializedState = JSON.stringify(normalized);
+    setState(normalized);
+    localStorage.setItem(STORAGE_KEY, serializedState);
+    lastCloudWriteRef.current = serializedState;
+    setCloudSyncing(false);
+    setCloudError('');
+    showToast('Данные загружены из облака');
+  }
+
+  async function syncToCloud() {
+    if (!supabase) {
+      showToast('Облако не настроено');
+      return;
+    }
+
+    setCloudSyncing(true);
+    const serializedState = JSON.stringify(state);
+    const payload = { id: CLOUD_ROW_ID, state };
+    const requestPreview = `supabase.from('${CLOUD_TABLE}').upsert(${JSON.stringify(payload)}, { onConflict: 'id' })`;
+    setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
+
+    try {
+      const { error } = await supabase
+        .from(CLOUD_TABLE)
+        .upsert(payload, { onConflict: 'id' });
+
+      setCloudSyncing(false);
+
+      if (error) {
+        const message = error.message || 'unknown error';
+        setCloudError(`Не удалось сохранить данные в облако: ${message}`);
+        setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:manual] upsert failed', { requestPreview, error });
+        showToast(`Ошибка выгрузки в облако: ${message}`);
+        return;
+      }
+
+      lastCloudWriteRef.current = serializedState;
+      setCloudError('');
+      setCloudDebug((prev) => ({ ...prev, lastError: '' }));
+      showToast('Данные сохранены в облако');
+    } catch (err) {
+      setCloudSyncing(false);
+      const message = err instanceof Error ? err.message : String(err);
+      setCloudError(`Не удалось сохранить данные в облако: ${message}`);
+      setCloudDebug((prev) => ({ ...prev, lastError: message }));
+      console.error('[cloud-sync:manual] upsert exception', { requestPreview, err });
+      showToast(`Ошибка выгрузки в облако: ${message}`);
+    }
+  }
+
+  function downloadCsv(filename, rows) {
+    const csv = toCsv(rows);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportScores() {
+    const criteriaColumns = state.criteria.map((criterion) => criterion.title);
+    const rows = [[
+      'Номер работы',
+      'Contest',
+      'Direction',
+      'Nomination',
+      'Category',
+      'Participant',
+      'JudgeID',
+      'JudgeName',
+      ...criteriaColumns,
+      'Comment',
+      'Total',
+      'Average',
+      'SubmittedAt',
+    ]];
+
+    state.scores.forEach((score) => {
+      const work = state.works.find((item) => item.id === score.workId);
+      const judge = state.judges.find((item) => item.id === score.judgeId);
+      const criteriaValues = state.criteria.map((criterion) => score.criteriaScores?.[criterion.id] ?? '');
+      rows.push([
+        score.workId,
+        work?.contest || '',
+        work?.direction || '',
+        work?.nomination || '',
+        work?.category || '',
+        work?.participantName || '',
+        score.judgeId,
+        judge?.fullName || '',
+        ...criteriaValues,
+        score.comment,
+        score.total,
+        Number(score.avg).toFixed(2),
+        score.submittedAt,
+      ]);
+    });
+
+    downloadCsv('scores-detailed.csv', rows);
+  }
+
+  function exportRatings() {
+    const rows = [['Group', 'Rank', 'Номер работы', 'Title', 'Average']];
+    Object.entries(ratings).forEach(([group, list]) => {
+      list.forEach((entry) => rows.push([group, entry.rank, entry.workId, entry.title, entry.avg]));
+    });
+    downloadCsv('ratings.csv', rows);
+  }
+
+  function startJudgeEdit(judge) {
+    setJudgeEditId(judge.id);
+    setJudgeEditDraft({
+      fullName: judge.fullName || '',
+      email: judge.email || '',
+      login: judge.login || '',
+      password: '',
+      active: Boolean(judge.active),
+    });
+  }
+
+  async function saveJudgeEdit() {
+    if (!judgeEditId) return;
+    const login = judgeEditDraft.login.trim();
+    if (!judgeEditDraft.fullName.trim() || !login) {
+      showToast('Укажите ФИО и логин судьи');
+      return;
+    }
+
+    const duplicate =
+      state.judges.some((j) => j.id !== judgeEditId && j.login === login) ||
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
+    if (duplicate) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    let nextPasswordHash = null;
+    if (judgeEditDraft.password) {
+      nextPasswordHash = await sha256(judgeEditDraft.password);
+    }
+
     }));
   }
 
@@ -1101,6 +2034,7 @@ export default function Dashboard() {
       nextPasswordHash = await sha256(judgeEditDraft.password);
     }
 
+>>>>>>> main
     setState((prev) => ({
       ...prev,
       judges: prev.judges.map((judge) => {
@@ -1571,6 +2505,9 @@ export default function Dashboard() {
           <small><strong>Текущий cloud row id:</strong> {cloudRowId}</small>
           {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
           {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
+          {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
+          {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
+>>>>>>> main
           <div className="row">
             <button onClick={syncFromCloud}>Загрузить из облака</button>
             <button onClick={syncToCloud}>Сохранить в облако</button>
