@@ -307,11 +307,12 @@ export default function Dashboard() {
   const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
   const lastCloudWriteRef = useRef('');
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
+    direction: 'Роспись на салонных типсах',
     nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
     category: 'Дебют',
-    direction: 'Роспись на салонных типсах',
     participantName: '',
     title: '',
     description: '',
@@ -319,6 +320,7 @@ export default function Dashboard() {
     videosText: '',
     status: 'Допущено',
   });
+
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
@@ -326,6 +328,7 @@ export default function Dashboard() {
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
+
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
@@ -333,13 +336,16 @@ export default function Dashboard() {
   const [stateImportText, setStateImportText] = useState('');
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
   const [adminTab, setAdminTab] = useState('main');
   const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
+
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
     fullName: '',
@@ -348,32 +354,64 @@ export default function Dashboard() {
     active: true,
     permissions: normalizeModeratorPermissions({}),
   });
+
   const [judgeEditId, setJudgeEditId] = useState(null);
-  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [judgeEditDraft, setJudgeEditDraft] = useState({
+    fullName: '',
+    email: '',
+    login: '',
+    password: '',
+    active: true,
+  });
+
   const [workEditId, setWorkEditId] = useState(null);
-  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const [workEditDraft, setWorkEditDraft] = useState({
+    title: '',
+    participantName: '',
+    nomination: '',
+    category: '',
+    direction: '',
+    status: 'Допущено',
+  });
+
   const toastTimerRef = useRef(null);
+
   const categoryOptions = useMemo(
     () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
     [workDraft.contest]
   );
+
   const directionOptions = useMemo(
     () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
     [workDraft.contest]
   );
+
   const nominationOptions = useMemo(
     () => getNominationOptions(workDraft.contest, workDraft.direction),
     [workDraft.contest, workDraft.direction]
   );
 
-  
+  // ВАЖНО: этот блок должен быть один в файле. Если ниже есть второй `const ratings = useMemo(...)`,
+  // его нужно удалить, иначе будет "ratings redefined".
+  const ratings = useMemo(() => {
+    const grouped = {};
+
+    state.works.forEach((work) => {
+      const scores = state.scores.filter((score) => score.workId === work.id);
+      if (!scores.length) return;
+
+      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
+
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
+    });
+
     Object.values(grouped).forEach((list) => {
       list.sort((a, b) => b.avg - a.avg);
       let rank = 1;
       list.forEach((entry, index) => {
-        if (index > 0 && entry.avg < list[index - 1].avg) {
-          rank = index + 1;
-        }
+        if (index > 0 && entry.avg < list[index - 1].avg) rank = index + 1;
         entry.rank = rank;
       });
     });
@@ -389,6 +427,7 @@ export default function Dashboard() {
 
     return filtered;
   }, [state.scores, state.works, ratingFilter]);
+
   useEffect(() => {
     let cancelled = false;
 
