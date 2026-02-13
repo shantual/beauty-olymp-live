@@ -366,7 +366,29 @@ export default function Dashboard() {
     [workDraft.contest, workDraft.direction]
   );
 
-  // Bootstrap: localStorage + cloud
+
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
   useEffect(() => {
     let cancelled = false;
 
@@ -940,13 +962,6 @@ export default function Dashboard() {
         comment,
       },
     }));
-
-    if (session.role === 'judge' && session.id === judgeEditId) {
-      setSession((prev) => ({ ...prev, login: loginValue }));
-    }
-
-    setJudgeEditId(null);
-    showToast('Судья обновлен');
   }
 
   function submitScore(workId) {
@@ -1400,9 +1415,8 @@ export default function Dashboard() {
                 <h3>Работа: {selectedJudgeWork.id}</h3>
                 <button onClick={() => setJudgeSelectedWorkId(null)}>Закрыть</button>
               </div>
-              <p>{selectedJudgeWork.contest} / {selectedJudgeWork.direction || 'Общий зачет'} / {selectedJudgeWork.nomination} / {selectedJudgeWork.category}</p>
-              <p><strong>Участник:</strong> {selectedJudgeWork.participantName || 'не указан'}</p>
-              <p>{selectedJudgeWork.description}</p>
+              <p><strong>Название:</strong> {selectedJudgeWork.title}</p>
+              <p><strong>Описание:</strong> {selectedJudgeWork.description || '—'}</p>
 
               <div className="grid">
                 {(selectedJudgeWork.photos || []).map((photo, index) => (
@@ -2022,8 +2036,8 @@ function Styles() {
       .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
       .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
       .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
-      .judge-video-grid { grid-template-columns: 1fr; }
-      .judge-video-thumb { cursor: zoom-in; }
+      .judge-video-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+      .judge-video-thumb { cursor: zoom-in; max-width: 50%; }
       .video-expanded { aspect-ratio: 16 / 9; min-height: 58vh; }
       .clickable { cursor: pointer; }
       .works-table { table-layout: fixed; }
@@ -2062,6 +2076,7 @@ function Styles() {
         .row > * { width: 100%; }
         input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
         .grid { grid-template-columns: 1fr; }
+        .judge-video-thumb { max-width: 100%; }
         .media { min-height: 180px; }
         .modal-overlay { padding: 8px; align-items: flex-end; }
         .modal { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
