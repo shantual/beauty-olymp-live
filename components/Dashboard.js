@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 
 const STORAGE_KEY = 'beauty-olymp-v2';
 const SESSION_KEY = 'beauty-olymp-session-v1';
-const CLOUD_ROW_ID = 'global-state';
+const DEFAULT_CLOUD_ROW_ID = process.env.NEXT_PUBLIC_SUPABASE_APP_STATE_ID || 'global-state';
 const CLOUD_TABLE = 'app_state';
 
 const CONTEST_OPTIONS = ['Эстетика Олимпа', 'Креатив Олимпа', 'Образ Олимпа', 'Империя Олимпа'];
@@ -136,7 +136,305 @@ function normalizeState(rawState) {
 
   return next;
 }
-<<<<<<< codex/develop-web-app-for-anonymous-judging-k8qfyp
+
+function normalizeSession(rawSession, normalizedState) {
+  if (!rawSession || !rawSession.role) return { role: null, id: null, login: null };
+
+  if (rawSession.role === 'admin') {
+    const adminExists = (normalizedState.adminUsers || []).some((admin) => admin.login === rawSession.login);
+    return adminExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  if (rawSession.role === 'judge') {
+    const judgeExists = (normalizedState.judges || []).some(
+      (judge) => judge.id === rawSession.id && judge.login === rawSession.login && judge.active
+    );
+    return judgeExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  if (rawSession.role === 'moderator') {
+    const moderatorExists = (normalizedState.moderators || []).some(
+      (moderator) => moderator.id === rawSession.id && moderator.login === rawSession.login && moderator.active
+    );
+    return moderatorExists ? rawSession : { role: null, id: null, login: null };
+  }
+
+  return { role: null, id: null, login: null };
+}
+
+function parseList(value) {
+  return value
+    .split('\n')
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function generateWorkId(existingWorks) {
+  const next = existingWorks.length + 1;
+  return `EO-${String(next).padStart(5, '0')}`;
+}
+
+async function sha256(text) {
+  const msgUint8 = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function toCsv(rows) {
+  return rows
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
+        .join(',')
+    )
+    .join('\n');
+}
+
+
+function isUuidInputError(message) {
+  const text = String(message || '').toLowerCase();
+  return text.includes('invalid input syntax for type uuid');
+}
+
+function buildCloudRequestPreview(table, payload) {
+  return `supabase.from('${table}').upsert({ id: '${payload.id}', state: <json> }, { onConflict: 'id' })`;
+}
+
+function safeParseJson(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+export default function Dashboard() {
+  const [state, setState] = useState(createDefaultState);
+  const [session, setSession] = useState({ role: null, id: null, login: null });
+  const [sessionReady, setSessionReady] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [cloudError, setCloudError] = useState('');
+  const [cloudDebug, setCloudDebug] = useState({ lastRequest: '', lastError: '' });
+  const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
+  const lastCloudWriteRef = useRef('');
+  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+  const [workDraft, setWorkDraft] = useState({
+    contest: 'Эстетика Олимпа',
+    nomination: '',
+    category: 'Дебют',
+    direction: 'Nail',
+    participantName: '',
+    title: '',
+    description: '',
+    photosText: '',
+    videosText: '',
+    status: 'Допущено',
+  });
+  const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [moderatorDraft, setModeratorDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [criterionTitle, setCriterionTitle] = useState('');
+  const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
+  const [scoreDrafts, setScoreDrafts] = useState({});
+  const [importText, setImportText] = useState('');
+  const [stateImportText, setStateImportText] = useState('');
+  const [toast, setToast] = useState('');
+  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [adminTab, setAdminTab] = useState('main');
+  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxVideo, setLightboxVideo] = useState('');
+  const [judgeViewId, setJudgeViewId] = useState(null);
+  const [moderatorEditId, setModeratorEditId] = useState(null);
+  const [moderatorEditDraft, setModeratorEditDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    active: true,
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [judgeEditId, setJudgeEditId] = useState(null);
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [workEditId, setWorkEditId] = useState(null);
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const toastTimerRef = useRef(null);
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrapState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const rawSession = localStorage.getItem(SESSION_KEY);
+
+      let nextState = createDefaultState();
+      if (saved) {
+        const parsedState = safeParseJson(saved);
+        if (parsedState) {
+          nextState = normalizeState(parsedState);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+
+      if (supabase) {
+        try {
+          let cloudData = null;
+          let cloudReadError = null;
+
+          const { data: byIdData, error: byIdError } = await supabase
+            .from(CLOUD_TABLE)
+            .select('id,state')
+            .eq('id', cloudRowId)
+            .maybeSingle();
+
+          if (byIdError && !isUuidInputError(byIdError.message)) {
+            cloudReadError = byIdError;
+          } else if (byIdData?.state) {
+            cloudData = byIdData;
+          }
+
+          if (!cloudData) {
+            const { data: firstRowData, error: firstRowError } = await supabase
+              .from(CLOUD_TABLE)
+              .select('id,state')
+              .limit(1)
+              .maybeSingle();
+
+            if (firstRowError) {
+              cloudReadError = firstRowError;
+            } else if (firstRowData?.state) {
+              cloudData = firstRowData;
+            }
+          }
+
+          if (cloudReadError) {
+            setCloudError(`Не удалось получить данные из облака: ${cloudReadError.message || 'unknown error'}`);
+          } else if (cloudData?.state) {
+            nextState = normalizeState(cloudData.state);
+            if (cloudData.id) {
+              setCloudRowId(cloudData.id);
+            }
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          setCloudError(`Ошибка подключения к облаку: ${message}`);
+        }
+      } else {
+        setCloudError('Облако отключено: заполните NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      }
+
+      if (cancelled) return;
+
+      setState(nextState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+
+      if (rawSession) {
+        const parsedSession = safeParseJson(rawSession);
+        if (parsedSession) {
+          setSession(normalizeSession(parsedSession, nextState));
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+
+      setCloudReady(true);
+      setSessionReady(true);
+    }
+
+    bootstrapState();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  useEffect(() => {
+    if (!sessionReady || !cloudReady || !supabase) return;
+
+    const serializedState = JSON.stringify(state);
+    if (lastCloudWriteRef.current === serializedState) return;
+
+    const timer = window.setTimeout(async () => {
+      setCloudSyncing(true);
+      const payload = { id: cloudRowId, state };
+      const requestPreview = buildCloudRequestPreview(CLOUD_TABLE, payload);
+      setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
+
+      try {
+        let { error } = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(payload, { onConflict: 'id' });
+
+        if (error && isUuidInputError(error.message)) {
+          const fallbackId = crypto.randomUUID();
+          const fallbackPayload = { id: fallbackId, state };
+          const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
+          setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
+          const retry = await supabase
+            .from(CLOUD_TABLE)
+            .upsert(fallbackPayload, { onConflict: 'id' });
+          error = retry.error;
+          if (!error) {
+            setCloudRowId(fallbackId);
+          }
+        }
+
+        if (error) {
+          const message = error.message || 'unknown error';
+          setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+          setCloudDebug((prev) => ({ ...prev, lastError: message }));
+          console.error('[cloud-sync:auto] upsert failed', { requestPreview, error });
+        } else {
+          lastCloudWriteRef.current = serializedState;
+          setCloudError('');
+          setCloudDebug((prev) => ({ ...prev, lastError: '' }));
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+        setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:auto] upsert exception', { requestPreview, err });
+      }
+
+      setCloudSyncing(false);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [state, sessionReady, cloudReady, cloudRowId]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    if (session.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
+  }, [session, sessionReady]);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
 
 function normalizeSession(rawSession, normalizedState) {
   if (!rawSession || !rawSession.role) return { role: null, id: null, login: null };
@@ -431,288 +729,6 @@ export default function Dashboard() {
     [selectedWorkId, state.scores]
   );
 
-=======
-
-function normalizeSession(rawSession, normalizedState) {
-  if (!rawSession || !rawSession.role) return { role: null, id: null, login: null };
-
-  if (rawSession.role === 'admin') {
-    const adminExists = (normalizedState.adminUsers || []).some((admin) => admin.login === rawSession.login);
-    return adminExists ? rawSession : { role: null, id: null, login: null };
-  }
-
-  if (rawSession.role === 'judge') {
-    const judgeExists = (normalizedState.judges || []).some(
-      (judge) => judge.id === rawSession.id && judge.login === rawSession.login && judge.active
-    );
-    return judgeExists ? rawSession : { role: null, id: null, login: null };
-  }
-
-  if (rawSession.role === 'moderator') {
-    const moderatorExists = (normalizedState.moderators || []).some(
-      (moderator) => moderator.id === rawSession.id && moderator.login === rawSession.login && moderator.active
-    );
-    return moderatorExists ? rawSession : { role: null, id: null, login: null };
-  }
-
-  return { role: null, id: null, login: null };
-}
-
-function parseList(value) {
-  return value
-    .split('\n')
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
-function generateWorkId(existingWorks) {
-  const next = existingWorks.length + 1;
-  return `EO-${String(next).padStart(5, '0')}`;
-}
-
-async function sha256(text) {
-  const msgUint8 = new TextEncoder().encode(text);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-function toCsv(rows) {
-  return rows
-    .map((row) =>
-      row
-        .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
-        .join(',')
-    )
-    .join('\n');
-}
-
-function safeParseJson(value) {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
-}
-
-export default function Dashboard() {
-  const [state, setState] = useState(createDefaultState);
-  const [session, setSession] = useState({ role: null, id: null, login: null });
-  const [sessionReady, setSessionReady] = useState(false);
-  const [cloudReady, setCloudReady] = useState(false);
-  const [cloudSyncing, setCloudSyncing] = useState(false);
-  const [cloudError, setCloudError] = useState('');
-  const lastCloudWriteRef = useRef('');
-  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
-  const [workDraft, setWorkDraft] = useState({
-    contest: 'Эстетика Олимпа',
-    nomination: '',
-    category: 'Дебют',
-    direction: 'Nail',
-    participantName: '',
-    title: '',
-    description: '',
-    photosText: '',
-    videosText: '',
-    status: 'Допущено',
-  });
-  const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
-  const [moderatorDraft, setModeratorDraft] = useState({
-    fullName: '',
-    login: '',
-    password: '',
-    permissions: normalizeModeratorPermissions({}),
-  });
-  const [criterionTitle, setCriterionTitle] = useState('');
-  const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
-  const [scoreDrafts, setScoreDrafts] = useState({});
-  const [importText, setImportText] = useState('');
-  const [stateImportText, setStateImportText] = useState('');
-  const [toast, setToast] = useState('');
-  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
-  const [selectedWorkId, setSelectedWorkId] = useState(null);
-  const [adminTab, setAdminTab] = useState('main');
-  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
-  const [lightboxImage, setLightboxImage] = useState('');
-  const [lightboxVideo, setLightboxVideo] = useState('');
-  const [judgeViewId, setJudgeViewId] = useState(null);
-  const [moderatorEditId, setModeratorEditId] = useState(null);
-  const [moderatorEditDraft, setModeratorEditDraft] = useState({
-    fullName: '',
-    login: '',
-    password: '',
-    active: true,
-    permissions: normalizeModeratorPermissions({}),
-  });
-  const [judgeEditId, setJudgeEditId] = useState(null);
-  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
-  const [workEditId, setWorkEditId] = useState(null);
-  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
-  const toastTimerRef = useRef(null);
-  const categoryOptions = useMemo(
-    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
-    [workDraft.contest]
-  );
-  const directionOptions = useMemo(
-    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
-    [workDraft.contest]
-  );
-
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function bootstrapState() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const rawSession = localStorage.getItem(SESSION_KEY);
-
-      let nextState = createDefaultState();
-      if (saved) {
-        const parsedState = safeParseJson(saved);
-        if (parsedState) {
-          nextState = normalizeState(parsedState);
-        } else {
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      }
-
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from(CLOUD_TABLE)
-            .select('state')
-            .eq('id', CLOUD_ROW_ID)
-            .maybeSingle();
-
-          if (error) {
-            setCloudError('Не удалось получить данные из облака');
-          } else if (data?.state) {
-            nextState = normalizeState(data.state);
-          }
-        } catch {
-          setCloudError('Ошибка подключения к облаку');
-        }
-      } else {
-        setCloudError('Облако отключено: заполните NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY');
-      }
-
-      if (cancelled) return;
-
-      setState(nextState);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
-
-      if (rawSession) {
-        const parsedSession = safeParseJson(rawSession);
-        if (parsedSession) {
-          setSession(normalizeSession(parsedSession, nextState));
-        } else {
-          localStorage.removeItem(SESSION_KEY);
-        }
-      }
-
-      setCloudReady(true);
-      setSessionReady(true);
-    }
-
-    bootstrapState();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-
-  useEffect(() => {
-    if (!sessionReady || !cloudReady || !supabase) return;
-
-    const serializedState = JSON.stringify(state);
-    if (lastCloudWriteRef.current === serializedState) return;
-
-    const timer = window.setTimeout(async () => {
-      setCloudSyncing(true);
-      const { error } = await supabase
-        .from(CLOUD_TABLE)
-        .upsert(
-          { id: CLOUD_ROW_ID, state, updated_at: new Date().toISOString() },
-          { onConflict: 'id' }
-        );
-
-      if (error) {
-        setCloudError('Не удалось сохранить состояние в облако');
-      } else {
-        lastCloudWriteRef.current = serializedState;
-        setCloudError('');
-      }
-      setCloudSyncing(false);
-    }, 700);
-
-    return () => window.clearTimeout(timer);
-  }, [state, sessionReady, cloudReady]);
-
-  useEffect(() => {
-    if (!sessionReady) return;
-
-    if (session.role) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-      return;
-    }
-    localStorage.removeItem(SESSION_KEY);
-  }, [session, sessionReady]);
-
-  useEffect(() => () => {
-    if (toastTimerRef.current) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-  }, []);
-
-  const judgeAssignments = useMemo(() => {
-    if (session.role !== 'judge') return [];
-    return state.assignments.filter((item) => item.judgeId === session.id);
-  }, [session, state.assignments]);
-
-  const judgeWorks = useMemo(
-    () =>
-      judgeAssignments
-        .map((a) => {
-          const work = state.works.find((w) => w.id === a.workId);
-          return work ? { ...work, assignmentStatus: a.status } : null;
-        })
-        .filter(Boolean)
-        .sort((a, b) => {
-          const aDone = a.assignmentStatus === 'оценено';
-          const bDone = b.assignmentStatus === 'оценено';
-          if (aDone === bDone) return a.id.localeCompare(b.id);
-          return aDone ? 1 : -1;
-        }),
-    [judgeAssignments, state.works]
-  );
-
-  const progress = useMemo(() => {
-    const total = state.assignments.length;
-    const done = state.assignments.filter((a) => a.status === 'оценено').length;
-    return total ? Math.round((done / total) * 100) : 0;
-  }, [state.assignments]);
-
-  const ratingFilterOptions = useMemo(() => {
-    const contests = [...new Set(state.works.map((w) => w.contest).filter(Boolean))];
-    const directions = [...new Set(state.works.map((w) => w.direction || 'Общий зачет').filter(Boolean))];
-    const categories = [...new Set(state.works.map((w) => w.category).filter(Boolean))];
-    return { contests, directions, categories };
-  }, [state.works]);
-
-  const selectedWork = useMemo(
-    () => state.works.find((work) => work.id === selectedWorkId) || null,
-    [selectedWorkId, state.works]
-  );
-
-  const selectedWorkScores = useMemo(
-    () => state.scores.filter((score) => score.workId === selectedWorkId),
-    [selectedWorkId, state.scores]
-  );
-
->>>>>>> main
   const currentModerator = useMemo(() => {
     if (session.role !== 'moderator') return null;
     return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
@@ -844,7 +860,6 @@ export default function Dashboard() {
       contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', direction: 'Nail', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
     showToast('Добавлено');
-<<<<<<< codex/develop-web-app-for-anonymous-judging-k8qfyp
   }
 
   async function addJudge() {
@@ -1007,8 +1022,245 @@ export default function Dashboard() {
     setState((prev) => ({ ...prev, criteria: [...prev.criteria, criterion] }));
     setCriterionTitle('');
   }
+}
 
-=======
+export default function Dashboard() {
+  const [state, setState] = useState(createDefaultState);
+  const [session, setSession] = useState({ role: null, id: null, login: null });
+  const [sessionReady, setSessionReady] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [cloudError, setCloudError] = useState('');
+  const lastCloudWriteRef = useRef('');
+  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+  const [workDraft, setWorkDraft] = useState({
+    contest: 'Эстетика Олимпа',
+    nomination: '',
+    category: 'Дебют',
+    direction: 'Nail',
+    participantName: '',
+    title: '',
+    description: '',
+    photosText: '',
+    videosText: '',
+    status: 'Допущено',
+  });
+  const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [moderatorDraft, setModeratorDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [criterionTitle, setCriterionTitle] = useState('');
+  const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
+  const [scoreDrafts, setScoreDrafts] = useState({});
+  const [importText, setImportText] = useState('');
+  const [stateImportText, setStateImportText] = useState('');
+  const [toast, setToast] = useState('');
+  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [adminTab, setAdminTab] = useState('main');
+  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxVideo, setLightboxVideo] = useState('');
+  const [judgeViewId, setJudgeViewId] = useState(null);
+  const [moderatorEditId, setModeratorEditId] = useState(null);
+  const [moderatorEditDraft, setModeratorEditDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    active: true,
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [judgeEditId, setJudgeEditId] = useState(null);
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [workEditId, setWorkEditId] = useState(null);
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const toastTimerRef = useRef(null);
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrapState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const rawSession = localStorage.getItem(SESSION_KEY);
+
+      let nextState = createDefaultState();
+      if (saved) {
+        const parsedState = safeParseJson(saved);
+        if (parsedState) {
+          nextState = normalizeState(parsedState);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from(CLOUD_TABLE)
+            .select('state')
+            .eq('id', CLOUD_ROW_ID)
+            .maybeSingle();
+
+          if (error) {
+            setCloudError('Не удалось получить данные из облака');
+          } else if (data?.state) {
+            nextState = normalizeState(data.state);
+          }
+        } catch {
+          setCloudError('Ошибка подключения к облаку');
+        }
+      } else {
+        setCloudError('Облако отключено: заполните NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      }
+
+      if (cancelled) return;
+
+      setState(nextState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+
+  const currentModerator = useMemo(() => {
+    if (session.role !== 'moderator') return null;
+    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
+  }, [session, state.moderators]);
+
+  const access = useMemo(() => {
+    if (session.role === 'admin') {
+      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
+    }
+    if (session.role === 'moderator') {
+      return normalizeModeratorPermissions(currentModerator?.permissions);
+    }
+    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
+  }, [session.role, currentModerator]);
+
+  const ratings = useMemo(() => {
+    const grouped = {};
+
+    state.works.forEach((work) => {
+      const scores = state.scores.filter((score) => score.workId === work.id);
+      if (!scores.length) return;
+      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
+    });
+
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
+  useEffect(() => {
+    if (session.role === 'judge') return;
+    const allowedTabs = ['main'];
+    if (access.canManageJudges) allowedTabs.push('judges');
+    if (access.canManageWorks) allowedTabs.push('works', 'import');
+    if (session.role === 'admin') allowedTabs.push('moderators');
+    if (!allowedTabs.includes(adminTab)) {
+      setAdminTab('main');
+    }
+  }, [adminTab, access, session.role]);
+
+
+  async function login() {
+    const normalizedLogin = loginForm.login.trim();
+    const passwordHash = await sha256(loginForm.password);
+
+    if (loginForm.role === 'admin') {
+      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
+      if (admin) {
+        setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
+        return;
+      }
+    }
+
+    if (loginForm.role === 'judge') {
+      const judge = state.judges.find(
+        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
+      );
+      if (judge) {
+        setSession({ role: 'judge', id: judge.id, login: judge.login });
+        return;
+      }
+    }
+
+    if (loginForm.role === 'moderator') {
+      const moderator = state.moderators.find(
+        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
+      );
+      if (moderator) {
+        setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
+        return;
+      }
+    }
+
+    alert('Неверные данные для входа.');
+  }
+
+
+  function showToast(message) {
+    setToast(message);
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
+  }
+
+  function addWork() {
+    if (!workDraft.nomination.trim() || !workDraft.title.trim()) {
+      showToast('Заполните минимум номинацию и название работы');
+      return;
+    }
+
+    const newWork = {
+      id: generateWorkId(state.works),
+      contest: workDraft.contest,
+      nomination: workDraft.nomination,
+      category: workDraft.category,
+      direction: workDraft.direction,
+      participantName: workDraft.participantName.trim(),
+      title: workDraft.title,
+      description: workDraft.description,
+      photos: parseList(workDraft.photosText),
+      videos: parseList(workDraft.videosText),
+      status: workDraft.status,
+      author: 'Скрыт',
+    };
+
+    setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
+    setWorkDraft({
+      contest: 'Эстетика Олимпа', nomination: '', category: 'Дебют', direction: 'Nail', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
+    });
+    showToast('Добавлено');
   }
 
   async function addJudge() {
@@ -1200,7 +1452,6 @@ export default function Dashboard() {
         ...(prev[workId] || { values: {}, comment: '' }),
         values: { ...(prev[workId]?.values || {}), [criterionId]: Number(value) },
       },
-<<<<<<< codex/develop-web-app-for-anonymous-judging-k8qfyp
     }));
   }
 
@@ -1485,7 +1736,6 @@ export default function Dashboard() {
       nextPasswordHash = await sha256(judgeEditDraft.password);
     }
 
-=======
     }));
   }
 
@@ -1608,7 +1858,7 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from(CLOUD_TABLE)
       .select('state')
-      .eq('id', CLOUD_ROW_ID)
+      .eq('id', cloudRowId)
       .maybeSingle();
 
     if (error) {
@@ -1642,24 +1892,52 @@ export default function Dashboard() {
 
     setCloudSyncing(true);
     const serializedState = JSON.stringify(state);
-    const { error } = await supabase
-      .from(CLOUD_TABLE)
-      .upsert(
-        { id: CLOUD_ROW_ID, state, updated_at: new Date().toISOString() },
-        { onConflict: 'id' }
-      );
+    const payload = { id: cloudRowId, state };
+    const requestPreview = buildCloudRequestPreview(CLOUD_TABLE, payload);
+    setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
 
-    setCloudSyncing(false);
+    try {
+      let { error } = await supabase
+        .from(CLOUD_TABLE)
+        .upsert(payload, { onConflict: 'id' });
 
-    if (error) {
-      setCloudError('Не удалось сохранить данные в облако');
-      showToast('Ошибка выгрузки в облако');
-      return;
+      if (error && isUuidInputError(error.message)) {
+        const fallbackId = crypto.randomUUID();
+        const fallbackPayload = { id: fallbackId, state };
+        const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
+        setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
+        const retry = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(fallbackPayload, { onConflict: 'id' });
+        error = retry.error;
+        if (!error) {
+          setCloudRowId(fallbackId);
+        }
+      }
+
+      setCloudSyncing(false);
+
+      if (error) {
+        const message = error.message || 'unknown error';
+        setCloudError(`Не удалось сохранить данные в облако: ${message}`);
+        setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:manual] upsert failed', { requestPreview, error });
+        showToast(`Ошибка выгрузки в облако: ${message}`);
+        return;
+      }
+
+      lastCloudWriteRef.current = serializedState;
+      setCloudError('');
+      setCloudDebug((prev) => ({ ...prev, lastError: '' }));
+      showToast('Данные сохранены в облако');
+    } catch (err) {
+      setCloudSyncing(false);
+      const message = err instanceof Error ? err.message : String(err);
+      setCloudError(`Не удалось сохранить данные в облако: ${message}`);
+      setCloudDebug((prev) => ({ ...prev, lastError: message }));
+      console.error('[cloud-sync:manual] upsert exception', { requestPreview, err });
+      showToast(`Ошибка выгрузки в облако: ${message}`);
     }
-
-    lastCloudWriteRef.current = serializedState;
-    setCloudError('');
-    showToast('Данные сохранены в облако');
   }
 
   function downloadCsv(filename, rows) {
@@ -2224,10 +2502,11 @@ export default function Dashboard() {
             Статус облака: {supabase ? (cloudSyncing ? 'идет синхронизация…' : 'подключено') : 'не настроено'}
             {cloudError ? ` — ${cloudError}` : ''}
           </p>
-<<<<<<< codex/develop-web-app-for-anonymous-judging-k8qfyp
+          <small><strong>Текущий cloud row id:</strong> {cloudRowId}</small>
           {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
           {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
-=======
+          {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
+          {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
 >>>>>>> main
           <div className="row">
             <button onClick={syncFromCloud}>Загрузить из облака</button>
