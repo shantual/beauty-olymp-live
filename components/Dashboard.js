@@ -366,17 +366,6 @@ export default function Dashboard() {
     [workDraft.contest, workDraft.direction]
   );
 
-
-  const categoryOptions = useMemo(
-    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
-    [workDraft.contest]
-  );
-
-  const directionOptions = useMemo(
-    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
-    [workDraft.contest]
-  );
-
   // Bootstrap: localStorage + cloud
   useEffect(() => {
     let cancelled = false;
