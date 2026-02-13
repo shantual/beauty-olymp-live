@@ -366,20 +366,7 @@ export default function Dashboard() {
     [workDraft.contest, workDraft.direction]
   );
 
-  const ratings = useMemo(() => {
-    const grouped = {};
-
-    state.works.forEach((work) => {
-      const scores = state.scores.filter((score) => score.workId === work.id);
-      if (!scores.length) return;
-
-      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
-      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
-
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
-    });
-
+  
     Object.values(grouped).forEach((list) => {
       list.sort((a, b) => b.avg - a.avg);
       let rank = 1;
