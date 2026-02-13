@@ -367,6 +367,17 @@ export default function Dashboard() {
   );
 
 
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+
+  // Bootstrap: localStorage + cloud
   useEffect(() => {
     let cancelled = false;
 
@@ -940,6 +951,13 @@ export default function Dashboard() {
         comment,
       },
     }));
+
+    if (session.role === 'judge' && session.id === judgeEditId) {
+      setSession((prev) => ({ ...prev, login: loginValue }));
+    }
+
+    setJudgeEditId(null);
+    showToast('Судья обновлен');
   }
 
   function submitScore(workId) {
