@@ -497,29 +497,6 @@ function safeParseJson(value) {
     return null;
   }
 }
-
-export default function Dashboard() {
-  const [state, setState] = useState(createDefaultState);
-  const [session, setSession] = useState({ role: null, id: null, login: null });
-  const [sessionReady, setSessionReady] = useState(false);
-  const [cloudReady, setCloudReady] = useState(false);
-  const [cloudSyncing, setCloudSyncing] = useState(false);
-  const [cloudError, setCloudError] = useState('');
-  const [cloudDebug, setCloudDebug] = useState({ lastRequest: '', lastError: '' });
-  const lastCloudWriteRef = useRef('');
-  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
-  const [workDraft, setWorkDraft] = useState({
-    contest: 'Эстетика Олимпа',
-    nomination: '',
-    category: 'Дебют',
-    direction: 'Nail',
-    participantName: '',
-    title: '',
-    description: '',
-    photosText: '',
-    videosText: '',
-    status: 'Допущено',
-  });
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
@@ -1024,27 +1001,6 @@ export default function Dashboard() {
   }
 }
 
-export default function Dashboard() {
-  const [state, setState] = useState(createDefaultState);
-  const [session, setSession] = useState({ role: null, id: null, login: null });
-  const [sessionReady, setSessionReady] = useState(false);
-  const [cloudReady, setCloudReady] = useState(false);
-  const [cloudSyncing, setCloudSyncing] = useState(false);
-  const [cloudError, setCloudError] = useState('');
-  const lastCloudWriteRef = useRef('');
-  const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
-  const [workDraft, setWorkDraft] = useState({
-    contest: 'Эстетика Олимпа',
-    nomination: '',
-    category: 'Дебют',
-    direction: 'Nail',
-    participantName: '',
-    title: '',
-    description: '',
-    photosText: '',
-    videosText: '',
-    status: 'Допущено',
-  });
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
