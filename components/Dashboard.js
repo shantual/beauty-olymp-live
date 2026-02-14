@@ -307,12 +307,11 @@ export default function Dashboard() {
   const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
   const lastCloudWriteRef = useRef('');
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
-
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
-    direction: 'Роспись на салонных типсах',
     nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
     category: 'Дебют',
+    direction: 'Роспись на салонных типсах',
     participantName: '',
     title: '',
     description: '',
@@ -320,7 +319,6 @@ export default function Dashboard() {
     videosText: '',
     status: 'Допущено',
   });
-
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
@@ -328,7 +326,6 @@ export default function Dashboard() {
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
-
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
@@ -336,16 +333,13 @@ export default function Dashboard() {
   const [stateImportText, setStateImportText] = useState('');
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
-
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
   const [adminTab, setAdminTab] = useState('main');
   const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
-
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
-
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
     fullName: '',
@@ -354,79 +348,24 @@ export default function Dashboard() {
     active: true,
     permissions: normalizeModeratorPermissions({}),
   });
-
   const [judgeEditId, setJudgeEditId] = useState(null);
-  const [judgeEditDraft, setJudgeEditDraft] = useState({
-    fullName: '',
-    email: '',
-    login: '',
-    password: '',
-    active: true,
-  });
-
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
   const [workEditId, setWorkEditId] = useState(null);
-  const [workEditDraft, setWorkEditDraft] = useState({
-    title: '',
-    participantName: '',
-    nomination: '',
-    category: '',
-    direction: '',
-    status: 'Допущено',
-  });
-
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
   const toastTimerRef = useRef(null);
-
   const categoryOptions = useMemo(
     () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
     [workDraft.contest]
   );
-
   const directionOptions = useMemo(
     () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
     [workDraft.contest]
   );
-
   const nominationOptions = useMemo(
     () => getNominationOptions(workDraft.contest, workDraft.direction),
     [workDraft.contest, workDraft.direction]
   );
 
-  // ВАЖНО: этот блок должен быть один в файле. Если ниже есть второй `const ratings = useMemo(...)`,
-  // его нужно удалить, иначе будет "ratings redefined".
-  const ratings = useMemo(() => {
-    const grouped = {};
-
-    state.works.forEach((work) => {
-      const scores = state.scores.filter((score) => score.workId === work.id);
-      if (!scores.length) return;
-
-      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
-      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
-
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
-    });
-
-    Object.values(grouped).forEach((list) => {
-      list.sort((a, b) => b.avg - a.avg);
-      let rank = 1;
-      list.forEach((entry, index) => {
-        if (index > 0 && entry.avg < list[index - 1].avg) rank = index + 1;
-        entry.rank = rank;
-      });
-    });
-
-    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
-      const [contest, direction, _nomination, category] = group.split(' | ');
-      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
-      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
-      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
-      acc[group] = list;
-      return acc;
-    }, {});
-
-    return filtered;
-  }, [state.scores, state.works, ratingFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -684,7 +623,40 @@ export default function Dashboard() {
     return { canManageWorks: false, canManageJudges: false, canExportScores: false };
   }, [session.role, currentModerator]);
 
-  
+  const ratings = useMemo(() => {
+    const grouped = {};
+
+    state.works.forEach((work) => {
+      const scores = state.scores.filter((score) => score.workId === work.id);
+      if (!scores.length) return;
+      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
+    });
+
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
   useEffect(() => {
     if (session.role === 'judge') return;
     const allowedTabs = ['main'];
@@ -1385,11 +1357,11 @@ export default function Dashboard() {
           <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         </div>
 
-        <div className="card">
-          <h2>Прогресс</h2>
-          <p>Назначено: {judgeAssignments.length}</p>
-          <p>Оценено: {done}</p>
-          <p>Осталось: {judgeAssignments.length - done}</p>
+        <div className="card judge-stats">
+          <h2>Количество работ к судейству</h2>
+          <p>Назначено работ: {judgeAssignments.length}</p>
+          <p>Уже отсужено работ: {done}</p>
+          <p>Осталось отсудить работ: {judgeAssignments.length - done}</p>
         </div>
 
         {judgeWorkGroups.map((group) => (
@@ -2042,8 +2014,10 @@ function Styles() {
       .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
       .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
       .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
-      .judge-video-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-      .judge-video-thumb { cursor: zoom-in; max-width: 50%; }
+      .judge-video-grid { grid-template-columns: 1fr; }
+      .judge-video-thumb { cursor: zoom-in; width: clamp(320px, 46vw, 640px); max-width: 100%; }
+      .judge-video-thumb .media { width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; }
+      .judge-video-thumb video, .judge-video-thumb iframe { width: 100%; height: 100%; object-fit: contain; display: block; }
       .video-expanded { aspect-ratio: 16 / 9; min-height: 58vh; }
       .clickable { cursor: pointer; }
       .works-table { table-layout: fixed; }
@@ -2051,9 +2025,10 @@ function Styles() {
       .works-table th { text-align: center; }
       .works-table td { text-align: left; }
       .works-table td > .row { justify-content: flex-start; }
-      .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+      .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
       .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
       .judge-preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; border: 1px solid #d8deea; }
+      .judge-stats p { margin: 6px 0; line-height: 1.2; }
       h1, h2, h3, h4 { margin: 0; color: #281C68; font-family: "Roboto Condensed", Arial, sans-serif; letter-spacing: 0.2px; }
       strong { color: #000; }
       p, label, li, td, th, small { color: #000; }
@@ -2082,7 +2057,6 @@ function Styles() {
         .row > * { width: 100%; }
         input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
         .grid { grid-template-columns: 1fr; }
-        .judge-video-thumb { max-width: 100%; }
         .media { min-height: 180px; }
         .modal-overlay { padding: 8px; align-items: flex-end; }
         .modal { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
