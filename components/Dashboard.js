@@ -1638,7 +1638,7 @@ useEffect(() => {
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
           <button onClick={login}>Войти</button>
-                    <small>Демо: admin/admin или judge1/password</small>
+                    <small>Введите ваш логин и пароль. По всем вопросам пишите: </small>
         </div>
         {lightboxImage ? (
         <div className="modal-overlay" onClick={() => setLightboxImage('')}>
