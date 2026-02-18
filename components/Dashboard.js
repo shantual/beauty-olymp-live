@@ -488,6 +488,129 @@ export default function Dashboard() {
     };
   }, []);
 
+  const judgeWorks = useMemo(
+    () =>
+      judgeAssignments
+        .map((a) => {
+          const work = state.works.find((w) => w.id === a.workId);
+          return work ? { ...work, assignmentStatus: a.status } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDone = a.assignmentStatus === 'оценено';
+          const bDone = b.assignmentStatus === 'оценено';
+          if (aDone === bDone) return a.id.localeCompare(b.id);
+          return aDone ? 1 : -1;
+        }),
+    [judgeAssignments, state.works]
+  );
+  const judgeWorkGroups = useMemo(() => {
+    const grouped = {};
+    judgeWorks.forEach((work) => {
+      const groupKey = [
+        work.contest || 'Без конкурса',
+        work.direction || 'Общий зачет',
+        work.nomination || 'Без номинации',
+        work.category || 'Без категории',
+      ].join(' | ');
+
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = {
+          contest: work.contest || 'Без конкурса',
+          direction: work.direction || 'Общий зачет',
+          nomination: work.nomination || 'Без номинации',
+          category: work.category || 'Без категории',
+          works: [],
+        };
+      }
+      grouped[groupKey].works.push(work);
+    });
+
+    return Object.values(grouped).map((group) => ({
+      ...group,
+      works: group.works.sort((a, b) => a.id.localeCompare(b.id)),
+    }));
+  }, [judgeWorks]);
+
+  const judgeSelectedWork = useMemo(
+    () => judgeWorks.find((work) => work.id === judgeSelectedWorkId) || null,
+    [judgeSelectedWorkId, judgeWorks]
+  );
+
+
+
+  const progress = useMemo(() => {
+    const total = state.assignments.length;
+    const done = state.assignments.filter((a) => a.status === 'оценено').length;
+    return total ? Math.round((done / total) * 100) : 0;
+  }, [state.assignments]);
+
+  const ratingFilterOptions = useMemo(() => {
+    const contests = [...new Set(state.works.map((w) => w.contest).filter(Boolean))];
+    const directions = [...new Set(state.works.map((w) => w.direction || 'Общий зачет').filter(Boolean))];
+    const categories = [...new Set(state.works.map((w) => w.category).filter(Boolean))];
+    return { contests, directions, categories };
+  }, [state.works]);
+
+  const selectedWork = useMemo(
+    () => state.works.find((work) => work.id === selectedWorkId) || null,
+    [selectedWorkId, state.works]
+  );
+
+  const selectedWorkScores = useMemo(
+    () => state.scores.filter((score) => score.workId === selectedWorkId),
+    [selectedWorkId, state.scores]
+  );
+
+  const currentModerator = useMemo(() => {
+    if (session.role !== 'moderator') return null;
+    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
+  }, [session, state.moderators]);
+
+  const access = useMemo(() => {
+    if (session.role === 'admin') {
+      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
+    }
+    if (session.role === 'moderator') {
+      return normalizeModeratorPermissions(currentModerator?.permissions);
+    }
+    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
+  }, [session.role, currentModerator]);
+
+  const ratings = useMemo(() => {
+    const grouped = {};
+
+    state.works.forEach((work) => {
+      const scores = state.scores.filter((score) => score.workId === work.id);
+      if (!scores.length) return;
+      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
+    });
+
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
