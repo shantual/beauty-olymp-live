@@ -931,18 +931,15 @@ useEffect(() => {
 };
 
     setState((prev) => ({ ...prev, works: [newWork, ...prev.works] }));
-    setParticipantDraft({
-      fullName: '',
-      contest: 'Эстетика Олимпа',
-      direction: 'Роспись на салонных типсах',
-      nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
-      category: 'Дебют',
-      title: '',
-      description: '',
-      photos: [],
-      videos: [],
-    });
-    setParticipantSubmissionId(`submission-${Date.now()}`);
+    setParticipantDraft((prev) => ({
+  ...prev,
+  title: '',
+  description: '',
+  photos: [],
+  videos: [],
+  submissionId: makeSubmissionId(),
+}));
+   
     showToast('Работа отправлена');
   }
 
