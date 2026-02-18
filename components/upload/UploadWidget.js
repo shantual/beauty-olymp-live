@@ -1,29 +1,6 @@
 import { useMemo, useState } from 'react';
 
-function uploadWithProgress(url, file, onProgress) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', url);
-    xhr.setRequestHeader('Content-Type', file.type);
 
-    xhr.upload.onprogress = (event) => {
-      if (!event.lengthComputable) return;
-      const progress = Math.round((event.loaded / event.total) * 100);
-      onProgress(progress);
-    };
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`Upload failed with status ${xhr.status}`));
-      }
-    };
-
-    xhr.onerror = () => reject(new Error('Network error during upload'));
-    xhr.send(file);
-  });
-}
 
 export default function UploadWidget({
   userId,
@@ -48,56 +25,47 @@ export default function UploadWidget({
       setItems((prev) => [...prev, { localId, name: file.name, progress: 0, status: 'presign' }]);
 
       try {
-        const presignRes = await fetch('/api/uploads/presign', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            originalFileName: file.name,
-            mimeType: file.type,
-            size: file.size,
-            userId,
-            submissionId,
-            fileKind,
-          }),
-        });
+        setItems((prev) => prev.map((item) =>
+  item.localId === localId ? { ...item, status: 'uploading', progress: 1 } : item
+));
 
-        const presignData = await presignRes.json();
-        if (!presignRes.ok) {
-          throw new Error(presignData.error || 'Failed to get upload URL');
-        }
+const form = new FormData();
+form.append('file', file);
+form.append('userId', userId);
+form.append('submissionId', submissionId);
+form.append('fileKind', fileKind);
 
-        setItems((prev) => prev.map((item) => item.localId === localId ? { ...item, status: 'uploading' } : item));
+const uploadRes = await fetch('/api/uploads/upload', {
+  method: 'POST',
+  body: form,
+});
 
-        await uploadWithProgress(presignData.uploadUrl, file, (progress) => {
-          setItems((prev) => prev.map((item) => item.localId === localId ? { ...item, progress } : item));
-        });
+const uploadData = await uploadRes.json();
+if (!uploadRes.ok) {
+  throw new Error(uploadData.error || 'Failed to upload file');
+}
 
-        const completeRes = await fetch('/api/uploads/complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            objectKey: presignData.objectKey,
-            originalFileName: file.name,
-            size: file.size,
-            mimeType: file.type,
-            userId,
-            submissionId,
-          }),
-        });
+// если сервер вернул record (лучший вариант) - используем его
+// если вернул только url/key - тоже норм, тогда record соберем минимально
+const record = uploadData.record || {
+  url: uploadData.url,
+  key: uploadData.key,
+  originalFileName: file.name,
+  size: file.size,
+  mimeType: file.type,
+  userId,
+  submissionId,
+  fileKind,
+};
 
-        const completeData = await completeRes.json();
-        if (!completeRes.ok) {
-          throw new Error(completeData.error || 'Failed to finalize upload');
-        }
+setItems((prev) => prev.map((item) =>
+  item.localId === localId
+    ? { ...item, progress: 100, status: 'done', record }
+    : item
+));
 
-        setItems((prev) => prev.map((item) => item.localId === localId ? {
-          ...item,
-          progress: 100,
-          status: 'done',
-          record: completeData.record,
-        } : item));
+onUploaded?.(record);
 
-        onUploaded?.(completeData.record);
       } catch (error) {
         setItems((prev) => prev.map((item) => item.localId === localId ? {
           ...item,
