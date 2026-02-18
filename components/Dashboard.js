@@ -132,6 +132,9 @@ const DEFAULT_JUDGES = [
   },
 ];
 
+const DEFAULT_PARTICIPANTS = [];
+
+
 const DEFAULT_WORKS = [
   {
     id: 'EO-00001',
@@ -171,6 +174,7 @@ function createDefaultState() {
     criteria: DEFAULT_CRITERIA,
     works: DEFAULT_WORKS,
     judges: DEFAULT_JUDGES,
+    participants: DEFAULT_PARTICIPANTS,
     assignments: [{ workId: 'EO-00001', judgeId: 'J-001', status: 'не начато', assignedAt: new Date().toISOString() }],
     scores: [],
     moderators: [],
@@ -222,6 +226,16 @@ function normalizeState(rawState) {
     permissions: normalizeModeratorPermissions(moderator.permissions),
   }));
 
+  next.participants = (next.participants || []).map((participant, index) => ({
+    id: participant.id || `P-${String(index + 1).padStart(3, '0')}`,
+    fullName: participant.fullName || '',
+    email: participant.email || '',
+    login: participant.login || '',
+    passwordHash: participant.passwordHash || '',
+    active: participant.active ?? true,
+  }));
+
+
   return next;
 }
 
@@ -246,6 +260,14 @@ function normalizeSession(rawSession, normalizedState) {
     );
     return moderatorExists ? rawSession : { role: null, id: null, login: null };
   }
+
+  if (rawSession.role === 'participant') {
+    const participantExists = (normalizedState.participants || []).some(
+      (participant) => participant.id === rawSession.id && participant.login === rawSession.login && participant.active
+    );
+    return participantExists ? rawSession : { role: null, id: null, login: null };
+  }
+
 
   return { role: null, id: null, login: null };
 }
@@ -306,7 +328,6 @@ function safeParseJson(value) {
 export default function Dashboard() {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
-  const [participantMode, setParticipantMode] = useState(false);
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
   const [sessionReady, setSessionReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
@@ -346,6 +367,9 @@ export default function Dashboard() {
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
+  const [participantAdminDraft, setParticipantAdminDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [participantEditId, setParticipantEditId] = useState(null);
+  const [participantEditDraft, setParticipantEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
@@ -391,11 +415,17 @@ export default function Dashboard() {
 
   const isAdmin = session.role === 'admin';
 
+  const participantProfile = useMemo(() => {
+    if (session.role !== 'participant') return null;
+    return state.participants.find((p) => p.id === session.id && p.active) || null;
+  }, [session, state.participants]);
+
   const canOpenAdminTab = (tab) => {
     if (tab === 'main') return true;
     if (tab === 'moderators') return isAdmin;
     if (tab === 'judges') return isAdmin || access.canManageJudges;
     if (tab === 'works' || tab === 'import') return isAdmin || access.canManageWorks;
+    if (tab === 'participants') return isAdmin;
     return false;
   };
 
@@ -803,7 +833,18 @@ export default function Dashboard() {
       }
     }
 
-    alert('Неверные данные для входа.');
+    
+
+    if (loginForm.role === 'participant') {
+      const participant = state.participants.find(
+        (p) => p.login === normalizedLogin && p.passwordHash === passwordHash && p.active
+      );
+      if (participant) {
+        setSession({ role: 'participant', id: participant.id, login: participant.login });
+        return;
+      }
+    }
+alert('Неверные данные для входа.');
   }
 
 
@@ -845,8 +886,13 @@ export default function Dashboard() {
 
 
   async function submitParticipantWork() {
-    if (!participantDraft.fullName.trim() || !participantDraft.title.trim() || !participantDraft.nomination.trim()) {
-      showToast('Заполните ФИО, номинацию и название работы');
+    if (!participantProfile || !participantProfile.fullName) {
+      showToast('Профиль участника не найден. Обратитесь к администратору.');
+      return;
+    }
+
+    if (!participantDraft.title.trim() || !participantDraft.nomination.trim()) {
+      showToast('Заполните номинацию и название работы');
       return;
     }
 
@@ -856,7 +902,8 @@ export default function Dashboard() {
       nomination: participantDraft.nomination,
       category: participantDraft.category,
       direction: participantDraft.direction,
-      participantName: participantDraft.fullName.trim(),
+      participantName: participantProfile.fullName.trim(),
+      participantId: participantProfile.id,
       title: participantDraft.title.trim(),
       description: participantDraft.description.trim(),
       photos: participantDraft.photos,
@@ -1033,6 +1080,113 @@ export default function Dashboard() {
     }
 
     showToast('Модератор удален');
+  }
+
+
+  async function addParticipant() {
+    if (!participantAdminDraft.fullName.trim() || !participantAdminDraft.login.trim() || !participantAdminDraft.password) {
+      showToast('Заполните ФИО, логин и пароль участника');
+      return;
+    }
+
+    const login = participantAdminDraft.login.trim();
+    const duplicateLogin =
+      state.participants.some((p) => p.login === login) ||
+      state.judges.some((j) => j.login === login) ||
+      state.moderators.some((m) => m.login === login) ||
+      state.adminUsers.some((a) => a.login === login);
+
+    if (duplicateLogin) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    const passwordHash = await sha256(participantAdminDraft.password);
+    const participant = {
+      id: `P-${String(state.participants.length + 1).padStart(3, '0')}`,
+      fullName: participantAdminDraft.fullName.trim(),
+      email: participantAdminDraft.email.trim(),
+      login,
+      passwordHash,
+      active: Boolean(participantAdminDraft.active),
+    };
+
+    setState((prev) => ({ ...prev, participants: [...prev.participants, participant] }));
+    setParticipantAdminDraft({ fullName: '', email: '', login: '', password: '', active: true });
+    showToast('Участник добавлен');
+  }
+
+  function startParticipantEdit(participant) {
+    setParticipantEditId(participant.id);
+    setParticipantEditDraft({
+      fullName: participant.fullName || '',
+      email: participant.email || '',
+      login: participant.login || '',
+      password: '',
+      active: participant.active ?? true,
+    });
+  }
+
+  async function saveParticipantEdit() {
+    if (!participantEditId) return;
+
+    const login = participantEditDraft.login.trim();
+    if (!participantEditDraft.fullName.trim() || !login) {
+      showToast('Укажите ФИО и логин участника');
+      return;
+    }
+
+    const duplicate =
+      state.participants.some((p) => p.id !== participantEditId && p.login === login) ||
+      state.judges.some((j) => j.login === login) ||
+      state.moderators.some((m) => m.login === login) ||
+      state.adminUsers.some((a) => a.login === login);
+
+    if (duplicate) {
+      showToast('Логин уже используется');
+      return;
+    }
+
+    let nextPasswordHash = null;
+    if (participantEditDraft.password) {
+      nextPasswordHash = await sha256(participantEditDraft.password);
+    }
+
+    setState((prev) => ({
+      ...prev,
+      participants: prev.participants.map((p) => {
+        if (p.id !== participantEditId) return p;
+        return {
+          ...p,
+          fullName: participantEditDraft.fullName.trim(),
+          email: participantEditDraft.email.trim(),
+          login,
+          active: Boolean(participantEditDraft.active),
+          ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
+        };
+      }),
+    }));
+
+    if (session.role === 'participant' && session.id === participantEditId) {
+      setSession((prev) => ({ ...prev, login }));
+    }
+
+    setParticipantEditId(null);
+    showToast('Участник обновлен');
+  }
+
+  function deleteParticipant(participantId) {
+    setState((prev) => ({
+      ...prev,
+      participants: prev.participants.filter((p) => p.id !== participantId),
+    }));
+
+    if (participantEditId === participantId) setParticipantEditId(null);
+    if (session.role === 'participant' && session.id === participantId) {
+      setSession({ role: null, id: null, login: null });
+    }
+
+    showToast('Участник удален');
   }
 
 
@@ -1440,91 +1594,6 @@ export default function Dashboard() {
   }
 
   if (!session.role) {
-    if (participantMode) {
-      return (
-        <div className="layout">
-          <BrandHeader />
-          <div className="card">
-            <h1>Личный кабинет участника</h1>
-            <input placeholder="Фамилия Имя Отчество" value={participantDraft.fullName} onChange={(e) => setParticipantDraft((p) => ({ ...p, fullName: e.target.value }))} />
-
-            <select
-              value={participantDraft.contest}
-              onChange={(e) => {
-                const nextContest = e.target.value;
-                const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
-                const nextDirection = nextDirections[0];
-                const nextNominations = getNominationOptions(nextContest, nextDirection);
-                const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
-                setParticipantDraft((p) => ({
-                  ...p,
-                  contest: nextContest,
-                  direction: nextDirection,
-                  nomination: nextNominations[0] || '',
-                  category: nextCategories[0],
-                }));
-              }}
-            >
-              {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
-            </select>
-
-            <select
-              value={participantDraft.direction}
-              onChange={(e) => {
-                const nextDirection = e.target.value;
-                const nextNominations = getNominationOptions(participantDraft.contest, nextDirection);
-                setParticipantDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
-              }}
-            >
-              {participantDirectionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
-            </select>
-
-            {participantNominationOptions.length ? (
-              <select value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}>
-                {participantNominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
-              </select>
-            ) : (
-              <input placeholder="Номинация" value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))} />
-            )}
-
-            <select value={participantDraft.category} onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}>
-              {participantCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-            </select>
-
-            <input placeholder="Название работы" value={participantDraft.title} onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))} />
-            <textarea placeholder="Описание работы" value={participantDraft.description} onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))} />
-
-            <UploadWidget
-              label="Загрузка фото"
-              accept="image/jpeg,image/png,image/webp"
-              fileKind="image"
-              userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
-              submissionId={participantSubmissionId}
-              onUploaded={(record) => {
-                setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
-              }}
-            />
-
-            <UploadWidget
-              label="Загрузка видео"
-              accept="video/mp4,video/quicktime"
-              fileKind="video"
-              userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
-              submissionId={participantSubmissionId}
-              onUploaded={(record) => {
-                setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }));
-              }}
-            />
-
-            <button onClick={submitParticipantWork}>Отправить работу</button>
-            <button onClick={() => setParticipantMode(false)}>Назад ко входу</button>
-          </div>
-          {toast ? <div className="toast">{toast}</div> : null}
-          <Styles />
-        </div>
-      );
-    }
-
     return (
       <div className="layout">
         <BrandHeader />
@@ -1535,12 +1604,12 @@ export default function Dashboard() {
             <option value="judge">Судья</option>
             <option value="admin">Администратор</option>
             <option value="moderator">Модератор</option>
+            <option value="participant">Участник</option>
           </select>
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
           <button onClick={login}>Войти</button>
-          <button onClick={() => setParticipantMode(true)}>Личный кабинет участника</button>
-          <small>Демо: admin/admin или judge1/password</small>
+                    <small>Демо: admin/admin или judge1/password</small>
         </div>
         {lightboxImage ? (
         <div className="modal-overlay" onClick={() => setLightboxImage('')}>
@@ -1721,6 +1790,98 @@ export default function Dashboard() {
       </div>
     );
   }
+  if (session.role === 'participant') {
+    return (
+      <div className="layout">
+        <BrandHeader />
+        <div className="toolbar">
+          <strong>Участник: {participantProfile?.fullName || session.login}</strong>
+          <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
+        </div>
+
+        <div className="card">
+          <h1>Личный кабинет участника</h1>
+
+          <p><strong>ФИО:</strong> {participantProfile?.fullName || '—'}</p>
+
+          <select
+            value={participantDraft.contest}
+            onChange={(e) => {
+              const nextContest = e.target.value;
+              const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
+              const nextDirection = nextDirections[0];
+              const nextNominations = getNominationOptions(nextContest, nextDirection);
+              const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
+              setParticipantDraft((p) => ({
+                ...p,
+                contest: nextContest,
+                direction: nextDirection,
+                nomination: nextNominations[0] || '',
+                category: nextCategories[0],
+              }));
+            }}
+          >
+            {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+          </select>
+
+          <select
+            value={participantDraft.direction}
+            onChange={(e) => {
+              const nextDirection = e.target.value;
+              const nextNominations = getNominationOptions(participantDraft.contest, nextDirection);
+              setParticipantDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
+            }}
+          >
+            {participantDirectionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+          </select>
+
+          {participantNominationOptions.length ? (
+            <select value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}>
+              {participantNominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
+            </select>
+          ) : (
+            <input placeholder="Номинация" value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))} />
+          )}
+
+          <select value={participantDraft.category} onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}>
+            {participantCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+          </select>
+
+          <input placeholder="Название работы" value={participantDraft.title} onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))} />
+          <textarea placeholder="Описание работы" value={participantDraft.description} onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))} />
+
+          <UploadWidget
+            label="Загрузка фото"
+            accept="image/jpeg,image/png,image/webp"
+            fileKind="image"
+            userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
+            submissionId={participantSubmissionId}
+            onUploaded={(record) => {
+              setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
+            }}
+          />
+
+          <UploadWidget
+            label="Загрузка видео"
+            accept="video/mp4,video/quicktime"
+            fileKind="video"
+            userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
+            submissionId={participantSubmissionId}
+            onUploaded={(record) => {
+              setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }));
+            }}
+          />
+
+          <button onClick={submitParticipantWork}>Отправить работу</button>
+        </div>
+
+        {toast ? <div className="toast">{toast}</div> : null}
+        <Styles />
+      </div>
+    );
+  }
+
+
 
 
   const notStartedJudges = state.judges.filter((judge) =>
@@ -1741,6 +1902,7 @@ export default function Dashboard() {
         {(isAdmin || access.canManageWorks) ? <button onClick={() => handleAdminTabChange('works')}>Работы</button> : null}
         {(isAdmin || access.canManageWorks) ? <button onClick={() => handleAdminTabChange('import')}>Импорт</button> : null}
         {isAdmin ? <button onClick={() => handleAdminTabChange('moderators')}>Модераторы</button> : null}
+        {isAdmin ? <button onClick={() => handleAdminTabChange('participants')}>Участники</button> : null}
       </div>
 
       {adminTab === 'main' ? (
@@ -2114,6 +2276,69 @@ export default function Dashboard() {
           </table></div>
         </div>
       ) : null}
+      {adminTab === 'participants' && isAdmin ? (
+        <div className="card">
+          <h3>Участники</h3>
+
+          <div className="card subtle">
+            <h4>Добавить участника</h4>
+            <input placeholder="ФИО" value={participantAdminDraft.fullName} onChange={(e) => setParticipantAdminDraft((p) => ({ ...p, fullName: e.target.value }))} />
+            <input placeholder="Email (опционально)" value={participantAdminDraft.email} onChange={(e) => setParticipantAdminDraft((p) => ({ ...p, email: e.target.value }))} />
+            <input placeholder="Логин" value={participantAdminDraft.login} onChange={(e) => setParticipantAdminDraft((p) => ({ ...p, login: e.target.value }))} />
+            <input type="password" placeholder="Пароль" value={participantAdminDraft.password} onChange={(e) => setParticipantAdminDraft((p) => ({ ...p, password: e.target.value }))} />
+            <label className="checkbox-row">
+              <input type="checkbox" checked={participantAdminDraft.active} onChange={(e) => setParticipantAdminDraft((p) => ({ ...p, active: e.target.checked }))} />
+              Активен
+            </label>
+            <button onClick={addParticipant}>Добавить</button>
+          </div>
+
+          <div className="admin-table-wrap">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>ФИО</th><th>Email</th><th>Логин</th><th>Статус</th><th>Действия</th></tr>
+              </thead>
+              <tbody>
+                {state.participants.map((participant) => {
+                  const isEditing = participantEditId === participant.id;
+                  return (
+                    <tr key={participant.id}>
+                      <td>{participant.id}</td>
+                      <td>{isEditing ? <input value={participantEditDraft.fullName} onChange={(e) => setParticipantEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : participant.fullName}</td>
+                      <td>{isEditing ? <input value={participantEditDraft.email} onChange={(e) => setParticipantEditDraft((p) => ({ ...p, email: e.target.value }))} /> : (participant.email || '—')}</td>
+                      <td>{isEditing ? <input value={participantEditDraft.login} onChange={(e) => setParticipantEditDraft((p) => ({ ...p, login: e.target.value }))} /> : participant.login}</td>
+                      <td>
+                        {isEditing ? (
+                          <label className="checkbox-row">
+                            <input type="checkbox" checked={participantEditDraft.active} onChange={(e) => setParticipantEditDraft((p) => ({ ...p, active: e.target.checked }))} />
+                            Активен
+                          </label>
+                        ) : (participant.active ? 'Активен' : 'Выключен')}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={participantEditDraft.password} onChange={(e) => setParticipantEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveParticipantEdit}>Сохранить</button>
+                            <button onClick={() => setParticipantEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startParticipantEdit(participant)}>Редактировать</button>
+                            <button onClick={() => deleteParticipant(participant.id)}>Удалить</button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
+
+
 
       {selectedJudgeWork ? (
         <div className="modal-overlay" onClick={() => setSelectedJudgeWork(null)}>
