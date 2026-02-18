@@ -2134,6 +2134,8 @@ export default function Dashboard() {
                 <p><strong>Категория:</strong> {work.category}</p>
                 <p><strong>Участник:</strong> {work.participantName || '—'}</p>
               </div>
+              ))}
+            </div>
 
               <div className="card">
                 <h3>Создание судьи</h3>
