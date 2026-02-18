@@ -802,50 +802,51 @@ export default function Dashboard({ forcedRole = null }) {
 
 
   async function login() {
-    const normalizedLogin = loginForm.login.trim();
-    const passwordHash = await sha256(loginForm.password);
+  const normalizedLogin = loginForm.login.trim();
+  const role = forcedRole || loginForm.role;
 
-    if (loginForm.role === 'admin') {
-      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
-      if (admin) {
-        setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
-        return;
-      }
-    }
-
-    if (loginForm.role === 'judge') {
-      const judge = state.judges.find(
-        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
-      );
-      if (judge) {
-        setSession({ role: 'judge', id: judge.id, login: judge.login });
-        return;
-      }
-    }
-
-    if (loginForm.role === 'moderator') {
-      const moderator = state.moderators.find(
-        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
-      );
-      if (moderator) {
-        setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
-        return;
-      }
-    }
-
-    
-
-    if (loginForm.role === 'participant') {
-      const participant = state.participants.find(
-        (p) => p.login === normalizedLogin && p.passwordHash === passwordHash && p.active
-      );
-      if (participant) {
-        setSession({ role: 'participant', id: participant.id, login: participant.login });
-        return;
-      }
-    }
-alert('Неверные данные для входа.');
+  if (!normalizedLogin || !loginForm.password) {
+    alert('Введите логин и пароль.');
+    return;
   }
+
+  const passwordHash = await sha256(loginForm.password);
+
+  if (role === 'admin') {
+    const admin = (state.adminUsers || []).find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
+    if (admin) {
+      setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
+      return;
+    }
+  }
+
+  if (role === 'judge') {
+    const judge = (state.judges || []).find((j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active);
+    if (judge) {
+      setSession({ role: 'judge', id: judge.id, login: judge.login });
+      return;
+    }
+  }
+
+  if (role === 'moderator') {
+    const moderator = (state.moderators || []).find((m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active);
+    if (moderator) {
+      setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
+      return;
+    }
+  }
+
+  if (role === 'participant') {
+    const participant = (state.participants || []).find((p) => p.login === normalizedLogin && p.passwordHash === passwordHash && p.active);
+    if (participant) {
+      setSession({ role: 'participant', id: participant.id, login: participant.login });
+      return;
+    }
+  }
+
+  alert('Неверные данные для входа.');
+}
+
 
 
   function showToast(message) {
