@@ -1,6 +1,7 @@
 import fs from 'fs';
 import formidable from 'formidable';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+import mime from 'mime-types';
 import { getSupabaseServerClient } from '../../../lib/supabaseServer';
 import {
   assertStorageConfig,
@@ -43,14 +44,51 @@ export default async function handler(req, res) {
     }
 
     const originalFileName = String(file.originalFilename || 'file');
-    const mimeType = String(file.mimetype || 'application/octet-stream');
-    const size = Number(file.size || 0);
+const size = Number(file.size || 0);
 
-    const kind = fileKind || (mimeType.startsWith('image/') ? 'image' : 'video');
-    const allowedList = cfg.allowedMime[kind] || [];
-    if (allowedList.length && !allowedList.includes(mimeType)) {
-      return res.status(400).json({ error: `Unsupported mimeType: ${mimeType}` });
-    }
+// 1) берем mimetype от formidable
+let mimeType = String(file.mimetype || '').trim();
+
+// 2) если он пустой или octet-stream - пробуем определить по расширению имени файла
+if (!mimeType || mimeType === 'application/octet-stream') {
+  const guessed = mime.lookup(originalFileName);
+  if (guessed) mimeType = String(guessed);
+}
+
+// 3) если все равно не нашли - оставляем octet-stream, но не валим загрузку,
+// а проверку делаем по kind + расширению
+if (!mimeType) {
+  mimeType = 'application/octet-stream';
+}
+
+// Определяем kind
+const kind =
+  fileKind ||
+  (mimeType.startsWith('image/') ? 'image' : mimeType.startsWith('video/') ? 'video' : 'file');
+
+// Проверяем допустимость
+const allowedList = cfg.allowedMime[kind] || [];
+
+// Если у тебя в cfg.allowedMime есть только image/video - для fileKind лучше принудить в image/video на фронте.
+// Но на всякий случай:
+if (allowedList.length && mimeType !== 'application/octet-stream' && !allowedList.includes(mimeType)) {
+  return res.status(400).json({ error: `Unsupported mimeType: ${mimeType}` });
+}
+
+// Если mimeType остался octet-stream - разрешаем, но можно ограничить расширениями
+if (mimeType === 'application/octet-stream') {
+  const ext = (originalFileName.split('.').pop() || '').toLowerCase();
+  const allowedExt = kind === 'image'
+    ? ['jpg', 'jpeg', 'png', 'webp']
+    : kind === 'video'
+      ? ['mp4', 'mov', 'webm']
+      : [];
+
+  if (allowedExt.length && !allowedExt.includes(ext)) {
+    return res.status(400).json({ error: `Unsupported file type: .${ext || '?'}` });
+  }
+}
+
 
     if (Number(size) > cfg.maxFileSizeBytes) {
       return res.status(400).json({ error: `File too large: ${size}` });
