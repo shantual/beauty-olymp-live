@@ -354,7 +354,6 @@ export default function Dashboard() {
   const [stateImportText, setStateImportText] = useState('');
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
--
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
 
