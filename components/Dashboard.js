@@ -39,17 +39,17 @@ const DIRECTION_OPTIONS_BY_CONTEST = {
 const NOMINATION_OPTIONS_BY_CONTEST_AND_DIRECTION = {
   'Эстетика Олимпа': {
     'Роспись на салонных типсах': [
-      '200.1 Художественная роспись на типсах, салонный дизайн. Тема - Свободная',
-      '200.2 Художественная роспись на типсах, салонный дизайн. Тема - Детское пространство',
-      '200.3 Акварель на маникюрных типсах, салонный дизайн. Тема - Свободная',
-      '200.4 Художественная роспись на педикюрных типсах (краски, гель-краски, гель-лаки). Тема - Свободная',
-      '200.5 Роспись на педикюрных типсах. Тема - Детское пространство',
-      '200.6 Роспись на педикюрных типсах. Тема - Цветочная фантазия',
-      '200.7 Монохромная роспись на педикюрных типсах. Тема - Свободная',
-      '200.8 Китайская роспись на педикюрных типсах. Тема - Свободная',
+      '200.1 Художественная роспись на типсах, салонный дизайн. Тема — Свободная',
+      '200.2 Художественная роспись на типсах, салонный дизайн. Тема — Детское пространство',
+      '200.3 Акварель на маникюрных типсах, салонный дизайн. Тема — Свободная',
+      '200.4 Художественная роспись на педикюрных типсах (краски, гель-краски, гель-лаки). Тема — Свободная',
+      '200.5 Роспись на педикюрных типсах. Тема — Детское пространство',
+      '200.6 Роспись на педикюрных типсах. Тема — Цветочная фантазия',
+      '200.7 Монохромная роспись на педикюрных типсах. Тема — Свободная',
+      '200.8 Китайская роспись на педикюрных типсах. Тема — Свободная',
       '200.9 Жостовская роспись на педикюрных типсах',
-      '200.10 Акварель на педикюрных типсах. Тема - Свободная',
-      '200.11 Роспись на педикюрных типсах. Тема - Абстракция и геометрия',
+      '200.10 Акварель на педикюрных типсах. Тема — Свободная',
+      '200.11 Роспись на педикюрных типсах. Тема — Абстракция и геометрия',
     ],
     Маникюр: [
       '201.1 Маникюр и покрытие в один тон на натуральных ногтях (гель-лак)',
@@ -73,20 +73,20 @@ const NOMINATION_OPTIONS_BY_CONTEST_AND_DIRECTION = {
     Перманент: [
       '220.1 Пудровое напыление бровей (до/после)',
       '220.2 Брови в аппаратной волосковой технике (до/после)',
-      '220.3 Глаза - классическая стрелка (до/после)',
-      '220.4 Глаза - стрелка с растушевкой (до/после)',
+      '220.3 Глаза — классическая стрелка (до/после)',
+      '220.4 Глаза — стрелка с растушёвкой (до/после)',
       '220.5 Перманентный макияж: губы в акварельной технике (до/после)',
-      '220.6 Перманентный макияж: губы - помадный прокрас (до/после)',
+      '220.6 Перманентный макияж: губы — помадный прокрас (до/после)',
     ],
     Макияж: [
-      '230.1 Преображение модели - модный трендовый образ (до/после)',
-      '230.2 Свадебный макияж - современный клиентский образ невесты',
-      '230.3 Smoky-eyes - современный клиентский вечерний образ',
+      '230.1 Преображение модели — модный трендовый образ (до/после)',
+      '230.2 Свадебный макияж — современный клиентский образ невесты',
+      '230.3 Smoky-eyes — современный клиентский вечерний образ',
     ],
     'Ресницы и брови': [
       '240.1 Классическое наращивание ресниц (до/после)',
       '240.2 Объемное наращивание ресниц 2-4D (до/после)',
-      '240.3 Гиперобъем - наращивание ресниц 6-10D (до/после)',
+      '240.3 Гиперобъем — наращивание ресниц 6-10D (до/после)',
       '240.4 Наращивание ресниц с современным эффектом (до/после)',
       '240.5 Колорирование ресниц (до/после)',
       '240.6 Оформление бровей краской (до/после)',
@@ -126,7 +126,8 @@ const DEFAULT_JUDGES = [
     fullName: 'Судья Демонстрационный',
     email: 'judge@demo.local',
     login: 'judge1',
-    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', // password
+    passwordHash:
+      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
     active: true,
   },
 ];
@@ -135,13 +136,15 @@ const DEFAULT_WORKS = [
   {
     id: 'EO-00001',
     contest: 'Эстетика Олимпа',
-    nomination: '200.1 Художественная роспись на типсах, салонный дизайн. Тема - Свободная',
+    nomination: '200.1 Художественная роспись на типсах, салонный дизайн. Тема — Свободная',
     category: 'Дебют',
     direction: 'Роспись на салонных типсах',
     participantName: 'Иванова Мария',
     title: 'Северное сияние',
     description: 'Градиентный дизайн с ручной прорисовкой.',
-    photos: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=60'],
+    photos: [
+      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=60',
+    ],
     videos: ['https://www.youtube.com/embed/NpEaa2P7qZI'],
     status: 'Допущено',
     author: 'Скрыт',
@@ -171,15 +174,29 @@ function createDefaultState() {
     assignments: [{ workId: 'EO-00001', judgeId: 'J-001', status: 'не начато', assignedAt: new Date().toISOString() }],
     scores: [],
     moderators: [],
-    adminUsers: [{ login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }], // admin
+    adminUsers: [{ login: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' }],
   };
 }
 
 function normalizeState(rawState) {
   const next = { ...createDefaultState(), ...(rawState || {}) };
 
-  next.judges = (next.judges || []).map((judge) => ({ ...judge, active: judge.active ?? true }));
+  // Миграция: исправляем старый неверный hash demo-пароля и отсутствие active.
+  next.judges = (next.judges || []).map((judge) => {
+    if (
+      judge.login === 'judge1' &&
+      judge.passwordHash === 'a5ceca62e47d0f6c0f56aa8198c75c5dc2e4f2f4903a06f5f5f7ff4f5d16fd5c'
+    ) {
+      return {
+        ...judge,
+        active: judge.active ?? true,
+        passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+      };
+    }
+    return { ...judge, active: judge.active ?? true };
+  });
 
+  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
   const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
   const demoJudge = {
     id: 'J-001',
@@ -190,8 +207,11 @@ function normalizeState(rawState) {
     active: true,
   };
 
-  if (demoIndex === -1) next.judges.unshift(demoJudge);
-  else next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
+  if (demoIndex === -1) {
+    next.judges.unshift(demoJudge);
+  } else {
+    next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
+  }
 
   next.moderators = (next.moderators || []).map((moderator, index) => ({
     id: moderator.id || `M-${String(index + 1).padStart(3, '0')}`,
@@ -209,35 +229,29 @@ function normalizeSession(rawSession, normalizedState) {
   if (!rawSession || !rawSession.role) return { role: null, id: null, login: null };
 
   if (rawSession.role === 'admin') {
-    const ok = (normalizedState.adminUsers || []).some((admin) => admin.login === rawSession.login);
-    return ok ? rawSession : { role: null, id: null, login: null };
+    const adminExists = (normalizedState.adminUsers || []).some((admin) => admin.login === rawSession.login);
+    return adminExists ? rawSession : { role: null, id: null, login: null };
   }
+
   if (rawSession.role === 'judge') {
-    const ok = (normalizedState.judges || []).some(
+    const judgeExists = (normalizedState.judges || []).some(
       (judge) => judge.id === rawSession.id && judge.login === rawSession.login && judge.active
     );
-    return ok ? rawSession : { role: null, id: null, login: null };
+    return judgeExists ? rawSession : { role: null, id: null, login: null };
   }
+
   if (rawSession.role === 'moderator') {
-    const ok = (normalizedState.moderators || []).some(
-      (m) => m.id === rawSession.id && m.login === rawSession.login && m.active
+    const moderatorExists = (normalizedState.moderators || []).some(
+      (moderator) => moderator.id === rawSession.id && moderator.login === rawSession.login && moderator.active
     );
-    return ok ? rawSession : { role: null, id: null, login: null };
+    return moderatorExists ? rawSession : { role: null, id: null, login: null };
   }
 
   return { role: null, id: null, login: null };
 }
 
-function safeParseJson(value) {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
-}
-
 function parseList(value) {
-  return String(value || '')
+  return value
     .split('\n')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -249,12 +263,12 @@ function isEmbeddedVideoUrl(url) {
 }
 
 function generateWorkId(existingWorks) {
-  const next = (existingWorks?.length || 0) + 1;
+  const next = existingWorks.length + 1;
   return `EO-${String(next).padStart(5, '0')}`;
 }
 
 async function sha256(text) {
-  const msgUint8 = new TextEncoder().encode(String(text || ''));
+  const msgUint8 = new TextEncoder().encode(text);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -262,9 +276,14 @@ async function sha256(text) {
 
 function toCsv(rows) {
   return rows
-    .map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(','))
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
+        .join(',')
+    )
     .join('\n');
 }
+
 
 function isUuidInputError(message) {
   const text = String(message || '').toLowerCase();
@@ -275,13 +294,20 @@ function buildCloudRequestPreview(table, payload) {
   return `supabase.from('${table}').upsert({ id: '${payload.id}', state: <json> }, { onConflict: 'id' })`;
 }
 
+
+function safeParseJson(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 export default function Dashboard() {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
-
   const [participantMode, setParticipantMode] = useState(false);
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
-
   const [sessionReady, setSessionReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSyncing, setCloudSyncing] = useState(false);
@@ -289,14 +315,12 @@ export default function Dashboard() {
   const [cloudDebug, setCloudDebug] = useState({ lastRequest: '', lastError: '' });
   const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
   const lastCloudWriteRef = useRef('');
-
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
-
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
-    direction: 'Роспись на салонных типсах',
     nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
     category: 'Дебют',
+    direction: 'Роспись на салонных типсах',
     participantName: '',
     title: '',
     description: '',
@@ -304,9 +328,7 @@ export default function Dashboard() {
     videosText: '',
     status: 'Допущено',
   });
-
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
-
   const [participantDraft, setParticipantDraft] = useState({
     fullName: '',
     contest: 'Эстетика Олимпа',
@@ -318,23 +340,87 @@ export default function Dashboard() {
     photos: [],
     videos: [],
   });
-
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
     login: '',
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
-
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
-
   const [importText, setImportText] = useState('');
   const [stateImportText, setStateImportText] = useState('');
-
   const [toast, setToast] = useState('');
+  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
+  const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
+  const [adminTab, setAdminTab] = useState('main');
+  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxVideo, setLightboxVideo] = useState('');
+  const [judgeViewId, setJudgeViewId] = useState(null);
+  const [judgeSubmissionFiles, setJudgeSubmissionFiles] = useState({});
+  const [moderatorEditId, setModeratorEditId] = useState(null);
+  const [moderatorEditDraft, setModeratorEditDraft] = useState({
+    fullName: '',
+    login: '',
+    password: '',
+    active: true,
+    permissions: normalizeModeratorPermissions({}),
+  });
+  const [judgeEditId, setJudgeEditId] = useState(null);
+  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+  const [workEditId, setWorkEditId] = useState(null);
+  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
   const toastTimerRef = useRef(null);
+
+  const canOpenAdminTab = (tab) => {
+    if (tab === 'main') return true;
+    if (tab === 'moderators') return session.role === 'admin';
+    if (tab === 'judges') return session.role === 'admin' || access.canManageJudges;
+    if (tab === 'works' || tab === 'import') return session.role === 'admin' || access.canManageWorks;
+    return false;
+  };
+
+  const handleAdminTabChange = (nextTab) => {
+    const allowed = canOpenAdminTab(nextTab);
+    console.log('[adminTab] change requested', {
+      from: adminTab,
+      to: nextTab,
+      role: session.role,
+      access,
+      allowed,
+    });
+
+    if (!allowed) return;
+    setAdminTab(nextTab);
+  };
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
+    [workDraft.contest]
+  );
+  const directionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
+    [workDraft.contest]
+  );
+  const nominationOptions = useMemo(
+    () => getNominationOptions(workDraft.contest, workDraft.direction),
+    [workDraft.contest, workDraft.direction]
+  );
+  const participantDirectionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Общий зачет'],
+    [participantDraft.contest]
+  );
+  const participantNominationOptions = useMemo(
+    () => getNominationOptions(participantDraft.contest, participantDraft.direction),
+    [participantDraft.contest, participantDraft.direction]
+  );
+  const participantCategoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Дебют'],
+    [participantDraft.contest]
+  );
+
 
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
 
@@ -428,8 +514,11 @@ export default function Dashboard() {
       let nextState = createDefaultState();
       if (saved) {
         const parsedState = safeParseJson(saved);
-        if (parsedState) nextState = normalizeState(parsedState);
-        else localStorage.removeItem(STORAGE_KEY);
+        if (parsedState) {
+          nextState = normalizeState(parsedState);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
 
       if (supabase) {
@@ -443,8 +532,11 @@ export default function Dashboard() {
             .eq('id', cloudRowId)
             .maybeSingle();
 
-          if (byIdError && !isUuidInputError(byIdError.message)) cloudReadError = byIdError;
-          else if (byIdData?.state) cloudData = byIdData;
+          if (byIdError && !isUuidInputError(byIdError.message)) {
+            cloudReadError = byIdError;
+          } else if (byIdData?.state) {
+            cloudData = byIdData;
+          }
 
           if (!cloudData) {
             const { data: firstRowData, error: firstRowError } = await supabase
@@ -453,15 +545,20 @@ export default function Dashboard() {
               .limit(1)
               .maybeSingle();
 
-            if (firstRowError) cloudReadError = firstRowError;
-            else if (firstRowData?.state) cloudData = firstRowData;
+            if (firstRowError) {
+              cloudReadError = firstRowError;
+            } else if (firstRowData?.state) {
+              cloudData = firstRowData;
+            }
           }
 
           if (cloudReadError) {
             setCloudError(`Не удалось получить данные из облака: ${cloudReadError.message || 'unknown error'}`);
           } else if (cloudData?.state) {
             nextState = normalizeState(cloudData.state);
-            if (cloudData.id) setCloudRowId(cloudData.id);
+            if (cloudData.id) {
+              setCloudRowId(cloudData.id);
+            }
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
@@ -478,8 +575,11 @@ export default function Dashboard() {
 
       if (rawSession) {
         const parsedSession = safeParseJson(rawSession);
-        if (parsedSession) setSession(normalizeSession(parsedSession, nextState));
-        else localStorage.removeItem(SESSION_KEY);
+        if (parsedSession) {
+          setSession(normalizeSession(parsedSession, nextState));
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
       }
 
       setCloudReady(true);
@@ -490,13 +590,12 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  // auto cloud sync
   useEffect(() => {
     if (!sessionReady || !cloudReady || !supabase) return;
 
@@ -510,24 +609,29 @@ export default function Dashboard() {
       setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
 
       try {
-        let { error } = await supabase.from(CLOUD_TABLE).upsert(payload, { onConflict: 'id' });
+        let { error } = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(payload, { onConflict: 'id' });
 
         if (error && isUuidInputError(error.message)) {
           const fallbackId = crypto.randomUUID();
           const fallbackPayload = { id: fallbackId, state };
           const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
           setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
-
-          const retry = await supabase.from(CLOUD_TABLE).upsert(fallbackPayload, { onConflict: 'id' });
+          const retry = await supabase
+            .from(CLOUD_TABLE)
+            .upsert(fallbackPayload, { onConflict: 'id' });
           error = retry.error;
-
-          if (!error) setCloudRowId(fallbackId);
+          if (!error) {
+            setCloudRowId(fallbackId);
+          }
         }
 
         if (error) {
           const message = error.message || 'unknown error';
           setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
           setCloudDebug((prev) => ({ ...prev, lastError: message }));
+          console.error('[cloud-sync:auto] upsert failed', { requestPreview, error });
         } else {
           lastCloudWriteRef.current = serializedState;
           setCloudError('');
@@ -537,6 +641,7 @@ export default function Dashboard() {
         const message = err instanceof Error ? err.message : String(err);
         setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
         setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:auto] upsert exception', { requestPreview, err });
       }
 
       setCloudSyncing(false);
@@ -545,43 +650,43 @@ export default function Dashboard() {
     return () => window.clearTimeout(timer);
   }, [state, sessionReady, cloudReady, cloudRowId]);
 
-  // session persist
   useEffect(() => {
     if (!sessionReady) return;
-    if (session.role) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    else localStorage.removeItem(SESSION_KEY);
+
+    if (session.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
   }, [session, sessionReady]);
 
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
   }, []);
 
-  // -------------------- judge data --------------------
   const judgeAssignments = useMemo(() => {
     if (session.role !== 'judge') return [];
     return state.assignments.filter((item) => item.judgeId === session.id);
   }, [session, state.assignments]);
 
-  const judgeWorks = useMemo(() => {
-    const works = judgeAssignments
-      .map((a) => {
-        const work = state.works.find((w) => w.id === a.workId);
-        return work ? { ...work, assignmentStatus: a.status } : null;
-      })
-      .filter(Boolean);
-
-    works.sort((a, b) => {
-      const aDone = a.assignmentStatus === 'оценено';
-      const bDone = b.assignmentStatus === 'оценено';
-      if (aDone === bDone) return a.id.localeCompare(b.id);
-      return aDone ? 1 : -1;
-    });
-
-    return works;
-  }, [judgeAssignments, state.works]);
-
+  const judgeWorks = useMemo(
+    () =>
+      judgeAssignments
+        .map((a) => {
+          const work = state.works.find((w) => w.id === a.workId);
+          return work ? { ...work, assignmentStatus: a.status } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDone = a.assignmentStatus === 'оценено';
+          const bDone = b.assignmentStatus === 'оценено';
+          if (aDone === bDone) return a.id.localeCompare(b.id);
+          return aDone ? 1 : -1;
+        }),
+    [judgeAssignments, state.works]
+  );
   const judgeWorkGroups = useMemo(() => {
     const grouped = {};
     judgeWorks.forEach((work) => {
@@ -616,12 +721,14 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    if (session.role !== 'judge') {
+    const shouldLoadSignedFiles = session.role === 'judge' || session.role === 'admin' || session.role === 'moderator';
+    if (!shouldLoadSignedFiles) {
       setJudgeSubmissionFiles({});
       return;
     }
 
-    const submissionIds = [...new Set(judgeWorks.map((work) => work.submissionId).filter(Boolean))];
+    const sourceWorks = session.role === 'judge' ? judgeWorks : state.works;
+    const submissionIds = [...new Set(sourceWorks.map((work) => work.submissionId).filter(Boolean))];
     if (!submissionIds.length) {
       setJudgeSubmissionFiles({});
       return;
@@ -630,38 +737,50 @@ export default function Dashboard() {
     let cancelled = false;
 
     async function loadSignedFiles() {
-      const entries = await Promise.all(
-        submissionIds.map(async (submissionId) => {
-          try {
-            const response = await fetch(`/api/uploads?submissionId=${encodeURIComponent(submissionId)}&withSignedGet=1`);
-            const payload = await response.json();
-            if (!response.ok) throw new Error(payload.error || 'Failed to load signed files');
-
-            const records = payload.records || [];
-            const photos = records
-              .filter((item) => String(item.mime || '').startsWith('image/') && item.signedGetUrl)
-              .map((item) => item.signedGetUrl);
-            const videos = records
-              .filter((item) => String(item.mime || '').startsWith('video/') && item.signedGetUrl)
-              .map((item) => item.signedGetUrl);
-
-            return [submissionId, { photos, videos }];
-          } catch {
-            return [submissionId, { photos: [], videos: [] }];
+      const entries = await Promise.all(submissionIds.map(async (submissionId) => {
+        try {
+          const response = await fetch(`/api/uploads?submissionId=${encodeURIComponent(submissionId)}&withSignedGet=1`);
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || 'Failed to load signed files');
           }
-        })
-      );
 
-      if (!cancelled) setJudgeSubmissionFiles(Object.fromEntries(entries));
+          const records = payload.records || [];
+          const photos = records
+            .filter((item) => String(item.mime || '').startsWith('image/') && item.signedGetUrl)
+            .map((item) => item.signedGetUrl);
+          const videos = records
+            .filter((item) => String(item.mime || '').startsWith('video/') && item.signedGetUrl)
+            .map((item) => item.signedGetUrl);
+
+          return [submissionId, { photos, videos }];
+        } catch (error) {
+          console.error(error);
+          return [submissionId, { photos: [], videos: [] }];
+        }
+      }));
+
+      if (!cancelled) {
+        setJudgeSubmissionFiles(Object.fromEntries(entries));
+      }
     }
 
     loadSignedFiles();
+
     return () => {
       cancelled = true;
     };
-  }, [session.role, judgeWorks]);
+  }, [session.role, judgeWorks, state.works]);
 
-  // -------------------- рейтинг / модалки --------------------
+  function getWorkMedia(work) {
+    if (!work) return { photos: [], videos: [] };
+    const signedMedia = judgeSubmissionFiles[work.submissionId] || {};
+    return {
+      photos: signedMedia.photos?.length ? signedMedia.photos : (work.photos || []),
+      videos: signedMedia.videos?.length ? signedMedia.videos : (work.videos || []),
+    };
+  }
+
   const progress = useMemo(() => {
     const total = state.assignments.length;
     const done = state.assignments.filter((a) => a.status === 'оценено').length;
@@ -685,13 +804,34 @@ export default function Dashboard() {
     [selectedWorkId, state.scores]
   );
 
+  const currentModerator = useMemo(() => {
+    if (session.role !== 'moderator') return null;
+    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
+  }, [session, state.moderators]);
+
+  const access = useMemo(() => {
+    let nextAccess;
+    if (session.role === 'admin') {
+      nextAccess = { canManageWorks: true, canManageJudges: true, canExportScores: true };
+      console.log('[access] computed', { role: session.role, currentModerator: null, access: nextAccess });
+      return nextAccess;
+    }
+    if (session.role === 'moderator') {
+      nextAccess = normalizeModeratorPermissions(currentModerator?.permissions);
+      console.log('[access] computed', { role: session.role, currentModerator, access: nextAccess });
+      return nextAccess;
+    }
+    nextAccess = { canManageWorks: false, canManageJudges: false, canExportScores: false };
+    console.log('[access] computed', { role: session.role, currentModerator: null, access: nextAccess });
+    return nextAccess;
+  }, [session.role, currentModerator]);
+
   const ratings = useMemo(() => {
     const grouped = {};
 
     state.works.forEach((work) => {
       const scores = state.scores.filter((score) => score.workId === work.id);
       if (!scores.length) return;
-
       const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
       const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
       if (!grouped[key]) grouped[key] = [];
@@ -702,7 +842,9 @@ export default function Dashboard() {
       list.sort((a, b) => b.avg - a.avg);
       let rank = 1;
       list.forEach((entry, index) => {
-        if (index > 0 && entry.avg < list[index - 1].avg) rank = index + 1;
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
         entry.rank = rank;
       });
     });
@@ -718,13 +860,17 @@ export default function Dashboard() {
 
     return filtered;
   }, [state.scores, state.works, ratingFilter]);
+  useEffect(() => {
+    if (session.role === 'judge' || !session.role) return;
+    console.log('[render-tabs] state', {
+      role: session.role,
+      adminTab,
+      isAdmin: session.role === 'admin',
+      canManageJudges: access.canManageJudges,
+      canManageWorks: access.canManageWorks,
+    });
+  }, [adminTab, access, session.role]);
 
-  // -------------------- helpers --------------------
-  function showToast(message) {
-    setToast(message);
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
-  }
 
   async function login() {
     const normalizedLogin = loginForm.login.trim();
@@ -734,13 +880,14 @@ export default function Dashboard() {
       const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
       if (admin) {
         setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
-        setAdminTab('main');
         return;
       }
     }
 
     if (loginForm.role === 'judge') {
-      const judge = state.judges.find((j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active);
+      const judge = state.judges.find(
+        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
+      );
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
         return;
@@ -748,10 +895,11 @@ export default function Dashboard() {
     }
 
     if (loginForm.role === 'moderator') {
-      const moderator = state.moderators.find((m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active);
+      const moderator = state.moderators.find(
+        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
+      );
       if (moderator) {
         setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
-        setAdminTab('main');
         return;
       }
     }
@@ -759,22 +907,13 @@ export default function Dashboard() {
     alert('Неверные данные для входа.');
   }
 
-  function logout() {
-    setSession({ role: null, id: null, login: null });
-    setAdminTab('main');
-    setJudgeSelectedWorkId(null);
-    setSelectedWorkId(null);
-    setSelectedJudgeWork(null);
-    setLightboxImage('');
-    setLightboxVideo('');
-  }
 
-  function addCriterion() {
-    if (!criterionTitle.trim()) return;
-    const criterion = { id: `c${Date.now()}`, title: criterionTitle.trim(), min: 1, max: 10 };
-    setState((prev) => ({ ...prev, criteria: [...prev.criteria, criterion] }));
-    setCriterionTitle('');
-    showToast('Критерий добавлен');
+  function showToast(message) {
+    setToast(message);
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
   }
 
   function addWork() {
@@ -790,8 +929,8 @@ export default function Dashboard() {
       category: workDraft.category,
       direction: workDraft.direction,
       participantName: workDraft.participantName.trim(),
-      title: workDraft.title.trim(),
-      description: workDraft.description.trim(),
+      title: workDraft.title,
+      description: workDraft.description,
       photos: parseList(workDraft.photosText),
       videos: parseList(workDraft.videosText),
       status: workDraft.status,
@@ -800,19 +939,11 @@ export default function Dashboard() {
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
     setWorkDraft({
-      contest: 'Эстетика Олимпа',
-      direction: 'Роспись на салонных типсах',
-      nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
-      category: 'Дебют',
-      participantName: '',
-      title: '',
-      description: '',
-      photosText: '',
-      videosText: '',
-      status: 'Допущено',
+      contest: 'Эстетика Олимпа', nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '', category: 'Дебют', direction: 'Роспись на салонных типсах', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
-    showToast('Работа добавлена');
+    showToast('Добавлено');
   }
+
 
   async function submitParticipantWork() {
     if (!participantDraft.fullName.trim() || !participantDraft.title.trim() || !participantDraft.nomination.trim()) {
@@ -863,33 +994,37 @@ export default function Dashboard() {
       state.judges.some((judge) => judge.login === login) ||
       state.adminUsers.some((admin) => admin.login === login) ||
       state.moderators.some((moderator) => moderator.login === login);
-
     if (duplicateLogin) {
-      showToast('Логин уже используется');
+      showToast('Судья с таким логином уже существует');
       return;
     }
 
     const passwordHash = await sha256(judgeDraft.password);
     const judge = {
       id: `J-${String(state.judges.length + 1).padStart(3, '0')}`,
-      fullName: judgeDraft.fullName.trim(),
-      email: judgeDraft.email.trim(),
+      fullName: judgeDraft.fullName,
+      email: judgeDraft.email,
       login,
       passwordHash,
       active: true,
     };
-
     setState((prev) => ({ ...prev, judges: [...prev.judges, judge] }));
     setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
-    showToast('Судья добавлен');
+    showToast('Добавлено');
   }
 
   function toggleDraftPermission(key) {
-    setModeratorDraft((prev) => ({ ...prev, permissions: { ...prev.permissions, [key]: !prev.permissions[key] } }));
+    setModeratorDraft((prev) => ({
+      ...prev,
+      permissions: { ...prev.permissions, [key]: !prev.permissions[key] },
+    }));
   }
 
   function toggleEditPermission(key) {
-    setModeratorEditDraft((prev) => ({ ...prev, permissions: { ...prev.permissions, [key]: !prev.permissions[key] } }));
+    setModeratorEditDraft((prev) => ({
+      ...prev,
+      permissions: { ...prev.permissions, [key]: !prev.permissions[key] },
+    }));
   }
 
   async function addModerator() {
@@ -920,7 +1055,12 @@ export default function Dashboard() {
     };
 
     setState((prev) => ({ ...prev, moderators: [...prev.moderators, moderator] }));
-    setModeratorDraft({ fullName: '', login: '', password: '', permissions: normalizeModeratorPermissions({}) });
+    setModeratorDraft({
+      fullName: '',
+      login: '',
+      password: '',
+      permissions: normalizeModeratorPermissions({}),
+    });
     showToast('Модератор добавлен');
   }
 
@@ -937,8 +1077,8 @@ export default function Dashboard() {
 
   async function saveModeratorEdit() {
     if (!moderatorEditId) return;
-
     const login = moderatorEditDraft.login.trim();
+
     if (!moderatorEditDraft.fullName.trim() || !login) {
       showToast('Укажите ФИО и логин модератора');
       return;
@@ -947,7 +1087,7 @@ export default function Dashboard() {
     const duplicate =
       state.judges.some((judge) => judge.login === login) ||
       state.adminUsers.some((admin) => admin.login === login) ||
-      state.moderators.some((m) => m.id !== moderatorEditId && m.login === login);
+      state.moderators.some((moderator) => moderator.id !== moderatorEditId && moderator.login === login);
 
     if (duplicate) {
       showToast('Логин уже используется');
@@ -955,14 +1095,16 @@ export default function Dashboard() {
     }
 
     let nextPasswordHash = null;
-    if (moderatorEditDraft.password) nextPasswordHash = await sha256(moderatorEditDraft.password);
+    if (moderatorEditDraft.password) {
+      nextPasswordHash = await sha256(moderatorEditDraft.password);
+    }
 
     setState((prev) => ({
       ...prev,
-      moderators: prev.moderators.map((m) => {
-        if (m.id !== moderatorEditId) return m;
+      moderators: prev.moderators.map((moderator) => {
+        if (moderator.id !== moderatorEditId) return moderator;
         return {
-          ...m,
+          ...moderator,
           fullName: moderatorEditDraft.fullName.trim(),
           login,
           active: moderatorEditDraft.active,
@@ -981,29 +1123,45 @@ export default function Dashboard() {
   }
 
   function deleteModerator(moderatorId) {
-    setState((prev) => ({ ...prev, moderators: prev.moderators.filter((m) => m.id !== moderatorId) }));
+    setState((prev) => ({
+      ...prev,
+      moderators: prev.moderators.filter((moderator) => moderator.id !== moderatorId),
+    }));
+
     if (moderatorEditId === moderatorId) setModeratorEditId(null);
-    if (session.role === 'moderator' && session.id === moderatorId) logout();
+    if (session.role === 'moderator' && session.id === moderatorId) {
+      setSession({ role: null, id: null, login: null });
+    }
+
     showToast('Модератор удален');
+  }
+
+
+  function addCriterion() {
+    if (!criterionTitle.trim()) return;
+    const criterion = { id: `c${Date.now()}`, title: criterionTitle.trim(), min: 1, max: 10 };
+    setState((prev) => ({ ...prev, criteria: [...prev.criteria, criterion] }));
+    setCriterionTitle('');
   }
 
   function assignWork() {
     if (!assignmentDraft.judgeId || !assignmentDraft.workId) return;
-
-    const exists = state.assignments.some((a) => a.judgeId === assignmentDraft.judgeId && a.workId === assignmentDraft.workId);
-    if (exists) {
-      showToast('Уже назначено');
-      return;
-    }
-
+    const exists = state.assignments.some(
+      (a) => a.judgeId === assignmentDraft.judgeId && a.workId === assignmentDraft.workId
+    );
+    if (exists) return;
     setState((prev) => ({
       ...prev,
       assignments: [
         ...prev.assignments,
-        { judgeId: assignmentDraft.judgeId, workId: assignmentDraft.workId, status: 'не начато', assignedAt: new Date().toISOString() },
+        {
+          judgeId: assignmentDraft.judgeId,
+          workId: assignmentDraft.workId,
+          status: 'не начато',
+          assignedAt: new Date().toISOString(),
+        },
       ],
     }));
-    showToast('Назначено');
   }
 
   function setScoreValue(workId, criterionId, value) {
@@ -1019,7 +1177,10 @@ export default function Dashboard() {
   function setComment(workId, comment) {
     setScoreDrafts((prev) => ({
       ...prev,
-      [workId]: { ...(prev[workId] || { values: {} }), comment },
+      [workId]: {
+        ...(prev[workId] || { values: {} }),
+        comment,
+      },
     }));
   }
 
@@ -1030,7 +1191,7 @@ export default function Dashboard() {
       return;
     }
 
-    const criteriaValues = state.criteria.map((c) => draft.values?.[c.id]).filter((v) => v != null);
+    const criteriaValues = state.criteria.map((criterion) => draft.values?.[criterion.id]).filter(Boolean);
     if (criteriaValues.length !== state.criteria.length) {
       alert('Оцените все критерии.');
       return;
@@ -1043,14 +1204,23 @@ export default function Dashboard() {
       ...prev,
       scores: [
         ...prev.scores.filter((s) => !(s.workId === workId && s.judgeId === session.id)),
-        { workId, judgeId: session.id, criteriaScores: draft.values, comment: draft.comment, total, avg, submittedAt: new Date().toISOString(), locked: true },
+        {
+          workId,
+          judgeId: session.id,
+          criteriaScores: draft.values,
+          comment: draft.comment,
+          total,
+          avg,
+          submittedAt: new Date().toISOString(),
+          locked: true,
+        },
       ],
       assignments: prev.assignments.map((a) =>
-        a.workId === workId && a.judgeId === session.id ? { ...a, status: 'оценено', finishedAt: new Date().toISOString() } : a
+        a.workId === workId && a.judgeId === session.id
+          ? { ...a, status: 'оценено', finishedAt: new Date().toISOString() }
+          : a
       ),
     }));
-
-    showToast('Оценка отправлена');
   }
 
   function importWorksFromCsv() {
@@ -1061,35 +1231,27 @@ export default function Dashboard() {
       .map((r) => r.split(';'));
 
     if (rows.length < 2) return;
-
     const [, ...dataRows] = rows;
-    const base = state.works.length;
 
-    const imported = dataRows.map((row, idx) => {
-      const id = `EO-${String(base + idx + 1).padStart(5, '0')}`;
-      const contest = row[0] || 'Эстетика Олимпа';
-      const direction = row[3] || (DIRECTION_OPTIONS_BY_CONTEST[contest]?.[0] || 'Общий зачет');
-
-      return {
-        id,
-        contest,
-        nomination: row[1] || 'Без номинации',
-        category: row[2] || 'Дебют',
-        direction,
-        title: row[4] || `Работа ${idx + 1}`,
-        description: row[5] || '',
-        photos: [row[6], row[7], row[8]].filter(Boolean),
-        videos: [row[9]].filter(Boolean),
-        participantName: row[10] || '',
-        status: 'Допущено',
-        author: 'Скрыт',
-      };
-    });
+    const imported = dataRows.map((row, idx) => ({
+      id: generateWorkId([...state.works, ...Array(idx)]),
+      contest: row[0] || 'Эстетика Олимпа',
+      nomination: row[1] || 'Без номинации',
+      category: row[2] || 'Дебют',
+      direction: row[3] || (DIRECTION_OPTIONS_BY_CONTEST[row[0]]?.[0] || 'Общий зачет'),
+      title: row[4] || `Работа ${idx + 1}`,
+      description: row[5] || '',
+      photos: [row[6], row[7], row[8]].filter(Boolean),
+      videos: [row[9]].filter(Boolean),
+      participantName: row[10] || '',
+      status: 'Допущено',
+      author: 'Скрыт',
+    }));
 
     setState((prev) => ({ ...prev, works: [...prev.works, ...imported] }));
     setImportText('');
-    showToast(`Импортировано: ${imported.length}`);
   }
+
 
   function exportAppState() {
     const payload = JSON.stringify(state, null, 2);
@@ -1100,7 +1262,7 @@ export default function Dashboard() {
     link.download = 'beauty-olymp-state.json';
     link.click();
     URL.revokeObjectURL(url);
-    showToast('Экспортировано');
+    showToast('Данные экспортированы');
   }
 
   function importAppState() {
@@ -1118,7 +1280,7 @@ export default function Dashboard() {
     const normalized = normalizeState(parsed);
     setState(normalized);
     setStateImportText('');
-    showToast('Импортировано');
+    showToast('Данные импортированы');
   }
 
   async function syncFromCloud() {
@@ -1128,7 +1290,11 @@ export default function Dashboard() {
     }
 
     setCloudSyncing(true);
-    const { data, error } = await supabase.from(CLOUD_TABLE).select('state').eq('id', cloudRowId).maybeSingle();
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select('state')
+      .eq('id', cloudRowId)
+      .maybeSingle();
 
     if (error) {
       setCloudSyncing(false);
@@ -1139,7 +1305,7 @@ export default function Dashboard() {
 
     if (!data?.state) {
       setCloudSyncing(false);
-      showToast('Облачное состояние пустое');
+      showToast('Облачное состояние пока пустое');
       return;
     }
 
@@ -1150,7 +1316,7 @@ export default function Dashboard() {
     lastCloudWriteRef.current = serializedState;
     setCloudSyncing(false);
     setCloudError('');
-    showToast('Загружено из облака');
+    showToast('Данные загружены из облака');
   }
 
   async function syncToCloud() {
@@ -1166,17 +1332,22 @@ export default function Dashboard() {
     setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
 
     try {
-      let { error } = await supabase.from(CLOUD_TABLE).upsert(payload, { onConflict: 'id' });
+      let { error } = await supabase
+        .from(CLOUD_TABLE)
+        .upsert(payload, { onConflict: 'id' });
 
       if (error && isUuidInputError(error.message)) {
         const fallbackId = crypto.randomUUID();
         const fallbackPayload = { id: fallbackId, state };
         const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
         setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
-
-        const retry = await supabase.from(CLOUD_TABLE).upsert(fallbackPayload, { onConflict: 'id' });
+        const retry = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(fallbackPayload, { onConflict: 'id' });
         error = retry.error;
-        if (!error) setCloudRowId(fallbackId);
+        if (!error) {
+          setCloudRowId(fallbackId);
+        }
       }
 
       setCloudSyncing(false);
@@ -1185,20 +1356,22 @@ export default function Dashboard() {
         const message = error.message || 'unknown error';
         setCloudError(`Не удалось сохранить данные в облако: ${message}`);
         setCloudDebug((prev) => ({ ...prev, lastError: message }));
-        showToast(`Ошибка выгрузки: ${message}`);
+        console.error('[cloud-sync:manual] upsert failed', { requestPreview, error });
+        showToast(`Ошибка выгрузки в облако: ${message}`);
         return;
       }
 
       lastCloudWriteRef.current = serializedState;
       setCloudError('');
       setCloudDebug((prev) => ({ ...prev, lastError: '' }));
-      showToast('Сохранено в облако');
+      showToast('Данные сохранены в облако');
     } catch (err) {
       setCloudSyncing(false);
       const message = err instanceof Error ? err.message : String(err);
       setCloudError(`Не удалось сохранить данные в облако: ${message}`);
       setCloudDebug((prev) => ({ ...prev, lastError: message }));
-      showToast(`Ошибка выгрузки: ${message}`);
+      console.error('[cloud-sync:manual] upsert exception', { requestPreview, err });
+      showToast(`Ошибка выгрузки в облако: ${message}`);
     }
   }
 
@@ -1214,7 +1387,7 @@ export default function Dashboard() {
   }
 
   function exportScores() {
-    const criteriaColumns = state.criteria.map((c) => c.title);
+    const criteriaColumns = state.criteria.map((criterion) => criterion.title);
     const rows = [[
       'Номер работы',
       'Contest',
@@ -1232,9 +1405,9 @@ export default function Dashboard() {
     ]];
 
     state.scores.forEach((score) => {
-      const work = state.works.find((w) => w.id === score.workId);
-      const judge = state.judges.find((j) => j.id === score.judgeId);
-      const criteriaValues = state.criteria.map((c) => score.criteriaScores?.[c.id] ?? '');
+      const work = state.works.find((item) => item.id === score.workId);
+      const judge = state.judges.find((item) => item.id === score.judgeId);
+      const criteriaValues = state.criteria.map((criterion) => score.criteriaScores?.[criterion.id] ?? '');
       rows.push([
         score.workId,
         work?.contest || '',
@@ -1276,7 +1449,6 @@ export default function Dashboard() {
 
   async function saveJudgeEdit() {
     if (!judgeEditId) return;
-
     const login = judgeEditDraft.login.trim();
     if (!judgeEditDraft.fullName.trim() || !login) {
       showToast('Укажите ФИО и логин судьи');
@@ -1285,25 +1457,26 @@ export default function Dashboard() {
 
     const duplicate =
       state.judges.some((j) => j.id !== judgeEditId && j.login === login) ||
-      state.adminUsers.some((a) => a.login === login) ||
-      state.moderators.some((m) => m.login === login);
-
+      state.adminUsers.some((admin) => admin.login === login) ||
+      state.moderators.some((moderator) => moderator.login === login);
     if (duplicate) {
       showToast('Логин уже используется');
       return;
     }
 
     let nextPasswordHash = null;
-    if (judgeEditDraft.password) nextPasswordHash = await sha256(judgeEditDraft.password);
+    if (judgeEditDraft.password) {
+      nextPasswordHash = await sha256(judgeEditDraft.password);
+    }
 
     setState((prev) => ({
       ...prev,
-      judges: prev.judges.map((j) => {
-        if (j.id !== judgeEditId) return j;
+      judges: prev.judges.map((judge) => {
+        if (judge.id !== judgeEditId) return judge;
         return {
-          ...j,
+          ...judge,
           fullName: judgeEditDraft.fullName.trim(),
-          email: judgeEditDraft.email.trim(),
+          email: judgeEditDraft.email,
           login,
           active: judgeEditDraft.active,
           ...(nextPasswordHash ? { passwordHash: nextPasswordHash } : {}),
@@ -1318,9 +1491,9 @@ export default function Dashboard() {
   function deleteJudge(judgeId) {
     setState((prev) => ({
       ...prev,
-      judges: prev.judges.filter((j) => j.id !== judgeId),
-      assignments: prev.assignments.filter((a) => a.judgeId !== judgeId),
-      scores: prev.scores.filter((s) => s.judgeId !== judgeId),
+      judges: prev.judges.filter((judge) => judge.id !== judgeId),
+      assignments: prev.assignments.filter((assignment) => assignment.judgeId !== judgeId),
+      scores: prev.scores.filter((score) => score.judgeId !== judgeId),
     }));
 
     if (judgeViewId === judgeId) setJudgeViewId(null);
@@ -1344,10 +1517,10 @@ export default function Dashboard() {
     if (!workEditId) return;
     setState((prev) => ({
       ...prev,
-      works: prev.works.map((w) =>
-        w.id === workEditId
-          ? { ...w, ...workEditDraft, title: workEditDraft.title.trim(), participantName: workEditDraft.participantName.trim() }
-          : w
+      works: prev.works.map((work) =>
+        work.id === workEditId
+          ? { ...work, ...workEditDraft, title: workEditDraft.title.trim(), participantName: workEditDraft.participantName.trim() }
+          : work
       ),
     }));
     setWorkEditId(null);
@@ -1357,9 +1530,9 @@ export default function Dashboard() {
   function deleteWork(workId) {
     setState((prev) => ({
       ...prev,
-      works: prev.works.filter((w) => w.id !== workId),
-      assignments: prev.assignments.filter((a) => a.workId !== workId),
-      scores: prev.scores.filter((s) => s.workId !== workId),
+      works: prev.works.filter((work) => work.id !== workId),
+      assignments: prev.assignments.filter((assignment) => assignment.workId !== workId),
+      scores: prev.scores.filter((score) => score.workId !== workId),
     }));
 
     if (selectedWorkId === workId) setSelectedWorkId(null);
@@ -1367,7 +1540,6 @@ export default function Dashboard() {
     showToast('Работа удалена');
   }
 
-  // -------------------- AUTH SCREENS --------------------
   if (!session.role) {
     if (participantMode) {
       return (
@@ -1375,11 +1547,7 @@ export default function Dashboard() {
           <BrandHeader />
           <div className="card">
             <h1>Личный кабинет участника</h1>
-            <input
-              placeholder="Фамилия Имя Отчество"
-              value={participantDraft.fullName}
-              onChange={(e) => setParticipantDraft((p) => ({ ...p, fullName: e.target.value }))}
-            />
+            <input placeholder="Фамилия Имя Отчество" value={participantDraft.fullName} onChange={(e) => setParticipantDraft((p) => ({ ...p, fullName: e.target.value }))} />
 
             <select
               value={participantDraft.contest}
@@ -1398,9 +1566,7 @@ export default function Dashboard() {
                 }));
               }}
             >
-              {CONTEST_OPTIONS.map((contest) => (
-                <option key={contest} value={contest}>{contest}</option>
-              ))}
+              {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
             </select>
 
             <select
@@ -1411,47 +1577,23 @@ export default function Dashboard() {
                 setParticipantDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
               }}
             >
-              {participantDirectionOptions.map((direction) => (
-                <option key={direction} value={direction}>{direction}</option>
-              ))}
+              {participantDirectionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
             </select>
 
             {participantNominationOptions.length ? (
-              <select
-                value={participantDraft.nomination}
-                onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}
-              >
-                {participantNominationOptions.map((nomination) => (
-                  <option key={nomination} value={nomination}>{nomination}</option>
-                ))}
+              <select value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}>
+                {participantNominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
               </select>
             ) : (
-              <input
-                placeholder="Номинация"
-                value={participantDraft.nomination}
-                onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}
-              />
+              <input placeholder="Номинация" value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))} />
             )}
 
-            <select
-              value={participantDraft.category}
-              onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}
-            >
-              {participantCategoryOptions.map((category) => (
-                <option key={category} value={category}>{category}</option>
-              ))}
+            <select value={participantDraft.category} onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}>
+              {participantCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
             </select>
 
-            <input
-              placeholder="Название работы"
-              value={participantDraft.title}
-              onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))}
-            />
-            <textarea
-              placeholder="Описание работы"
-              value={participantDraft.description}
-              onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))}
-            />
+            <input placeholder="Название работы" value={participantDraft.title} onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))} />
+            <textarea placeholder="Описание работы" value={participantDraft.description} onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))} />
 
             <UploadWidget
               label="Загрузка фото"
@@ -1459,7 +1601,9 @@ export default function Dashboard() {
               fileKind="image"
               userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
               submissionId={participantSubmissionId}
-              onUploaded={(record) => setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }))}
+              onUploaded={(record) => {
+                setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
+              }}
             />
 
             <UploadWidget
@@ -1468,13 +1612,14 @@ export default function Dashboard() {
               fileKind="video"
               userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
               submissionId={participantSubmissionId}
-              onUploaded={(record) => setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }))}
+              onUploaded={(record) => {
+                setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }));
+              }}
             />
 
             <button onClick={submitParticipantWork}>Отправить работу</button>
             <button onClick={() => setParticipantMode(false)}>Назад ко входу</button>
           </div>
-
           {toast ? <div className="toast">{toast}</div> : null}
           <Styles />
         </div>
@@ -1485,36 +1630,52 @@ export default function Dashboard() {
       <div className="layout">
         <BrandHeader />
         <div className="card narrow">
-          <h1>Beauty Olymp - система судейства</h1>
+          <h1>Beauty Olymp — система судейства</h1>
           <p>Вход для администратора, модератора или судьи.</p>
-
           <select value={loginForm.role} onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}>
             <option value="judge">Судья</option>
             <option value="admin">Администратор</option>
             <option value="moderator">Модератор</option>
           </select>
-
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
-
           <button onClick={login}>Войти</button>
           <button onClick={() => setParticipantMode(true)}>Личный кабинет участника</button>
-
           <small>Демо: admin/admin или judge1/password</small>
         </div>
+        {lightboxImage ? (
+        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
+            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+          </div>
+        </div>
+      ) : null}
 
-        {toast ? <div className="toast">{toast}</div> : null}
+      {lightboxVideo ? (
+        <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
+          <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
+            <div className="video-frame video-expanded">
+              <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast">{toast}</div> : null}
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
   }
 
-  // -------------------- JUDGE VIEW --------------------
+
   if (session.role === 'judge') {
     const done = judgeAssignments.filter((a) => a.status === 'оценено').length;
-    const selected = judgeSelectedWork;
-    const alreadyScored = selected
-      ? state.scores.some((score) => score.workId === selected.id && score.judgeId === session.id)
+    const selectedJudgeWork = judgeSelectedWork;
+    const alreadyScored = selectedJudgeWork
+      ? state.scores.some((score) => score.workId === selectedJudgeWork.id && score.judgeId === session.id)
       : false;
 
     return (
@@ -1522,7 +1683,7 @@ export default function Dashboard() {
         <BrandHeader />
         <div className="toolbar">
           <strong>Судья: {session.login}</strong>
-          <button className="top-logout" onClick={logout}>Выйти</button>
+          <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         </div>
 
         <div className="card judge-stats">
@@ -1538,16 +1699,11 @@ export default function Dashboard() {
             <p><strong>Направление:</strong> {group.direction}</p>
             <p><strong>Номинация:</strong> {group.nomination}</p>
             <p><strong>Категория:</strong> {group.category}</p>
-
             <div className="judge-preview-grid">
               {group.works.map((work) => (
                 <button key={work.id} className="judge-preview-card" onClick={() => setJudgeSelectedWorkId(work.id)}>
                   <img
-                    src={
-                      judgeSubmissionFiles[work.submissionId]?.photos?.[0] ||
-                      work.photos?.[0] ||
-                      'https://via.placeholder.com/480x320?text=%D0%9D%D0%B5%D1%82+%D1%84%D0%BE%D1%82%D0%BE'
-                    }
+                    src={judgeSubmissionFiles[work.submissionId]?.photos?.[0] || work.photos?.[0] || 'https://via.placeholder.com/480x320?text=%D0%9D%D0%B5%D1%82+%D1%84%D0%BE%D1%82%D0%BE'}
                     alt={`Превью ${work.id}`}
                     className="judge-preview-image"
                   />
@@ -1559,34 +1715,27 @@ export default function Dashboard() {
           </div>
         ))}
 
-        {selected ? (
+        {selectedJudgeWork ? (
           <div className="modal-overlay" onClick={() => setJudgeSelectedWorkId(null)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="toolbar">
-                <h3>Работа: {selected.id}</h3>
+                <h3>Работа: {selectedJudgeWork.id}</h3>
                 <button onClick={() => setJudgeSelectedWorkId(null)}>Закрыть</button>
               </div>
-
-              <p><strong>Название:</strong> {selected.title}</p>
-              <p><strong>Описание:</strong> {selected.description || '—'}</p>
+              <p><strong>Название:</strong> {selectedJudgeWork.title}</p>
+              <p><strong>Описание:</strong> {selectedJudgeWork.description || '—'}</p>
 
               <div className="grid">
-                {(judgeSubmissionFiles[selected.submissionId]?.photos || selected.photos || []).map((photo, index) => (
-                  <img
-                    key={`${photo}-${index}`}
-                    src={photo}
-                    alt={`Фото ${index + 1}`}
-                    className="media clickable"
-                    onClick={() => setLightboxImage(photo)}
-                  />
+                {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.photos || selectedJudgeWork.photos || []).map((photo, index) => (
+                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                 ))}
               </div>
 
               <div className="grid judge-video-grid">
-                {(judgeSubmissionFiles[selected.submissionId]?.videos || selected.videos || []).map((video, index) => (
-                  <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.videos || selectedJudgeWork.videos || []).map((video) => (
+                  <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
                     {isEmbeddedVideoUrl(video) ? (
-                      <iframe src={video} title={selected.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                      <iframe src={video} title={selectedJudgeWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
                     ) : (
                       <video src={video} className="media" controls playsInline preload="metadata" />
                     )}
@@ -1598,15 +1747,15 @@ export default function Dashboard() {
                 <>
                   <p><strong>Оценка отправлена. Редактирование закрыто.</strong></p>
                   {(() => {
-                    const submitted = state.scores.find((s) => s.workId === selected.id && s.judgeId === session.id);
+                    const submitted = state.scores.find((score) => score.workId === selectedJudgeWork.id && score.judgeId === session.id);
                     if (!submitted) return null;
                     return (
                       <div>
                         <table>
                           <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
                           <tbody>
-                            {state.criteria.map((c) => (
-                              <tr key={c.id}><td>{c.title}</td><td>{submitted.criteriaScores?.[c.id] ?? '-'}</td></tr>
+                            {state.criteria.map((criterion) => (
+                              <tr key={criterion.id}><td>{criterion.title}</td><td>{submitted.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
                             ))}
                           </tbody>
                         </table>
@@ -1619,24 +1768,24 @@ export default function Dashboard() {
               ) : (
                 <>
                   <h4>Оценка</h4>
-                  {state.criteria.map((c) => (
-                    <div key={c.id}>
-                      <label>{c.title}: {scoreDrafts[selected.id]?.values?.[c.id] ?? c.min}</label>
+                  {state.criteria.map((criterion) => (
+                    <div key={criterion.id}>
+                      <label>{criterion.title}: {scoreDrafts[selectedJudgeWork.id]?.values?.[criterion.id] ?? 1}</label>
                       <input
                         type="range"
-                        min={c.min}
-                        max={c.max}
-                        value={scoreDrafts[selected.id]?.values?.[c.id] ?? c.min}
-                        onChange={(e) => setScoreValue(selected.id, c.id, e.target.value)}
+                        min={criterion.min}
+                        max={criterion.max}
+                        value={scoreDrafts[selectedJudgeWork.id]?.values?.[criterion.id] ?? criterion.min}
+                        onChange={(e) => setScoreValue(selectedJudgeWork.id, criterion.id, e.target.value)}
                       />
                     </div>
                   ))}
                   <textarea
                     placeholder="Обязательный комментарий судьи"
-                    value={scoreDrafts[selected.id]?.comment || ''}
-                    onChange={(e) => setComment(selected.id, e.target.value)}
+                    value={scoreDrafts[selectedJudgeWork.id]?.comment || ''}
+                    onChange={(e) => setComment(selectedJudgeWork.id, e.target.value)}
                   />
-                  <button onClick={() => submitScore(selected.id)}>Отправить оценку</button>
+                  <button onClick={() => submitScore(selectedJudgeWork.id)}>Отправить оценку</button>
                 </>
               )}
             </div>
@@ -1660,7 +1809,7 @@ export default function Dashboard() {
                 {isEmbeddedVideoUrl(lightboxVideo) ? (
                   <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
                 ) : (
-                  <video src={lightboxVideo} className="media" controls autoPlay playsInline />
+                  <video src={lightboxVideo} title="Увеличенное видео" className="media" controls autoPlay playsInline />
                 )}
               </div>
             </div>
@@ -1668,24 +1817,24 @@ export default function Dashboard() {
         ) : null}
 
         {toast ? <div className="toast">{toast}</div> : null}
-        <button className="mobile-logout" onClick={logout}>Выйти</button>
+        <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
   }
 
-  // -------------------- ADMIN / MODERATOR VIEW --------------------
+
   const notStartedJudges = state.judges.filter((judge) =>
     state.assignments.some((a) => a.judgeId === judge.id && a.status !== 'оценено')
   );
+  const isAdmin = session.role === 'admin';
 
   return (
     <div className="layout">
       <BrandHeader />
-
       <div className="toolbar">
         <strong>{isAdmin ? `Администратор: ${session.login}` : `Модератор: ${session.login}`}</strong>
-        <button className="top-logout" onClick={logout}>Выйти</button>
+        <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       </div>
 
       <div className="card row">
@@ -1698,239 +1847,216 @@ export default function Dashboard() {
 
       {adminTab === 'main' ? (
         <>
-          <div className="card">
-            <h2>Дашборд</h2>
-            <p>Работ: {state.works.length}</p>
-            <p>Судей: {state.judges.length}</p>
-            <p>Завершено назначений: {progress}%</p>
-            <p>Работ без оценок: {state.works.filter((w) => !state.scores.some((s) => s.workId === w.id)).length}</p>
-            <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
+      <div className="card">
+        <h2>Дашборд</h2>
+        <p>Работ: {state.works.length}</p>
+        <p>Судей: {state.judges.length}</p>
+        <p>Завершено назначений: {progress}%</p>
+        <p>Работ без оценок: {state.works.filter((w) => !state.scores.some((s) => s.workId === w.id)).length}</p>
+        <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
+      </div>
+
+      {access.canManageWorks ? (
+      <div className="card">
+        <h3>Создание карточки работы</h3>
+        <select
+          value={workDraft.contest}
+          onChange={(e) => {
+            const nextContest = e.target.value;
+            const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
+            const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
+            const nextDirection = nextDirections[0];
+            const nextNominations = getNominationOptions(nextContest, nextDirection);
+            setWorkDraft((p) => ({
+              ...p,
+              contest: nextContest,
+              category: nextCategories[0],
+              direction: nextDirection,
+              nomination: nextNominations[0] || '',
+            }));
+          }}
+        >
+          {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+        </select>
+        <select
+          value={workDraft.direction}
+          onChange={(e) => {
+            const nextDirection = e.target.value;
+            const nextNominations = getNominationOptions(workDraft.contest, nextDirection);
+            setWorkDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
+          }}
+        >
+          {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+        </select>
+        {nominationOptions.length ? (
+          <select value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))}>
+            {nominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
+          </select>
+        ) : (
+          <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
+        )}
+        <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
+          {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
+        <input placeholder="Фамилия и отчество участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
+        <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
+        <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
+        <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
+        <textarea placeholder="Видео (по 1 ссылке на строку)" value={workDraft.videosText} onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))} />
+        <button onClick={addWork}>Сохранить работу</button>
+      </div>
+      ) : null}
+
+      {access.canManageJudges ? (
+      <>
+      <div className="card">
+        <h3>Управление критериями</h3>
+        <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
+        <input value={criterionTitle} onChange={(e) => setCriterionTitle(e.target.value)} placeholder="Новый критерий" />
+        <button onClick={addCriterion}>Добавить критерий</button>
+      </div>
+
+      <div className="card">
+        <h3>Создание судьи</h3>
+        <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
+        <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
+        <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
+        <button onClick={addJudge}>Добавить судью</button>
+      </div>
+
+      {isAdmin ? (
+      <div className="card">
+        <h3>Создание модератора</h3>
+        <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
+        <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
+        <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
+        <div>
+          {MODERATOR_PERMISSIONS.map((permission) => (
+            <label key={permission.key} style={{ display: 'block' }}>
+              <input
+                type="checkbox"
+                checked={moderatorDraft.permissions[permission.key]}
+                onChange={() => toggleDraftPermission(permission.key)}
+              />{' '}
+              {permission.label}
+            </label>
+          ))}
+        </div>
+        <button onClick={addModerator}>Добавить модератора</button>
+      </div>
+      ) : null}
+
+      <div className="card">
+        <h3>Назначение работ</h3>
+        <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
+          <option value="">Выберите судью</option>
+          {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} — {judge.fullName}</option>)}
+        </select>
+        <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
+          <option value="">Выберите работу</option>
+          {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} — {work.title}</option>)}
+        </select>
+        <button onClick={assignWork}>Назначить</button>
+      </div>
+      </>
+      ) : null}
+
+      {access.canExportScores ? (
+      <>
+      <div className="card">
+        <h3>Рейтинг по номинациям и категориям</h3>
+        <div className="row rating-filters">
+          <label>Конкурсы</label>
+          <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
+            <option value="all">Все конкурсы</option>
+            {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+          </select>
+          <label>Направления</label>
+          <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
+            <option value="all">Все направления</option>
+            {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+          </select>
+          <label>Категории</label>
+          <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
+            <option value="all">Все категории</option>
+            {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
+          </select>
+        </div>
+        {Object.entries(ratings).map(([group, list]) => (
+          <div key={group}>
+            <h4>{group}</h4>
+            <table>
+              <thead><tr><th>Место</th><th>Номер работы</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr></thead>
+              <tbody>
+                {list.map((item) => <tr key={item.workId}><td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td><td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td></tr>)}
+              </tbody>
+            </table>
           </div>
+        ))}
+      </div>
 
-          {access.canManageWorks ? (
-            <div className="card">
-              <h3>Создание карточки работы</h3>
+      <div className="card row">
+        <button onClick={exportScores}>Экспорт всех оценок CSV</button>
+        <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
+      </div>
+      </>
+      ) : null}
 
-              <select
-                value={workDraft.contest}
-                onChange={(e) => {
-                  const nextContest = e.target.value;
-                  const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
-                  const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
-                  const nextDirection = nextDirections[0];
-                  const nextNominations = getNominationOptions(nextContest, nextDirection);
-
-                  setWorkDraft((p) => ({
-                    ...p,
-                    contest: nextContest,
-                    category: nextCategories[0],
-                    direction: nextDirection,
-                    nomination: nextNominations[0] || '',
-                  }));
-                }}
-              >
-                {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
-              </select>
-
-              <select
-                value={workDraft.direction}
-                onChange={(e) => {
-                  const nextDirection = e.target.value;
-                  const nextNominations = getNominationOptions(workDraft.contest, nextDirection);
-                  setWorkDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
-                }}
-              >
-                {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
-              </select>
-
-              {nominationOptions.length ? (
-                <select value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))}>
-                  {nominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
-                </select>
-              ) : (
-                <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
-              )}
-
-              <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
-                {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-              </select>
-
-              <input placeholder="ФИО участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
-              <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
-              <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
-              <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
-              <textarea placeholder="Видео (по 1 ссылке на строку)" value={workDraft.videosText} onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))} />
-
-              <button onClick={addWork}>Сохранить работу</button>
-            </div>
-          ) : null}
-
-          {access.canManageJudges ? (
-            <>
-              <div className="card">
-                <h3>Управление критериями</h3>
-                <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
-                <input value={criterionTitle} onChange={(e) => setCriterionTitle(e.target.value)} placeholder="Новый критерий" />
-                <button onClick={addCriterion}>Добавить критерий</button>
-              </div>
-
-              <div className="card">
-                <h3>Создание судьи</h3>
-                <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
-                <input placeholder="Email (опц.)" value={judgeDraft.email} onChange={(e) => setJudgeDraft((p) => ({ ...p, email: e.target.value }))} />
-                <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
-                <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
-                <button onClick={addJudge}>Добавить судью</button>
-              </div>
-
-              <div className="card">
-                <h3>Назначение работ</h3>
-                <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
-                  <option value="">Выберите судью</option>
-                  {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} - {judge.fullName}</option>)}
-                </select>
-
-                <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
-                  <option value="">Выберите работу</option>
-                  {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} - {work.title}</option>)}
-                </select>
-
-                <button onClick={assignWork}>Назначить</button>
-              </div>
-            </>
-          ) : null}
-
-          {access.canExportScores ? (
-            <>
-              <div className="card">
-                <h3>Рейтинг по номинациям и категориям</h3>
-
-                <div className="row rating-filters">
-                  <label>Конкурсы</label>
-                  <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((p) => ({ ...p, contest: e.target.value }))}>
-                    <option value="all">Все конкурсы</option>
-                    {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
-                  </select>
-
-                  <label>Направления</label>
-                  <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((p) => ({ ...p, direction: e.target.value }))}>
-                    <option value="all">Все направления</option>
-                    {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
-                  </select>
-
-                  <label>Категории</label>
-                  <select value={ratingFilter.category} onChange={(e) => setRatingFilter((p) => ({ ...p, category: e.target.value }))}>
-                    <option value="all">Все категории</option>
-                    {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
-                  </select>
-                </div>
-
-                {Object.entries(ratings).map(([group, list]) => (
-                  <div key={group}>
-                    <h4>{group}</h4>
-                    <table>
-                      <thead><tr><th>Место</th><th>Номер</th><th>Название</th><th>Средний балл</th><th></th></tr></thead>
-                      <tbody>
-                        {list.map((item) => (
-                          <tr key={item.workId}>
-                            <td>{item.rank}</td>
-                            <td>{item.workId}</td>
-                            <td>{item.title}</td>
-                            <td>{item.avg}</td>
-                            <td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-
-              <div className="card row">
-                <button onClick={exportScores}>Экспорт оценок CSV</button>
-                <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
-              </div>
-            </>
-          ) : null}
-        </>
+      </>
       ) : null}
 
       {adminTab === 'judges' && (isAdmin || access.canManageJudges) ? (
         <div className="card">
           <h3>Все судьи</h3>
-
-          <div className="admin-table-wrap">
-            <table>
-              <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Статус</th><th>Действия</th></tr></thead>
-              <tbody>
-                {state.judges.map((judge) => {
-                  const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
-                  const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено');
-                  const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено');
-                  const editing = judgeEditId === judge.id;
-
-                  return (
-                    <tr key={judge.id}>
-                      <td>{judge.id}</td>
-                      <td>{editing ? <input value={judgeEditDraft.fullName} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : judge.fullName}</td>
-                      <td>{editing ? <input value={judgeEditDraft.login} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, login: e.target.value }))} /> : judge.login}</td>
-                      <td>
-                        {editing ? (
-                          <select value={String(judgeEditDraft.active)} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
-                            <option value="true">Активен</option>
-                            <option value="false">Неактивен</option>
-                          </select>
-                        ) : (judge.active ? 'Активен' : 'Неактивен')}
-                      </td>
-                      <td>
-                        <div className="row">
-                          {editing ? (
-                            <>
-                              <input type="password" placeholder="Новый пароль (опц.)" value={judgeEditDraft.password} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, password: e.target.value }))} />
-                              <button onClick={saveJudgeEdit}>Сохранить</button>
-                              <button onClick={() => setJudgeEditId(null)}>Отмена</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => setJudgeViewId(judge.id)}>Просмотр</button>
-                              <button onClick={() => startJudgeEdit(judge)}>Редактировать</button>
-                              <button onClick={() => deleteJudge(judge.id)}>Удалить</button>
-                            </>
-                          )}
+          <div className="admin-table-wrap"><table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.judges.map((judge) => {
+                const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
+                const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено');
+                const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено');
+                const isEditing = judgeEditId === judge.id;
+                return (
+                  <tr key={judge.id}>
+                    <td>{judge.id}</td>
+                    <td>{isEditing ? <input value={judgeEditDraft.fullName} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : judge.fullName}</td>
+                    <td>{isEditing ? <input value={judgeEditDraft.login} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, login: e.target.value }))} /> : judge.login}</td>
+                    <td>{isEditing ? (
+                      <select value={String(judgeEditDraft.active)} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (judge.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={judgeEditDraft.password} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveJudgeEdit}>Сохранить</button>
+                            <button onClick={() => setJudgeEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => setJudgeViewId(judge.id)}>Просмотр</button>
+                            <button onClick={() => startJudgeEdit(judge)}>Редактировать</button>
+                            <button onClick={() => deleteJudge(judge.id)}>Удалить</button>
+                          </>
+                        )}
+                      </div>
+                      {judgeViewId === judge.id ? (
+                        <div>
+                          <p><strong>Отсудил:</strong> {judged.length}</p>
+                          <ul>{judged.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}><button onClick={() => setSelectedJudgeWork({ judgeId: judge.id, workId: a.workId })}>{a.workId} — {work?.title || 'Удалена'}</button></li>; })}</ul>
+                          <p><strong>Не отсудил:</strong> {pending.length}</p>
+                          <ul>{pending.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
                         </div>
-
-                        {judgeViewId === judge.id ? (
-                          <div>
-                            <p><strong>Отсудил:</strong> {judged.length}</p>
-                            <ul>
-                              {judged.map((a) => {
-                                const w = state.works.find((x) => x.id === a.workId);
-                                return (
-                                  <li key={a.workId}>
-                                    <button onClick={() => setSelectedJudgeWork({ judgeId: judge.id, workId: a.workId })}>
-                                      {a.workId} - {w?.title || 'Удалена'}
-                                    </button>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-
-                            <p><strong>Не отсудил:</strong> {pending.length}</p>
-                            <ul>
-                              {pending.map((a) => {
-                                const w = state.works.find((x) => x.id === a.workId);
-                                return <li key={a.workId}>{a.workId} - {w?.title || 'Удалена'}</li>;
-                              })}
-                            </ul>
-                          </div>
-                        ) : null}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
 
           <div className="mobile-only-list">
             {state.judges.map((judge) => {
@@ -1955,33 +2081,26 @@ export default function Dashboard() {
         <div className="card">
           <h3>Импорт работ из CSV (;)</h3>
           <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1;ФИО участника</p>
-
           <textarea rows={8} value={importText} onChange={(e) => setImportText(e.target.value)} />
           <button onClick={importWorksFromCsv}>Импортировать</button>
 
           <h3>Синхронизация данных между устройствами</h3>
-          <p>Автосинхронизация через Supabase включена. Ручной JSON оставлен как резерв.</p>
+          <p>
+            Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.
+          </p>
           <p>
             Статус облака: {supabase ? (cloudSyncing ? 'идет синхронизация…' : 'подключено') : 'не настроено'}
-            {cloudError ? ` - ${cloudError}` : ''}
+            {cloudError ? ` — ${cloudError}` : ''}
           </p>
-
           <small><strong>Текущий cloud row id:</strong> {cloudRowId}</small>
           {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
           {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
-
           <div className="row">
             <button onClick={syncFromCloud}>Загрузить из облака</button>
             <button onClick={syncToCloud}>Сохранить в облако</button>
             <button onClick={exportAppState}>Экспорт JSON состояния</button>
           </div>
-
-          <textarea
-            rows={6}
-            placeholder="Вставьте JSON состояния сюда"
-            value={stateImportText}
-            onChange={(e) => setStateImportText(e.target.value)}
-          />
+          <textarea rows={6} placeholder="Вставьте JSON состояния сюда" value={stateImportText} onChange={(e) => setStateImportText(e.target.value)} />
           <button onClick={importAppState}>Импорт JSON состояния</button>
         </div>
       ) : null}
@@ -1989,43 +2108,40 @@ export default function Dashboard() {
       {adminTab === 'works' && (isAdmin || access.canManageWorks) ? (
         <div className="card">
           <h3>Все загруженные работы</h3>
-
-          <div className="admin-table-wrap">
-            <table className="works-table">
-              <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
-              <tbody>
-                {state.works.map((work) => {
-                  const editing = workEditId === work.id;
-                  return (
-                    <tr key={work.id}>
-                      <td>{work.id}</td>
-                      <td>{work.contest}</td>
-                      <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
-                      <td>{editing ? <input value={workEditDraft.category} onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))} /> : work.category}</td>
-                      <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
-                      <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
-                      <td>
-                        <div className="row">
-                          {editing ? (
-                            <>
-                              <button onClick={saveWorkEdit}>Сохранить</button>
-                              <button onClick={() => setWorkEditId(null)}>Отмена</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => startWorkEdit(work)}>Редактировать</button>
-                              <button onClick={() => deleteWork(work.id)}>Удалить</button>
-                              <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <div className="admin-table-wrap"><table className="works-table">
+            <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.works.map((work) => {
+                const editing = workEditId === work.id;
+                return (
+                  <tr key={work.id}>
+                    <td>{work.id}</td>
+                    <td>{work.contest}</td>
+                    <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
+                    <td>{editing ? <input value={workEditDraft.category} onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))} /> : work.category}</td>
+                    <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
+                    <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
+                    <td>
+                      <div className="row">
+                        {editing ? (
+                          <>
+                            <button onClick={saveWorkEdit}>Сохранить</button>
+                            <button onClick={() => setWorkEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startWorkEdit(work)}>Редактировать</button>
+                            <button onClick={() => deleteWork(work.id)}>Удалить</button>
+                            <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
 
           <div className="mobile-only-list">
             {state.works.map((work) => (
@@ -2045,86 +2161,59 @@ export default function Dashboard() {
       {adminTab === 'moderators' && isAdmin ? (
         <div className="card">
           <h3>Модераторы</h3>
-
-          <div className="card">
-            <h4>Создание модератора</h4>
-            <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
-            <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
-            <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
-            <div>
-              {MODERATOR_PERMISSIONS.map((perm) => (
-                <label key={perm.key} style={{ display: 'block' }}>
-                  <input
-                    type="checkbox"
-                    checked={moderatorDraft.permissions[perm.key]}
-                    onChange={() => toggleDraftPermission(perm.key)}
-                  />{' '}
-                  {perm.label}
-                </label>
-              ))}
-            </div>
-            <button onClick={addModerator}>Добавить модератора</button>
-          </div>
-
-          <div className="admin-table-wrap">
-            <table>
-              <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
-              <tbody>
-                {state.moderators.map((m) => {
-                  const editing = moderatorEditId === m.id;
-                  return (
-                    <tr key={m.id}>
-                      <td>{m.id}</td>
-                      <td>{editing ? <input value={moderatorEditDraft.fullName} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : m.fullName}</td>
-                      <td>{editing ? <input value={moderatorEditDraft.login} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))} /> : m.login}</td>
-                      <td>
-                        {editing ? (
-                          <div>
-                            {MODERATOR_PERMISSIONS.map((perm) => (
-                              <label key={perm.key} style={{ display: 'block' }}>
-                                <input
-                                  type="checkbox"
-                                  checked={moderatorEditDraft.permissions[perm.key]}
-                                  onChange={() => toggleEditPermission(perm.key)}
-                                />{' '}
-                                {perm.label}
-                              </label>
-                            ))}
-                          </div>
-                        ) : (
-                          MODERATOR_PERMISSIONS.filter((perm) => m.permissions?.[perm.key]).map((perm) => perm.label).join(', ') || 'Нет прав'
-                        )}
-                      </td>
-                      <td>
-                        {editing ? (
-                          <select value={String(moderatorEditDraft.active)} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
-                            <option value="true">Активен</option>
-                            <option value="false">Неактивен</option>
-                          </select>
-                        ) : (m.active ? 'Активен' : 'Неактивен')}
-                      </td>
-                      <td>
-                        <div className="row">
-                          {editing ? (
-                            <>
-                              <input type="password" placeholder="Новый пароль (опц.)" value={moderatorEditDraft.password} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))} />
-                              <button onClick={saveModeratorEdit}>Сохранить</button>
-                              <button onClick={() => setModeratorEditId(null)}>Отмена</button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => startModeratorEdit(m)}>Редактировать</button>
-                              <button onClick={() => deleteModerator(m.id)}>Удалить</button>
-                            </>
-                          )}
+          <div className="admin-table-wrap"><table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.moderators.map((moderator) => {
+                const isEditing = moderatorEditId === moderator.id;
+                return (
+                  <tr key={moderator.id}>
+                    <td>{moderator.id}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.fullName} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : moderator.fullName}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.login} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))} /> : moderator.login}</td>
+                    <td>
+                      {isEditing ? (
+                        <div>
+                          {MODERATOR_PERMISSIONS.map((permission) => (
+                            <label key={permission.key} style={{ display: 'block' }}>
+                              <input
+                                type="checkbox"
+                                checked={moderatorEditDraft.permissions[permission.key]}
+                                onChange={() => toggleEditPermission(permission.key)}
+                              />{' '}
+                              {permission.label}
+                            </label>
+                          ))}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      ) : MODERATOR_PERMISSIONS.filter((permission) => moderator.permissions?.[permission.key]).map((permission) => permission.label).join(', ') || 'Нет прав'}
+                    </td>
+                    <td>{isEditing ? (
+                      <select value={String(moderatorEditDraft.active)} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (moderator.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={moderatorEditDraft.password} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveModeratorEdit}>Сохранить</button>
+                            <button onClick={() => setModeratorEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startModeratorEdit(moderator)}>Редактировать</button>
+                            <button onClick={() => deleteModerator(moderator.id)}>Удалить</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
         </div>
       ) : null}
 
@@ -2135,12 +2224,10 @@ export default function Dashboard() {
               <h3>Оценка судьи по работе</h3>
               <button onClick={() => setSelectedJudgeWork(null)}>Закрыть</button>
             </div>
-
             {(() => {
               const score = state.scores.find((s) => s.workId === selectedJudgeWork.workId && s.judgeId === selectedJudgeWork.judgeId);
               const judge = state.judges.find((j) => j.id === selectedJudgeWork.judgeId);
               const work = state.works.find((w) => w.id === selectedJudgeWork.workId);
-
               return (
                 <div>
                   <p><strong>Судья:</strong> {judge?.fullName || selectedJudgeWork.judgeId}</p>
@@ -2149,28 +2236,30 @@ export default function Dashboard() {
                   <p><strong>Описание:</strong> {work?.description || '—'}</p>
 
                   <div className="grid">
-                    {(work?.photos || []).map((photo, index) => (
-                      <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+                    {getWorkMedia(work).photos.map((photo, index) => (
+                      <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                     ))}
                   </div>
 
                   <div className="grid judge-video-grid">
-                    {(work?.videos || []).map((video, index) => (
-                      <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
-                        <iframe src={video} title={work?.id || 'video'} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                    {getWorkMedia(work).videos.map((video) => (
+                      <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                        {isEmbeddedVideoUrl(video) ? (
+                          <iframe src={video} title={work?.id || 'video'} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                        ) : (
+                          <video src={video} className="media" controls playsInline preload="metadata" />
+                        )}
                       </div>
                     ))}
                   </div>
 
-                  {!score ? (
-                    <p>По этой связке судья-работа оценка пока не отправлена.</p>
-                  ) : (
+                  {!score ? <p>По этой связке судья-работа оценка пока не отправлена.</p> : (
                     <>
                       <table>
                         <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
                         <tbody>
-                          {state.criteria.map((c) => (
-                            <tr key={c.id}><td>{c.title}</td><td>{score.criteriaScores?.[c.id] ?? '-'}</td></tr>
+                          {state.criteria.map((criterion) => (
+                            <tr key={criterion.id}><td>{criterion.title}</td><td>{score.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
                           ))}
                         </tbody>
                       </table>
@@ -2186,47 +2275,51 @@ export default function Dashboard() {
       ) : null}
 
       {selectedWork ? (
+
         <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="toolbar">
               <h3>Результаты судейства: Номер работы {selectedWork.id}</h3>
               <button onClick={() => setSelectedWorkId(null)}>Закрыть</button>
             </div>
-
             <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
             <p><strong>Участник:</strong> {selectedWork.participantName || 'не указан'}</p>
             <p><strong>Название:</strong> {selectedWork.title || '—'}</p>
             <p><strong>Описание:</strong> {selectedWork.description || '—'}</p>
-
             <h4>Фото работы</h4>
             <div className="grid">
-              {(selectedWork.photos || []).map((photo, index) => (
-                <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+              {getWorkMedia(selectedWork).photos.map((photo, index) => (
+                <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
               ))}
             </div>
-
             <h4>Видео работы</h4>
             <div className="grid judge-video-grid">
-              {(selectedWork.videos || []).map((video, index) => (
-                <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
-                  <iframe src={video} title={selectedWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+              {getWorkMedia(selectedWork).videos.map((video) => (
+                <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                  {isEmbeddedVideoUrl(video) ? (
+                    <iframe src={video} title={selectedWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                  ) : (
+                    <video src={video} className="media" controls playsInline preload="metadata" />
+                  )}
                 </div>
               ))}
             </div>
-
             {selectedWorkScores.length === 0 ? (
               <p>По этой работе пока нет отправленных оценок.</p>
             ) : (
               selectedWorkScores.map((score) => {
-                const judge = state.judges.find((j) => j.id === score.judgeId);
+                const judge = state.judges.find((item) => item.id === score.judgeId);
                 return (
                   <div key={`${score.workId}-${score.judgeId}-${score.submittedAt}`} className="card">
                     <strong>{judge?.fullName || score.judgeId}</strong>
                     <table>
                       <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
                       <tbody>
-                        {state.criteria.map((c) => (
-                          <tr key={c.id}><td>{c.title}</td><td>{score.criteriaScores?.[c.id] ?? '-'}</td></tr>
+                        {state.criteria.map((criterion) => (
+                          <tr key={criterion.id}>
+                            <td>{criterion.title}</td>
+                            <td>{score.criteriaScores?.[criterion.id] ?? '-'}</td>
+                          </tr>
                         ))}
                       </tbody>
                     </table>
@@ -2249,27 +2342,13 @@ export default function Dashboard() {
         </div>
       ) : null}
 
-      {lightboxVideo ? (
-        <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
-          <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
-            <div className="video-frame video-expanded">
-              {isEmbeddedVideoUrl(lightboxVideo) ? (
-                <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
-              ) : (
-                <video src={lightboxVideo} className="media" controls autoPlay playsInline />
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       {toast ? <div className="toast">{toast}</div> : null}
-      <button className="mobile-logout" onClick={logout}>Выйти</button>
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       <Styles />
     </div>
   );
 }
+
 
 function BrandHeader() {
   return (
@@ -2279,119 +2358,61 @@ function BrandHeader() {
   );
 }
 
+
 function Styles() {
   return (
     <style jsx global>{`
       @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
-
-      body {
-        margin: 0;
-        font-family: 'Open Sans', Arial, sans-serif;
-        color: #000;
-        background:
-          radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%),
-          radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%),
-          radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%),
-          #fff;
-      }
-
+      body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #000; background: radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%), radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%), radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%), #fff; }
       .layout { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
       .brand-header { display: flex; justify-content: flex-start; margin-bottom: 4px; }
       .brand-logo-image { width: min(360px, 65vw); height: auto; object-fit: contain; }
-
-      .card {
-        background: rgba(255,255,255,0.94);
-        border: 1px solid rgba(40,28,104,0.1);
-        border-radius: 14px;
-        padding: 16px;
-        box-shadow: 0 12px 34px rgba(40,28,104,0.08);
-        display: grid;
-        gap: 8px;
-      }
-
+      .card { background: rgba(255,255,255,0.94); border: 1px solid rgba(40,28,104,0.1); border-radius: 14px; padding: 16px; box-shadow: 0 12px 34px rgba(40,28,104,0.08); display: grid; gap: 8px; }
       .narrow { max-width: 420px; margin: 40px auto; }
       .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-
       input, textarea, select, button { padding: 10px; border-radius: 10px; border: 1px solid rgba(40,28,104,0.2); font-size: 14px; }
       input, textarea, select { background: rgba(255,255,255,0.94); color: #000; }
       input:focus, textarea:focus, select:focus { outline: none; border-color: #FF025D; box-shadow: 0 0 0 3px rgba(255,2,93,0.14); }
-
-      button {
-        border: none;
-        background: linear-gradient(135deg, #FF025D 0%, #d90178 100%);
-        color: #fff;
-        cursor: pointer;
-        transition: transform 0.15s ease, filter 0.15s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        font-weight: 700;
-        font-family: 'Roboto Condensed', Arial, sans-serif;
-      }
+      button { border: none; background: linear-gradient(135deg, #FF025D 0%, #d90178 100%); color: #fff; cursor: pointer; box-shadow: none; transition: transform 0.15s ease, filter 0.15s ease; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; font-family: 'Roboto Condensed', Arial, sans-serif; }
       button:hover { filter: brightness(1.05); transform: translateY(-1px); }
       button:active { transform: translateY(0); }
-
       .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
       .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
       .row { display: flex; gap: 8px; flex-wrap: wrap; }
-
       .rating-filters label { font-size: 13px; font-weight: 700; color: #281C68; }
-
       .admin-table-wrap { overflow-x: auto; }
       .admin-table-wrap table { min-width: 920px; }
-
       .mobile-only-list { display: none; }
       .compact-card { padding: 10px 12px; gap: 4px; }
-
       .top-logout { display: inline-flex; }
       .mobile-logout { display: none; background: #281C68; margin-top: 4px; }
-
-      .toast {
-        position: fixed;
-        right: 20px;
-        bottom: 20px;
-        background: linear-gradient(135deg, #281C68 0%, #FF025D 100%);
-        color: #fff;
-        padding: 10px 14px;
-        border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-        z-index: 30;
-      }
-
+      .toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #281C68 0%, #FF025D 100%); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
       .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
       .image-modal { width: min(1100px, 100%); position: relative; }
       .video-modal { width: min(1200px, 100%); position: relative; }
-
       .icon-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border-radius: 999px; padding: 0; font-size: 28px; line-height: 1; display: grid; place-items: center; z-index: 2; }
-
       .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
-
       .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
       .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
-
       .judge-video-grid { grid-template-columns: 1fr; }
       .judge-video-thumb { cursor: zoom-in; width: clamp(320px, 46vw, 640px); max-width: 100%; }
       .judge-video-thumb .media { width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; }
       .judge-video-thumb video, .judge-video-thumb iframe { width: 100%; height: 100%; object-fit: contain; display: block; }
       .video-expanded { aspect-ratio: 16 / 9; min-height: 58vh; }
-
       .clickable { cursor: pointer; }
       .works-table { table-layout: fixed; }
       .works-table th, .works-table td { vertical-align: middle; }
       .works-table th { text-align: center; }
       .works-table td { text-align: left; }
       .works-table td > .row { justify-content: flex-start; }
-
       .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
       .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
       .judge-preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; border: 1px solid #d8deea; }
-
       .judge-stats p { margin: 6px 0; line-height: 1.2; }
-
       h1, h2, h3, h4 { margin: 0; color: #281C68; font-family: "Roboto Condensed", Arial, sans-serif; letter-spacing: 0.2px; }
       strong { color: #000; }
       p, label, li, td, th, small { color: #000; }
-
       table { width: 100%; border-collapse: collapse; }
       td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
 
