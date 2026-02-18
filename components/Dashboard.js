@@ -126,8 +126,7 @@ const DEFAULT_JUDGES = [
     fullName: 'Судья Демонстрационный',
     email: 'judge@demo.local',
     login: 'judge1',
-    passwordHash:
-      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
     active: true,
   },
 ];
@@ -181,7 +180,6 @@ function createDefaultState() {
 function normalizeState(rawState) {
   const next = { ...createDefaultState(), ...(rawState || {}) };
 
-  // Миграция: исправляем старый неверный hash demo-пароля и отсутствие active.
   next.judges = (next.judges || []).map((judge) => {
     if (
       judge.login === 'judge1' &&
@@ -196,7 +194,6 @@ function normalizeState(rawState) {
     return { ...judge, active: judge.active ?? true };
   });
 
-  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
   const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
   const demoJudge = {
     id: 'J-001',
@@ -294,7 +291,6 @@ function buildCloudRequestPreview(table, payload) {
   return `supabase.from('${table}').upsert({ id: '${payload.id}', state: <json> }, { onConflict: 'id' })`;
 }
 
-
 function safeParseJson(value) {
   try {
     return JSON.parse(value);
@@ -316,6 +312,7 @@ export default function Dashboard() {
   const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
   const lastCloudWriteRef = useRef('');
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
     nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
@@ -328,7 +325,9 @@ export default function Dashboard() {
     videosText: '',
     status: 'Допущено',
   });
+
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+
   const [participantDraft, setParticipantDraft] = useState({
     fullName: '',
     contest: 'Эстетика Олимпа',
@@ -340,12 +339,14 @@ export default function Dashboard() {
     photos: [],
     videos: [],
   });
+
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
     login: '',
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
+
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
@@ -353,14 +354,19 @@ export default function Dashboard() {
   const [stateImportText, setStateImportText] = useState('');
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
+
   const [adminTab, setAdminTab] = useState('main');
+
   const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
+
   const [judgeViewId, setJudgeViewId] = useState(null);
   const [judgeSubmissionFiles, setJudgeSubmissionFiles] = useState({});
+
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
     fullName: '',
@@ -369,33 +375,26 @@ export default function Dashboard() {
     active: true,
     permissions: normalizeModeratorPermissions({}),
   });
+
   const [judgeEditId, setJudgeEditId] = useState(null);
   const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
+
   const [workEditId, setWorkEditId] = useState(null);
-  const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
+  const [workEditDraft, setWorkEditDraft] = useState({
+    title: '',
+    participantName: '',
+    nomination: '',
+    category: '',
+    direction: '',
+    status: 'Допущено',
+  });
+
   const toastTimerRef = useRef(null);
 
-  const handleAdminTabChange = (nextTab) => {
-    console.log('[adminTab] change requested', {
-      from: adminTab,
-      to: nextTab,
-      role: session.role,
-      access,
-    });
-    setAdminTab(nextTab);
-  };
-  const categoryOptions = useMemo(
-    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
-    [workDraft.contest]
-  );
-  const directionOptions = useMemo(
-    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
-    [workDraft.contest]
-  );
-  const nominationOptions = useMemo(
-    () => getNominationOptions(workDraft.contest, workDraft.direction),
-    [workDraft.contest, workDraft.direction]
-  );
+  const categoryOptions = useMemo(() => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'], [workDraft.contest]);
+  const directionOptions = useMemo(() => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'], [workDraft.contest]);
+  const nominationOptions = useMemo(() => getNominationOptions(workDraft.contest, workDraft.direction), [workDraft.contest, workDraft.direction]);
+
   const participantDirectionOptions = useMemo(
     () => DIRECTION_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Общий зачет'],
     [participantDraft.contest]
@@ -408,7 +407,6 @@ export default function Dashboard() {
     () => CATEGORY_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Дебют'],
     [participantDraft.contest]
   );
-
 
   useEffect(() => {
     let cancelled = false;
@@ -621,60 +619,17 @@ export default function Dashboard() {
     }));
   }, [judgeWorks]);
 
+
+    return Object.values(grouped).map((group) => ({
+      ...group,
+      works: group.works.sort((a, b) => a.id.localeCompare(b.id)),
+    }));
+  }, [judgeWorks]);
+
   const judgeSelectedWork = useMemo(
     () => judgeWorks.find((work) => work.id === judgeSelectedWorkId) || null,
     [judgeSelectedWorkId, judgeWorks]
   );
-
-  useEffect(() => {
-    if (session.role !== 'judge') {
-      setJudgeSubmissionFiles({});
-      return;
-    }
-
-    const submissionIds = [...new Set(judgeWorks.map((work) => work.submissionId).filter(Boolean))];
-    if (!submissionIds.length) {
-      setJudgeSubmissionFiles({});
-      return;
-    }
-
-    let cancelled = false;
-
-    async function loadSignedFiles() {
-      const entries = await Promise.all(submissionIds.map(async (submissionId) => {
-        try {
-          const response = await fetch(`/api/uploads?submissionId=${encodeURIComponent(submissionId)}&withSignedGet=1`);
-          const payload = await response.json();
-          if (!response.ok) {
-            throw new Error(payload.error || 'Failed to load signed files');
-          }
-
-          const records = payload.records || [];
-          const photos = records
-            .filter((item) => String(item.mime || '').startsWith('image/') && item.signedGetUrl)
-            .map((item) => item.signedGetUrl);
-          const videos = records
-            .filter((item) => String(item.mime || '').startsWith('video/') && item.signedGetUrl)
-            .map((item) => item.signedGetUrl);
-
-          return [submissionId, { photos, videos }];
-        } catch (error) {
-          console.error(error);
-          return [submissionId, { photos: [], videos: [] }];
-        }
-      }));
-
-      if (!cancelled) {
-        setJudgeSubmissionFiles(Object.fromEntries(entries));
-      }
-    }
-
-    loadSignedFiles();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session.role, judgeWorks]);
 
   const progress = useMemo(() => {
     const total = state.assignments.length;
@@ -702,23 +657,16 @@ export default function Dashboard() {
   const currentModerator = useMemo(() => {
     if (session.role !== 'moderator') return null;
     return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
-  }, [session, state.moderators]);
+  }, [session.role, session.id, state.moderators]);
 
   const access = useMemo(() => {
-    let nextAccess;
     if (session.role === 'admin') {
-      nextAccess = { canManageWorks: true, canManageJudges: true, canExportScores: true };
-      console.log('[access] computed', { role: session.role, currentModerator: null, access: nextAccess });
-      return nextAccess;
+      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
     }
     if (session.role === 'moderator') {
-      nextAccess = normalizeModeratorPermissions(currentModerator?.permissions);
-      console.log('[access] computed', { role: session.role, currentModerator, access: nextAccess });
-      return nextAccess;
+      return normalizeModeratorPermissions(currentModerator?.permissions);
     }
-    nextAccess = { canManageWorks: false, canManageJudges: false, canExportScores: false };
-    console.log('[access] computed', { role: session.role, currentModerator: null, access: nextAccess });
-    return nextAccess;
+    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
   }, [session.role, currentModerator]);
 
   const ratings = useMemo(() => {
@@ -727,6 +675,7 @@ export default function Dashboard() {
     state.works.forEach((work) => {
       const scores = state.scores.filter((score) => score.workId === work.id);
       if (!scores.length) return;
+
       const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
       const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
       if (!grouped[key]) grouped[key] = [];
@@ -737,9 +686,7 @@ export default function Dashboard() {
       list.sort((a, b) => b.avg - a.avg);
       let rank = 1;
       list.forEach((entry, index) => {
-        if (index > 0 && entry.avg < list[index - 1].avg) {
-          rank = index + 1;
-        }
+        if (index > 0 && entry.avg < list[index - 1].avg) rank = index + 1;
         entry.rank = rank;
       });
     });
@@ -755,36 +702,137 @@ export default function Dashboard() {
 
     return filtered;
   }, [state.scores, state.works, ratingFilter]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  useEffect(() => {
+    if (!sessionReady || !cloudReady || !supabase) return;
+
+    const serializedState = JSON.stringify(state);
+    if (lastCloudWriteRef.current === serializedState) return;
+
+    const timer = window.setTimeout(async () => {
+      setCloudSyncing(true);
+      const payload = { id: cloudRowId, state };
+      const requestPreview = buildCloudRequestPreview(CLOUD_TABLE, payload);
+      setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
+
+      try {
+        let { error } = await supabase.from(CLOUD_TABLE).upsert(payload, { onConflict: 'id' });
+
+        if (error && isUuidInputError(error.message)) {
+          const fallbackId = crypto.randomUUID();
+          const fallbackPayload = { id: fallbackId, state };
+          const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
+          setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
+          const retry = await supabase.from(CLOUD_TABLE).upsert(fallbackPayload, { onConflict: 'id' });
+          error = retry.error;
+          if (!error) setCloudRowId(fallbackId);
+        }
+
+        if (error) {
+          const message = error.message || 'unknown error';
+          setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+          setCloudDebug((prev) => ({ ...prev, lastError: message }));
+          console.error('[cloud-sync:auto] upsert failed', { requestPreview, error });
+        } else {
+          lastCloudWriteRef.current = serializedState;
+          setCloudError('');
+          setCloudDebug((prev) => ({ ...prev, lastError: '' }));
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+        setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:auto] upsert exception', { requestPreview, err });
+      }
+
+      setCloudSyncing(false);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [state, sessionReady, cloudReady, cloudRowId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    if (session.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
+  }, [session, sessionReady]);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+  }, []);
+
   useEffect(() => {
     if (session.role === 'judge') return;
-    if (session.role === 'admin') return;
 
     const allowedTabs = ['main'];
     if (access.canManageJudges) allowedTabs.push('judges');
     if (access.canManageWorks) allowedTabs.push('works', 'import');
+    if (session.role === 'admin') allowedTabs.push('moderators');
 
     if (!allowedTabs.includes(adminTab)) {
-      console.log('[adminTab] forced reset to main', {
-        reason: 'tab-not-allowed-for-role',
-        adminTab,
-        role: session.role,
-        access,
-      });
       setAdminTab('main');
     }
   }, [adminTab, access, session.role]);
 
   useEffect(() => {
-    if (session.role === 'judge' || !session.role) return;
-    console.log('[render-tabs] state', {
-      role: session.role,
-      adminTab,
-      isAdmin: session.role === 'admin',
-      canManageJudges: access.canManageJudges,
-      canManageWorks: access.canManageWorks,
-    });
-  }, [adminTab, access, session.role]);
+    if (session.role !== 'judge') {
+      setJudgeSubmissionFiles({});
+      return;
+    }
 
+    const submissionIds = [...new Set(judgeWorks.map((work) => work.submissionId).filter(Boolean))];
+    if (!submissionIds.length) {
+      setJudgeSubmissionFiles({});
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadSignedFiles() {
+      const entries = await Promise.all(
+        submissionIds.map(async (submissionId) => {
+          try {
+            const response = await fetch(`/api/uploads?submissionId=${encodeURIComponent(submissionId)}&withSignedGet=1`);
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.error || 'Failed to load signed files');
+
+            const records = payload.records || [];
+            const photos = records
+              .filter((item) => String(item.mime || '').startsWith('image/') && item.signedGetUrl)
+              .map((item) => item.signedGetUrl);
+            const videos = records
+              .filter((item) => String(item.mime || '').startsWith('video/') && item.signedGetUrl)
+              .map((item) => item.signedGetUrl);
+
+            return [submissionId, { photos, videos }];
+          } catch (error) {
+            console.error(error);
+            return [submissionId, { photos: [], videos: [] }];
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setJudgeSubmissionFiles(Object.fromEntries(entries));
+      }
+    }
+
+    loadSignedFiles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session.role, judgeWorks]);
 
   async function login() {
     const normalizedLogin = loginForm.login.trim();
@@ -799,9 +847,7 @@ export default function Dashboard() {
     }
 
     if (loginForm.role === 'judge') {
-      const judge = state.judges.find(
-        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
-      );
+      const judge = state.judges.find((j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active);
       if (judge) {
         setSession({ role: 'judge', id: judge.id, login: judge.login });
         return;
@@ -809,9 +855,7 @@ export default function Dashboard() {
     }
 
     if (loginForm.role === 'moderator') {
-      const moderator = state.moderators.find(
-        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
-      );
+      const moderator = state.moderators.find((m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active);
       if (moderator) {
         setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
         return;
@@ -821,12 +865,9 @@ export default function Dashboard() {
     alert('Неверные данные для входа.');
   }
 
-
   function showToast(message) {
     setToast(message);
-    if (toastTimerRef.current) {
-      window.clearTimeout(toastTimerRef.current);
-    }
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
     toastTimerRef.current = window.setTimeout(() => setToast(''), 2200);
   }
 
@@ -853,11 +894,19 @@ export default function Dashboard() {
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
     setWorkDraft({
-      contest: 'Эстетика Олимпа', nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '', category: 'Дебют', direction: 'Роспись на салонных типсах', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
+      contest: 'Эстетика Олимпа',
+      nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
+      category: 'Дебют',
+      direction: 'Роспись на салонных типсах',
+      participantName: '',
+      title: '',
+      description: '',
+      photosText: '',
+      videosText: '',
+      status: 'Допущено',
     });
     showToast('Добавлено');
   }
-
 
   async function submitParticipantWork() {
     if (!participantDraft.fullName.trim() || !participantDraft.title.trim() || !participantDraft.nomination.trim()) {
@@ -1050,7 +1099,6 @@ export default function Dashboard() {
     showToast('Модератор удален');
   }
 
-
   function addCriterion() {
     if (!criterionTitle.trim()) return;
     const criterion = { id: `c${Date.now()}`, title: criterionTitle.trim(), min: 1, max: 10 };
@@ -1060,9 +1108,7 @@ export default function Dashboard() {
 
   function assignWork() {
     if (!assignmentDraft.judgeId || !assignmentDraft.workId) return;
-    const exists = state.assignments.some(
-      (a) => a.judgeId === assignmentDraft.judgeId && a.workId === assignmentDraft.workId
-    );
+    const exists = state.assignments.some((a) => a.judgeId === assignmentDraft.judgeId && a.workId === assignmentDraft.workId);
     if (exists) return;
     setState((prev) => ({
       ...prev,
@@ -1166,7 +1212,6 @@ export default function Dashboard() {
     setImportText('');
   }
 
-
   function exportAppState() {
     const payload = JSON.stringify(state, null, 2);
     const blob = new Blob([payload], { type: 'application/json;charset=utf-8;' });
@@ -1204,11 +1249,7 @@ export default function Dashboard() {
     }
 
     setCloudSyncing(true);
-    const { data, error } = await supabase
-      .from(CLOUD_TABLE)
-      .select('state')
-      .eq('id', cloudRowId)
-      .maybeSingle();
+    const { data, error } = await supabase.from(CLOUD_TABLE).select('state').eq('id', cloudRowId).maybeSingle();
 
     if (error) {
       setCloudSyncing(false);
@@ -1246,22 +1287,16 @@ export default function Dashboard() {
     setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
 
     try {
-      let { error } = await supabase
-        .from(CLOUD_TABLE)
-        .upsert(payload, { onConflict: 'id' });
+      let { error } = await supabase.from(CLOUD_TABLE).upsert(payload, { onConflict: 'id' });
 
       if (error && isUuidInputError(error.message)) {
         const fallbackId = crypto.randomUUID();
         const fallbackPayload = { id: fallbackId, state };
         const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
         setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
-        const retry = await supabase
-          .from(CLOUD_TABLE)
-          .upsert(fallbackPayload, { onConflict: 'id' });
+        const retry = await supabase.from(CLOUD_TABLE).upsert(fallbackPayload, { onConflict: 'id' });
         error = retry.error;
-        if (!error) {
-          setCloudRowId(fallbackId);
-        }
+        if (!error) setCloudRowId(fallbackId);
       }
 
       setCloudSyncing(false);
@@ -1454,6 +1489,7 @@ export default function Dashboard() {
     showToast('Работа удалена');
   }
 
+  // --- UI below (kept as in your version, but relies on the cleaned state above) ---
   if (!session.role) {
     if (participantMode) {
       return (
@@ -1461,7 +1497,11 @@ export default function Dashboard() {
           <BrandHeader />
           <div className="card">
             <h1>Личный кабинет участника</h1>
-            <input placeholder="Фамилия Имя Отчество" value={participantDraft.fullName} onChange={(e) => setParticipantDraft((p) => ({ ...p, fullName: e.target.value }))} />
+            <input
+              placeholder="Фамилия Имя Отчество"
+              value={participantDraft.fullName}
+              onChange={(e) => setParticipantDraft((p) => ({ ...p, fullName: e.target.value }))}
+            />
 
             <select
               value={participantDraft.contest}
@@ -1480,7 +1520,11 @@ export default function Dashboard() {
                 }));
               }}
             >
-              {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+              {CONTEST_OPTIONS.map((contest) => (
+                <option key={contest} value={contest}>
+                  {contest}
+                </option>
+              ))}
             </select>
 
             <select
@@ -1491,23 +1535,53 @@ export default function Dashboard() {
                 setParticipantDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
               }}
             >
-              {participantDirectionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+              {participantDirectionOptions.map((direction) => (
+                <option key={direction} value={direction}>
+                  {direction}
+                </option>
+              ))}
             </select>
 
             {participantNominationOptions.length ? (
-              <select value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}>
-                {participantNominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
+              <select
+                value={participantDraft.nomination}
+                onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}
+              >
+                {participantNominationOptions.map((nomination) => (
+                  <option key={nomination} value={nomination}>
+                    {nomination}
+                  </option>
+                ))}
               </select>
             ) : (
-              <input placeholder="Номинация" value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))} />
+              <input
+                placeholder="Номинация"
+                value={participantDraft.nomination}
+                onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}
+              />
             )}
 
-            <select value={participantDraft.category} onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}>
-              {participantCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+            <select
+              value={participantDraft.category}
+              onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}
+            >
+              {participantCategoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
             </select>
 
-            <input placeholder="Название работы" value={participantDraft.title} onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))} />
-            <textarea placeholder="Описание работы" value={participantDraft.description} onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))} />
+            <input
+              placeholder="Название работы"
+              value={participantDraft.title}
+              onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))}
+            />
+            <textarea
+              placeholder="Описание работы"
+              value={participantDraft.description}
+              onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))}
+            />
 
             <UploadWidget
               label="Загрузка фото"
@@ -1516,6 +1590,7 @@ export default function Dashboard() {
               userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
               submissionId={participantSubmissionId}
               onUploaded={(record) => {
+                // оставляем как есть - судья все равно берет signedGetUrl по submissionId
                 setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
               }}
             />
@@ -1544,7 +1619,7 @@ export default function Dashboard() {
       <div className="layout">
         <BrandHeader />
         <div className="card narrow">
-          <h1>Beauty Olymp — система судейства</h1>
+          <h1>Beauty Olymp - система судейства</h1>
           <p>Вход для администратора, модератора или судьи.</p>
           <select value={loginForm.role} onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}>
             <option value="judge">Судья</option>
@@ -1557,33 +1632,33 @@ export default function Dashboard() {
           <button onClick={() => setParticipantMode(true)}>Личный кабинет участника</button>
           <small>Демо: admin/admin или judge1/password</small>
         </div>
-        {lightboxImage ? (
-        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
-          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
-            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
-          </div>
-        </div>
-      ) : null}
 
-      {lightboxVideo ? (
-        <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
-          <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
-            <div className="video-frame video-expanded">
-              <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+        {lightboxImage ? (
+          <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+            <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
+              <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
             </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      {toast ? <div className="toast">{toast}</div> : null}
-      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
+        {lightboxVideo ? (
+          <div className="modal-overlay" onClick={() => setLightboxVideo('')}>
+            <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
+              <div className="video-frame video-expanded">
+                <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {toast ? <div className="toast">{toast}</div> : null}
+        <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
         <Styles />
       </div>
     );
   }
-
 
   if (session.role === 'judge') {
     const done = judgeAssignments.filter((a) => a.status === 'оценено').length;
@@ -1641,13 +1716,13 @@ export default function Dashboard() {
 
               <div className="grid">
                 {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.photos || selectedJudgeWork.photos || []).map((photo, index) => (
-                  <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+                  <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                 ))}
               </div>
 
               <div className="grid judge-video-grid">
-                {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.videos || selectedJudgeWork.videos || []).map((video) => (
-                  <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.videos || selectedJudgeWork.videos || []).map((video, idx) => (
+                  <div key={`${video}-${idx}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
                     {isEmbeddedVideoUrl(video) ? (
                       <iframe src={video} title={selectedJudgeWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
                     ) : (
@@ -1737,7 +1812,6 @@ export default function Dashboard() {
     );
   }
 
-
   const notStartedJudges = state.judges.filter((judge) =>
     state.assignments.some((a) => a.judgeId === judge.id && a.status !== 'оценено')
   );
@@ -1752,243 +1826,182 @@ export default function Dashboard() {
       </div>
 
       <div className="card row">
-        <button onClick={() => handleAdminTabChange('main')}>Админка</button>
-        {access.canManageJudges ? <button onClick={() => handleAdminTabChange('judges')}>Судьи</button> : null}
-        {access.canManageWorks ? <button onClick={() => handleAdminTabChange('works')}>Работы</button> : null}
-        {access.canManageWorks ? <button onClick={() => handleAdminTabChange('import')}>Импорт</button> : null}
-        {isAdmin ? <button onClick={() => handleAdminTabChange('moderators')}>Модераторы</button> : null}
+        <button onClick={() => setAdminTab('main')}>Админка</button>
+        {access.canManageJudges ? <button onClick={() => setAdminTab('judges')}>Судьи</button> : null}
+        {access.canManageWorks ? <button onClick={() => setAdminTab('works')}>Работы</button> : null}
+        {access.canManageWorks ? <button onClick={() => setAdminTab('import')}>Импорт</button> : null}
+        {isAdmin ? <button onClick={() => setAdminTab('moderators')}>Модераторы</button> : null}
       </div>
 
       {adminTab === 'main' ? (
         <>
-      <div className="card">
-        <h2>Дашборд</h2>
-        <p>Работ: {state.works.length}</p>
-        <p>Судей: {state.judges.length}</p>
-        <p>Завершено назначений: {progress}%</p>
-        <p>Работ без оценок: {state.works.filter((w) => !state.scores.some((s) => s.workId === w.id)).length}</p>
-        <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
-      </div>
-
-      {access.canManageWorks ? (
-      <div className="card">
-        <h3>Создание карточки работы</h3>
-        <select
-          value={workDraft.contest}
-          onChange={(e) => {
-            const nextContest = e.target.value;
-            const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
-            const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
-            const nextDirection = nextDirections[0];
-            const nextNominations = getNominationOptions(nextContest, nextDirection);
-            setWorkDraft((p) => ({
-              ...p,
-              contest: nextContest,
-              category: nextCategories[0],
-              direction: nextDirection,
-              nomination: nextNominations[0] || '',
-            }));
-          }}
-        >
-          {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
-        </select>
-        <select
-          value={workDraft.direction}
-          onChange={(e) => {
-            const nextDirection = e.target.value;
-            const nextNominations = getNominationOptions(workDraft.contest, nextDirection);
-            setWorkDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
-          }}
-        >
-          {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
-        </select>
-        {nominationOptions.length ? (
-          <select value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))}>
-            {nominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
-          </select>
-        ) : (
-          <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
-        )}
-        <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
-          {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-        </select>
-        <input placeholder="Фамилия и отчество участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
-        <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
-        <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
-        <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
-        <textarea placeholder="Видео (по 1 ссылке на строку)" value={workDraft.videosText} onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))} />
-        <button onClick={addWork}>Сохранить работу</button>
-      </div>
-      ) : null}
-
-      {access.canManageJudges ? (
-      <>
-      <div className="card">
-        <h3>Управление критериями</h3>
-        <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
-        <input value={criterionTitle} onChange={(e) => setCriterionTitle(e.target.value)} placeholder="Новый критерий" />
-        <button onClick={addCriterion}>Добавить критерий</button>
-      </div>
-
-      <div className="card">
-        <h3>Создание судьи</h3>
-        <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
-        <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
-        <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
-        <button onClick={addJudge}>Добавить судью</button>
-      </div>
-
-      {isAdmin ? (
-      <div className="card">
-        <h3>Создание модератора</h3>
-        <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
-        <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
-        <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
-        <div>
-          {MODERATOR_PERMISSIONS.map((permission) => (
-            <label key={permission.key} style={{ display: 'block' }}>
-              <input
-                type="checkbox"
-                checked={moderatorDraft.permissions[permission.key]}
-                onChange={() => toggleDraftPermission(permission.key)}
-              />{' '}
-              {permission.label}
-            </label>
-          ))}
-        </div>
-        <button onClick={addModerator}>Добавить модератора</button>
-      </div>
-      ) : null}
-
-      <div className="card">
-        <h3>Назначение работ</h3>
-        <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
-          <option value="">Выберите судью</option>
-          {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} — {judge.fullName}</option>)}
-        </select>
-        <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
-          <option value="">Выберите работу</option>
-          {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} — {work.title}</option>)}
-        </select>
-        <button onClick={assignWork}>Назначить</button>
-      </div>
-      </>
-      ) : null}
-
-      {access.canExportScores ? (
-      <>
-      <div className="card">
-        <h3>Рейтинг по номинациям и категориям</h3>
-        <div className="row rating-filters">
-          <label>Конкурсы</label>
-          <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
-            <option value="all">Все конкурсы</option>
-            {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
-          </select>
-          <label>Направления</label>
-          <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
-            <option value="all">Все направления</option>
-            {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
-          </select>
-          <label>Категории</label>
-          <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
-            <option value="all">Все категории</option>
-            {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
-          </select>
-        </div>
-        {Object.entries(ratings).map(([group, list]) => (
-          <div key={group}>
-            <h4>{group}</h4>
-            <table>
-              <thead><tr><th>Место</th><th>Номер работы</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr></thead>
-              <tbody>
-                {list.map((item) => <tr key={item.workId}><td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td><td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td></tr>)}
-              </tbody>
-            </table>
+          <div className="card">
+            <h2>Дашборд</h2>
+            <p>Работ: {state.works.length}</p>
+            <p>Судей: {state.judges.length}</p>
+            <p>Завершено назначений: {progress}%</p>
+            <p>Работ без оценок: {state.works.filter((w) => !state.scores.some((s) => s.workId === w.id)).length}</p>
+            <p>Судьи с незавершенными назначениями: {notStartedJudges.map((j) => j.fullName).join(', ') || 'нет'}</p>
           </div>
-        ))}
-      </div>
 
-      <div className="card row">
-        <button onClick={exportScores}>Экспорт всех оценок CSV</button>
-        <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
-      </div>
-      </>
-      ) : null}
+          {access.canManageWorks ? (
+            <div className="card">
+              <h3>Создание карточки работы</h3>
+              <select
+                value={workDraft.contest}
+                onChange={(e) => {
+                  const nextContest = e.target.value;
+                  const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
+                  const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
+                  const nextDirection = nextDirections[0];
+                  const nextNominations = getNominationOptions(nextContest, nextDirection);
+                  setWorkDraft((p) => ({
+                    ...p,
+                    contest: nextContest,
+                    category: nextCategories[0],
+                    direction: nextDirection,
+                    nomination: nextNominations[0] || '',
+                  }));
+                }}
+              >
+                {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+              </select>
 
-      </>
-      ) : null}
+              <select
+                value={workDraft.direction}
+                onChange={(e) => {
+                  const nextDirection = e.target.value;
+                  const nextNominations = getNominationOptions(workDraft.contest, nextDirection);
+                  setWorkDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
+                }}
+              >
+                {directionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+              </select>
 
-      {adminTab === 'judges' && access.canManageJudges ? (
-        <div className="card">
-          <h3>Все судьи</h3>
-          <div className="admin-table-wrap"><table>
-            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Статус</th><th>Действия</th></tr></thead>
-            <tbody>
-              {state.judges.map((judge) => {
-                const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
-                const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено');
-                const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено');
-                const isEditing = judgeEditId === judge.id;
-                return (
-                  <tr key={judge.id}>
-                    <td>{judge.id}</td>
-                    <td>{isEditing ? <input value={judgeEditDraft.fullName} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : judge.fullName}</td>
-                    <td>{isEditing ? <input value={judgeEditDraft.login} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, login: e.target.value }))} /> : judge.login}</td>
-                    <td>{isEditing ? (
-                      <select value={String(judgeEditDraft.active)} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
-                        <option value="true">Активен</option>
-                        <option value="false">Неактивен</option>
-                      </select>
-                    ) : (judge.active ? 'Активен' : 'Неактивен')}</td>
-                    <td>
-                      <div className="row">
-                        {isEditing ? (
-                          <>
-                            <input type="password" placeholder="Новый пароль (опц.)" value={judgeEditDraft.password} onChange={(e) => setJudgeEditDraft((p) => ({ ...p, password: e.target.value }))} />
-                            <button onClick={saveJudgeEdit}>Сохранить</button>
-                            <button onClick={() => setJudgeEditId(null)}>Отмена</button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => setJudgeViewId(judge.id)}>Просмотр</button>
-                            <button onClick={() => startJudgeEdit(judge)}>Редактировать</button>
-                            <button onClick={() => deleteJudge(judge.id)}>Удалить</button>
-                          </>
-                        )}
-                      </div>
-                      {judgeViewId === judge.id ? (
-                        <div>
-                          <p><strong>Отсудил:</strong> {judged.length}</p>
-                          <ul>{judged.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}><button onClick={() => setSelectedJudgeWork({ judgeId: judge.id, workId: a.workId })}>{a.workId} — {work?.title || 'Удалена'}</button></li>; })}</ul>
-                          <p><strong>Не отсудил:</strong> {pending.length}</p>
-                          <ul>{pending.map((a) => { const work = state.works.find((w) => w.id === a.workId); return <li key={a.workId}>{a.workId} — {work?.title || 'Удалена'}</li>; })}</ul>
-                        </div>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table></div>
+              {nominationOptions.length ? (
+                <select value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))}>
+                  {nominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
+                </select>
+              ) : (
+                <input placeholder="Номинация" value={workDraft.nomination} onChange={(e) => setWorkDraft((p) => ({ ...p, nomination: e.target.value }))} />
+              )}
 
-          <div className="mobile-only-list">
-            {state.judges.map((judge) => {
-              const judgeAssignmentsList = state.assignments.filter((a) => a.judgeId === judge.id);
-              const judged = judgeAssignmentsList.filter((a) => a.status === 'оценено').length;
-              const pending = judgeAssignmentsList.filter((a) => a.status !== 'оценено').length;
-              return (
-                <div key={`mobile-${judge.id}`} className="card compact-card">
-                  <h4>{judge.fullName}</h4>
-                  <p><strong>ID:</strong> {judge.id}</p>
-                  <p><strong>Логин:</strong> {judge.login}</p>
-                  <p><strong>Статус:</strong> {judge.active ? 'Активен' : 'Неактивен'}</p>
-                  <p><strong>Отсудил:</strong> {judged} · <strong>Не отсудил:</strong> {pending}</p>
+              <select value={workDraft.category} onChange={(e) => setWorkDraft((p) => ({ ...p, category: e.target.value }))}>
+                {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+              </select>
+
+              <input placeholder="Фамилия и отчество участника" value={workDraft.participantName} onChange={(e) => setWorkDraft((p) => ({ ...p, participantName: e.target.value }))} />
+              <input placeholder="Название" value={workDraft.title} onChange={(e) => setWorkDraft((p) => ({ ...p, title: e.target.value }))} />
+              <textarea placeholder="Описание" value={workDraft.description} onChange={(e) => setWorkDraft((p) => ({ ...p, description: e.target.value }))} />
+              <textarea placeholder="Фото (по 1 ссылке на строку)" value={workDraft.photosText} onChange={(e) => setWorkDraft((p) => ({ ...p, photosText: e.target.value }))} />
+              <textarea placeholder="Видео (по 1 ссылке на строку)" value={workDraft.videosText} onChange={(e) => setWorkDraft((p) => ({ ...p, videosText: e.target.value }))} />
+              <button onClick={addWork}>Сохранить работу</button>
+            </div>
+          ) : null}
+
+          {access.canManageJudges ? (
+            <>
+              <div className="card">
+                <h3>Управление критериями</h3>
+                <ul>{state.criteria.map((c) => <li key={c.id}>{c.title}</li>)}</ul>
+                <input value={criterionTitle} onChange={(e) => setCriterionTitle(e.target.value)} placeholder="Новый критерий" />
+                <button onClick={addCriterion}>Добавить критерий</button>
+              </div>
+
+              <div className="card">
+                <h3>Создание судьи</h3>
+                <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
+                <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
+                <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
+                <button onClick={addJudge}>Добавить судью</button>
+              </div>
+
+              {isAdmin ? (
+                <div className="card">
+                  <h3>Создание модератора</h3>
+                  <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
+                  <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
+                  <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
+                  <div>
+                    {MODERATOR_PERMISSIONS.map((permission) => (
+                      <label key={permission.key} style={{ display: 'block' }}>
+                        <input
+                          type="checkbox"
+                          checked={moderatorDraft.permissions[permission.key]}
+                          onChange={() => toggleDraftPermission(permission.key)}
+                        />{' '}
+                        {permission.label}
+                      </label>
+                    ))}
+                  </div>
+                  <button onClick={addModerator}>Добавить модератора</button>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              ) : null}
+
+              <div className="card">
+                <h3>Назначение работ</h3>
+                <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
+                  <option value="">Выберите судью</option>
+                  {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} - {judge.fullName}</option>)}
+                </select>
+                <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
+                  <option value="">Выберите работу</option>
+                  {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} - {work.title}</option>)}
+                </select>
+                <button onClick={assignWork}>Назначить</button>
+              </div>
+            </>
+          ) : null}
+
+          {access.canExportScores ? (
+            <>
+              <div className="card">
+                <h3>Рейтинг по номинациям и категориям</h3>
+                <div className="row rating-filters">
+                  <label>Конкурсы</label>
+                  <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
+                    <option value="all">Все конкурсы</option>
+                    {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+                  </select>
+                  <label>Направления</label>
+                  <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
+                    <option value="all">Все направления</option>
+                    {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+                  </select>
+                  <label>Категории</label>
+                  <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
+                    <option value="all">Все категории</option>
+                    {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                  </select>
+                </div>
+
+                {Object.entries(ratings).map(([group, list]) => (
+                  <div key={group}>
+                    <h4>{group}</h4>
+                    <table>
+                      <thead>
+                        <tr><th>Место</th><th>Номер работы</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr>
+                      </thead>
+                      <tbody>
+                        {list.map((item) => (
+                          <tr key={item.workId}>
+                            <td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td>
+                            <td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </div>
+
+              <div className="card row">
+                <button onClick={exportScores}>Экспорт всех оценок CSV</button>
+                <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
+              </div>
+            </>
+          ) : null}
+        </>
       ) : null}
 
       {adminTab === 'import' && access.canManageWorks ? (
@@ -1999,12 +2012,10 @@ export default function Dashboard() {
           <button onClick={importWorksFromCsv}>Импортировать</button>
 
           <h3>Синхронизация данных между устройствами</h3>
-          <p>
-            Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.
-          </p>
+          <p>Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.</p>
           <p>
             Статус облака: {supabase ? (cloudSyncing ? 'идет синхронизация…' : 'подключено') : 'не настроено'}
-            {cloudError ? ` — ${cloudError}` : ''}
+            {cloudError ? ` - ${cloudError}` : ''}
           </p>
           <small><strong>Текущий cloud row id:</strong> {cloudRowId}</small>
           {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
@@ -2016,118 +2027,6 @@ export default function Dashboard() {
           </div>
           <textarea rows={6} placeholder="Вставьте JSON состояния сюда" value={stateImportText} onChange={(e) => setStateImportText(e.target.value)} />
           <button onClick={importAppState}>Импорт JSON состояния</button>
-        </div>
-      ) : null}
-
-      {adminTab === 'works' && access.canManageWorks ? (
-        <div className="card">
-          <h3>Все загруженные работы</h3>
-          <div className="admin-table-wrap"><table className="works-table">
-            <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
-            <tbody>
-              {state.works.map((work) => {
-                const editing = workEditId === work.id;
-                return (
-                  <tr key={work.id}>
-                    <td>{work.id}</td>
-                    <td>{work.contest}</td>
-                    <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
-                    <td>{editing ? <input value={workEditDraft.category} onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))} /> : work.category}</td>
-                    <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
-                    <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
-                    <td>
-                      <div className="row">
-                        {editing ? (
-                          <>
-                            <button onClick={saveWorkEdit}>Сохранить</button>
-                            <button onClick={() => setWorkEditId(null)}>Отмена</button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startWorkEdit(work)}>Редактировать</button>
-                            <button onClick={() => deleteWork(work.id)}>Удалить</button>
-                            <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table></div>
-
-          <div className="mobile-only-list">
-            {state.works.map((work) => (
-              <div key={`mobile-work-${work.id}`} className="card compact-card">
-                <h4>{work.title}</h4>
-                <p><strong>Номер:</strong> {work.id}</p>
-                <p><strong>Конкурс:</strong> {work.contest}</p>
-                <p><strong>Направление:</strong> {work.direction || '—'}</p>
-                <p><strong>Категория:</strong> {work.category}</p>
-                <p><strong>Участник:</strong> {work.participantName || '—'}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {adminTab === 'moderators' && isAdmin ? (
-        <div className="card">
-          <h3>Модераторы</h3>
-          <div className="admin-table-wrap"><table>
-            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
-            <tbody>
-              {state.moderators.map((moderator) => {
-                const isEditing = moderatorEditId === moderator.id;
-                return (
-                  <tr key={moderator.id}>
-                    <td>{moderator.id}</td>
-                    <td>{isEditing ? <input value={moderatorEditDraft.fullName} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : moderator.fullName}</td>
-                    <td>{isEditing ? <input value={moderatorEditDraft.login} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))} /> : moderator.login}</td>
-                    <td>
-                      {isEditing ? (
-                        <div>
-                          {MODERATOR_PERMISSIONS.map((permission) => (
-                            <label key={permission.key} style={{ display: 'block' }}>
-                              <input
-                                type="checkbox"
-                                checked={moderatorEditDraft.permissions[permission.key]}
-                                onChange={() => toggleEditPermission(permission.key)}
-                              />{' '}
-                              {permission.label}
-                            </label>
-                          ))}
-                        </div>
-                      ) : MODERATOR_PERMISSIONS.filter((permission) => moderator.permissions?.[permission.key]).map((permission) => permission.label).join(', ') || 'Нет прав'}
-                    </td>
-                    <td>{isEditing ? (
-                      <select value={String(moderatorEditDraft.active)} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
-                        <option value="true">Активен</option>
-                        <option value="false">Неактивен</option>
-                      </select>
-                    ) : (moderator.active ? 'Активен' : 'Неактивен')}</td>
-                    <td>
-                      <div className="row">
-                        {isEditing ? (
-                          <>
-                            <input type="password" placeholder="Новый пароль (опц.)" value={moderatorEditDraft.password} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))} />
-                            <button onClick={saveModeratorEdit}>Сохранить</button>
-                            <button onClick={() => setModeratorEditId(null)}>Отмена</button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startModeratorEdit(moderator)}>Редактировать</button>
-                            <button onClick={() => deleteModerator(moderator.id)}>Удалить</button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table></div>
         </div>
       ) : null}
 
@@ -2151,19 +2050,21 @@ export default function Dashboard() {
 
                   <div className="grid">
                     {(work?.photos || []).map((photo, index) => (
-                      <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+                      <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                     ))}
                   </div>
 
                   <div className="grid judge-video-grid">
-                    {(work?.videos || []).map((video) => (
-                      <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                    {(work?.videos || []).map((video, index) => (
+                      <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
                         <iframe src={video} title={work?.id || 'video'} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
                       </div>
                     ))}
                   </div>
 
-                  {!score ? <p>По этой связке судья-работа оценка пока не отправлена.</p> : (
+                  {!score ? (
+                    <p>По этой связке судья-работа оценка пока не отправлена.</p>
+                  ) : (
                     <>
                       <table>
                         <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
@@ -2185,7 +2086,6 @@ export default function Dashboard() {
       ) : null}
 
       {selectedWork ? (
-
         <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="toolbar">
@@ -2199,13 +2099,13 @@ export default function Dashboard() {
             <h4>Фото работы</h4>
             <div className="grid">
               {(selectedWork.photos || []).map((photo, index) => (
-                <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+                <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
               ))}
             </div>
             <h4>Видео работы</h4>
             <div className="grid judge-video-grid">
-              {(selectedWork.videos || []).map((video) => (
-                <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+              {(selectedWork.videos || []).map((video, index) => (
+                <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
                   <iframe src={video} title={selectedWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
                 </div>
               ))}
@@ -2255,7 +2155,6 @@ export default function Dashboard() {
   );
 }
 
-
 function BrandHeader() {
   return (
     <div className="brand-header">
@@ -2263,7 +2162,6 @@ function BrandHeader() {
     </div>
   );
 }
-
 
 function Styles() {
   return (
