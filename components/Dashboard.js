@@ -1600,12 +1600,30 @@ alert('Неверные данные для входа.');
         <div className="card narrow">
           <h1>Beauty Olymp — система судейства</h1>
           <p>Вход для администратора, модератора или судьи.</p>
-          <select value={loginForm.role} onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}>
-            <option value="judge">Судья</option>
-            <option value="admin">Администратор</option>
-            <option value="moderator">Модератор</option>
-            <option value="participant">Участник</option>
-          </select>
+          {forcedRole ? (
+  <div style={{ marginBottom: 12, fontWeight: 500 }}>
+    Роль: {
+      forcedRole === 'admin'
+        ? 'Администратор'
+        : forcedRole === 'judge'
+        ? 'Судья'
+        : forcedRole === 'moderator'
+        ? 'Модератор'
+        : 'Участник'
+    }
+  </div>
+) : (
+  <select
+    value={loginForm.role}
+    onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}
+  >
+    <option value="judge">Судья</option>
+    <option value="admin">Администратор</option>
+    <option value="moderator">Модератор</option>
+    <option value="participant">Участник</option>
+  </select>
+)}
+
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
           <button onClick={login}>Войти</button>
