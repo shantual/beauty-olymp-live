@@ -126,8 +126,7 @@ const DEFAULT_JUDGES = [
     fullName: 'Судья Демонстрационный',
     email: 'judge@demo.local',
     login: 'judge1',
-    passwordHash:
-      '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+    passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
     active: true,
   },
 ];
@@ -181,7 +180,6 @@ function createDefaultState() {
 function normalizeState(rawState) {
   const next = { ...createDefaultState(), ...(rawState || {}) };
 
-  // Миграция: исправляем старый неверный hash demo-пароля и отсутствие active.
   next.judges = (next.judges || []).map((judge) => {
     if (
       judge.login === 'judge1' &&
@@ -196,7 +194,6 @@ function normalizeState(rawState) {
     return { ...judge, active: judge.active ?? true };
   });
 
-  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
   const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
   const demoJudge = {
     id: 'J-001',
@@ -294,7 +291,6 @@ function buildCloudRequestPreview(table, payload) {
   return `supabase.from('${table}').upsert({ id: '${payload.id}', state: <json> }, { onConflict: 'id' })`;
 }
 
-
 function safeParseJson(value) {
   try {
     return JSON.parse(value);
@@ -316,6 +312,7 @@ export default function Dashboard() {
   const [cloudRowId, setCloudRowId] = useState(DEFAULT_CLOUD_ROW_ID);
   const lastCloudWriteRef = useRef('');
   const [loginForm, setLoginForm] = useState({ login: '', password: '', role: 'judge' });
+
   const [workDraft, setWorkDraft] = useState({
     contest: 'Эстетика Олимпа',
     nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
@@ -328,7 +325,9 @@ export default function Dashboard() {
     videosText: '',
     status: 'Допущено',
   });
+
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+
   const [participantDraft, setParticipantDraft] = useState({
     fullName: '',
     contest: 'Эстетика Олимпа',
@@ -340,12 +339,14 @@ export default function Dashboard() {
     photos: [],
     videos: [],
   });
+
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
     login: '',
     password: '',
     permissions: normalizeModeratorPermissions({}),
   });
+
   const [criterionTitle, setCriterionTitle] = useState('');
   const [assignmentDraft, setAssignmentDraft] = useState({ judgeId: '', workId: '' });
   const [scoreDrafts, setScoreDrafts] = useState({});
@@ -353,14 +354,19 @@ export default function Dashboard() {
   const [stateImportText, setStateImportText] = useState('');
   const [toast, setToast] = useState('');
   const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
+-
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
+
   const [adminTab, setAdminTab] = useState('main');
+
   const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
+
   const [judgeViewId, setJudgeViewId] = useState(null);
   const [judgeSubmissionFiles, setJudgeSubmissionFiles] = useState({});
+
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
     fullName: '',
@@ -420,7 +426,6 @@ export default function Dashboard() {
     () => CATEGORY_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Дебют'],
     [participantDraft.contest]
   );
-
 
   useEffect(() => {
     let cancelled = false;
@@ -2245,6 +2250,289 @@ export default function Dashboard() {
       <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
       <Styles />
     </div>
+  </div>
+) : null}
+
+      {adminTab === 'moderators' && isAdmin ? (
+        <div className="card">
+          <h3>Модераторы</h3>
+          <div className="admin-table-wrap"><table>
+            <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {state.moderators.map((moderator) => {
+                const isEditing = moderatorEditId === moderator.id;
+                return (
+                  <tr key={moderator.id}>
+                    <td>{moderator.id}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.fullName} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, fullName: e.target.value }))} /> : moderator.fullName}</td>
+                    <td>{isEditing ? <input value={moderatorEditDraft.login} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, login: e.target.value }))} /> : moderator.login}</td>
+                    <td>
+                      {isEditing ? (
+                        <div>
+                          {MODERATOR_PERMISSIONS.map((permission) => (
+                            <label key={permission.key} style={{ display: 'block' }}>
+                              <input
+                                type="checkbox"
+                                checked={moderatorEditDraft.permissions[permission.key]}
+                                onChange={() => toggleEditPermission(permission.key)}
+                              />{' '}
+                              {permission.label}
+                            </label>
+                          ))}
+                        </div>
+                      ) : MODERATOR_PERMISSIONS.filter((permission) => moderator.permissions?.[permission.key]).map((permission) => permission.label).join(', ') || 'Нет прав'}
+                    </td>
+                    <td>{isEditing ? (
+                      <select value={String(moderatorEditDraft.active)} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, active: e.target.value === 'true' }))}>
+                        <option value="true">Активен</option>
+                        <option value="false">Неактивен</option>
+                      </select>
+                    ) : (moderator.active ? 'Активен' : 'Неактивен')}</td>
+                    <td>
+                      <div className="row">
+                        {isEditing ? (
+                          <>
+                            <input type="password" placeholder="Новый пароль (опц.)" value={moderatorEditDraft.password} onChange={(e) => setModeratorEditDraft((p) => ({ ...p, password: e.target.value }))} />
+                            <button onClick={saveModeratorEdit}>Сохранить</button>
+                            <button onClick={() => setModeratorEditId(null)}>Отмена</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startModeratorEdit(moderator)}>Редактировать</button>
+                            <button onClick={() => deleteModerator(moderator.id)}>Удалить</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
+        </div>
+      ) : null}
+
+       {selectedJudgeWork ? (
+        <div className="modal-overlay" onClick={() => setSelectedJudgeWork(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="toolbar">
+              <h3>Оценка судьи по работе</h3>
+              <button onClick={() => setSelectedJudgeWork(null)}>Закрыть</button>
+            </div>
+            {(() => {
+              const score = state.scores.find((s) => s.workId === selectedJudgeWork.workId && s.judgeId === selectedJudgeWork.judgeId);
+              const judge = state.judges.find((j) => j.id === selectedJudgeWork.judgeId);
+              const work = state.works.find((w) => w.id === selectedJudgeWork.workId);
+              return (
+                <div>
+                  <p><strong>Судья:</strong> {judge?.fullName || selectedJudgeWork.judgeId}</p>
+                  <p><strong>Номер работы:</strong> {work?.id}</p>
+                  <p><strong>Название:</strong> {work?.title || '—'}</p>
+                  <p><strong>Описание:</strong> {work?.description || '—'}</p>
+
+                  <div className="grid">
+                    {(work?.photos || []).map((photo, index) => (
+                      <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+                    ))}
+                  </div>
+
+                  <div className="grid judge-video-grid">
+                    {(work?.videos || []).map((video, index) => (
+                      <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                        <iframe src={video} title={work?.id || 'video'} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                      </div>
+                    ))}
+                  </div>
+
+                  {!score ? (
+                    <p>По этой связке судья-работа оценка пока не отправлена.</p>
+                  ) : (
+                    <>
+                      <table>
+                        <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
+                        <tbody>
+                          {state.criteria.map((criterion) => (
+                            <tr key={criterion.id}><td>{criterion.title}</td><td>{score.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <p><strong>Комментарий:</strong> {score.comment}</p>
+                      <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
+
+      {selectedWork ? (
+        <div className="modal-overlay" onClick={() => setSelectedWorkId(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="toolbar">
+              <h3>Результаты судейства: Номер работы {selectedWork.id}</h3>
+              <button onClick={() => setSelectedWorkId(null)}>Закрыть</button>
+            </div>
+            <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
+            <p><strong>Участник:</strong> {selectedWork.participantName || 'не указан'}</p>
+            <p><strong>Название:</strong> {selectedWork.title || '—'}</p>
+            <p><strong>Описание:</strong> {selectedWork.description || '—'}</p>
+            <h4>Фото работы</h4>
+            <div className="grid">
+              {(selectedWork.photos || []).map((photo, index) => (
+                <img key={`${photo}-${index}`} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+              ))}
+            </div>
+            <h4>Видео работы</h4>
+            <div className="grid judge-video-grid">
+              {(selectedWork.videos || []).map((video, index) => (
+                <div key={`${video}-${index}`} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                  <iframe src={video} title={selectedWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                </div>
+              ))}
+            </div>
+            {selectedWorkScores.length === 0 ? (
+              <p>По этой работе пока нет отправленных оценок.</p>
+            ) : (
+              selectedWorkScores.map((score) => {
+                const judge = state.judges.find((item) => item.id === score.judgeId);
+                return (
+                  <div key={`${score.workId}-${score.judgeId}-${score.submittedAt}`} className="card">
+                    <strong>{judge?.fullName || score.judgeId}</strong>
+                    <table>
+                      <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
+                      <tbody>
+                        {state.criteria.map((criterion) => (
+                          <tr key={criterion.id}>
+                            <td>{criterion.title}</td>
+                            <td>{score.criteriaScores?.[criterion.id] ?? '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p><strong>Комментарий:</strong> {score.comment}</p>
+                    <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {lightboxImage ? (
+        <div className="modal-overlay" onClick={() => setLightboxImage('')}>
+          <div className="modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="icon-close" onClick={() => setLightboxImage('')} aria-label="Закрыть">×</button>
+            <img src={lightboxImage} alt="Увеличенное фото" className="zoom-image" />
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast">{toast}</div> : null}
+      <button className="mobile-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
+      <Styles />
+    </div>
+  );
+}
+
+function BrandHeader() {
+  return (
+    <div className="brand-header">
+      <img src="/beauty-olymp-logo.png" alt="Association of Beauty Professionals | beauty olymp" className="brand-logo-image" />
+    </div>
+  );
+}
+
+function Styles() {
+  return (
+    <style jsx global>{`
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
+      body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #000; background: radial-gradient(circle at 8% 10%, rgba(255,2,93,0.14), transparent 40%), radial-gradient(circle at 92% 20%, rgba(40,28,104,0.14), transparent 44%), radial-gradient(circle at 50% 100%, rgba(255,2,93,0.1), transparent 35%), #fff; }
+      .layout { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
+      .brand-header { display: flex; justify-content: flex-start; margin-bottom: 4px; }
+      .brand-logo-image { width: min(360px, 65vw); height: auto; object-fit: contain; }
+      .card { background: rgba(255,255,255,0.94); border: 1px solid rgba(40,28,104,0.1); border-radius: 14px; padding: 16px; box-shadow: 0 12px 34px rgba(40,28,104,0.08); display: grid; gap: 8px; }
+      .narrow { max-width: 420px; margin: 40px auto; }
+      .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+      input, textarea, select, button { padding: 10px; border-radius: 10px; border: 1px solid rgba(40,28,104,0.2); font-size: 14px; }
+      input, textarea, select { background: rgba(255,255,255,0.94); color: #000; }
+      input:focus, textarea:focus, select:focus { outline: none; border-color: #FF025D; box-shadow: 0 0 0 3px rgba(255,2,93,0.14); }
+      button { border: none; background: linear-gradient(135deg, #FF025D 0%, #d90178 100%); color: #fff; cursor: pointer; box-shadow: none; transition: transform 0.15s ease, filter 0.15s ease; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; font-family: 'Roboto Condensed', Arial, sans-serif; }
+      button:hover { filter: brightness(1.05); transform: translateY(-1px); }
+      button:active { transform: translateY(0); }
+      .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+      .media { width: 100%; min-height: 140px; border-radius: 8px; border: 1px solid #d8deea; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .rating-filters label { font-size: 13px; font-weight: 700; color: #281C68; }
+      .admin-table-wrap { overflow-x: auto; }
+      .admin-table-wrap table { min-width: 920px; }
+      .mobile-only-list { display: none; }
+      .compact-card { padding: 10px 12px; gap: 4px; }
+      .top-logout { display: inline-flex; }
+      .mobile-logout { display: none; background: #281C68; margin-top: 4px; }
+      .toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #281C68 0%, #FF025D 100%); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 30; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(10, 17, 35, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 25; }
+      .modal { width: min(920px, 100%); max-height: 85vh; overflow: auto; background: #fff; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+      .image-modal { width: min(1100px, 100%); position: relative; }
+      .video-modal { width: min(1200px, 100%); position: relative; }
+      .icon-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border-radius: 999px; padding: 0; font-size: 28px; line-height: 1; display: grid; place-items: center; z-index: 2; }
+      .zoom-image { width: 100%; max-height: 75vh; object-fit: contain; }
+      .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; }
+      .video-frame .media { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
+      .judge-video-grid { grid-template-columns: 1fr; }
+      .judge-video-thumb { cursor: zoom-in; width: clamp(320px, 46vw, 640px); max-width: 100%; }
+      .judge-video-thumb .media { width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; }
+      .judge-video-thumb video, .judge-video-thumb iframe { width: 100%; height: 100%; object-fit: contain; display: block; }
+      .video-expanded { aspect-ratio: 16 / 9; min-height: 58vh; }
+      .clickable { cursor: pointer; }
+      .works-table { table-layout: fixed; }
+      .works-table th, .works-table td { vertical-align: middle; }
+      .works-table th { text-align: center; }
+      .works-table td { text-align: left; }
+      .works-table td > .row { justify-content: flex-start; }
+      .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+      .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
+      .judge-preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; border: 1px solid #d8deea; }
+      .judge-stats p { margin: 6px 0; line-height: 1.2; }
+      h1, h2, h3, h4 { margin: 0; color: #281C68; font-family: "Roboto Condensed", Arial, sans-serif; letter-spacing: 0.2px; }
+      strong { color: #000; }
+      p, label, li, td, th, small { color: #000; }
+      table { width: 100%; border-collapse: collapse; }
+      td, th { border: 1px solid #e4e8f1; padding: 8px; text-align: left; }
+
+      @media (max-width: 1024px) {
+        .layout { padding: 14px; gap: 12px; }
+        .card { padding: 14px; }
+        .toolbar { gap: 10px; flex-wrap: wrap; }
+        .row { gap: 6px; }
+        table { display: block; overflow-x: auto; white-space: nowrap; }
+      }
+
+      @media (max-width: 768px) {
+        .brand-logo-image { width: min(250px, 78vw); }
+        .layout { padding: 10px; gap: 10px; }
+        .card { padding: 12px; border-radius: 10px; }
+        .toolbar { flex-direction: column; align-items: stretch; }
+        .toolbar > * { width: 100%; }
+        .top-logout { display: none; }
+        .mobile-logout { display: block; position: sticky; bottom: 8px; z-index: 10; }
+        .row { flex-direction: column; }
+        .admin-table-wrap { display: none; }
+        .mobile-only-list { display: grid; gap: 8px; }
+        .row > * { width: 100%; }
+        input, textarea, select, button { width: 100%; box-sizing: border-box; font-size: 16px; }
+        .grid { grid-template-columns: 1fr; }
+        .media { min-height: 180px; }
+        .modal-overlay { padding: 8px; align-items: flex-end; }
+        .modal { width: 100%; max-height: 92vh; border-radius: 14px 14px 0 0; }
+        .image-modal { border-radius: 14px; }
+        .video-modal { border-radius: 14px; }
+        .video-expanded { min-height: 36vh; }
+        .toast { right: 10px; left: 10px; bottom: 10px; text-align: center; }
+      }
+    `}</style>
   );
 }
 
