@@ -774,11 +774,7 @@ export default function Dashboard() {
     };
   }, [session.role, judgeWorks]);
 
-  const progress = useMemo(() => {
-    const total = state.assignments.length;
-    const done = state.assignments.filter((a) => a.status === 'оценено').length;
-    return total ? Math.round((done / total) * 100) : 0;
-  }, [state.assignments]);
+  
 
   const ratingFilterOptions = useMemo(() => {
     const contests = [...new Set(state.works.map((w) => w.contest).filter(Boolean))];
