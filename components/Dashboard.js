@@ -2187,32 +2187,6 @@ export default function Dashboard() {
     </div>
   </div>
 ) : null}
-      
-      {adminTab === 'import' && access.canManageWorks ? (
-        <div className="card">
-          <h3>Импорт работ из CSV (;)</h3>
-          <p>Колонки: Конкурс;Номинация;Категория;Направление;Название;Описание;Фото1;Фото2;Фото3;Видео1;ФИО участника</p>
-          <textarea rows={8} value={importText} onChange={(e) => setImportText(e.target.value)} />
-          <button onClick={importWorksFromCsv}>Импортировать</button>
-
-          <h3>Синхронизация данных между устройствами</h3>
-          <p>Теперь данные синхронизируются через облако Supabase автоматически. Ручной JSON-обмен оставлен как резервный вариант.</p>
-          <p>
-            Статус облака: {supabase ? (cloudSyncing ? 'идет синхронизация…' : 'подключено') : 'не настроено'}
-            {cloudError ? ` - ${cloudError}` : ''}
-          </p>
-          <small><strong>Текущий cloud row id:</strong> {cloudRowId}</small>
-          {cloudDebug.lastRequest ? <small><strong>Последний запрос:</strong> {cloudDebug.lastRequest}</small> : null}
-          {cloudDebug.lastError ? <small><strong>Последний error.message:</strong> {cloudDebug.lastError}</small> : null}
-          <div className="row">
-            <button onClick={syncFromCloud}>Загрузить из облака</button>
-            <button onClick={syncToCloud}>Сохранить в облако</button>
-            <button onClick={exportAppState}>Экспорт JSON состояния</button>
-          </div>
-           <textarea rows={6} placeholder="Вставьте JSON состояния сюда" value={stateImportText} onChange={(e) => setStateImportText(e.target.value)} />
-          <button onClick={importAppState}>Импорт JSON состояния</button>
-        </div>
-      ) : null}
 
       {adminTab === 'moderators' && isAdmin ? (
         <div className="card">
