@@ -2087,100 +2087,107 @@ export default function Dashboard() {
       ) : null}
 
       {adminTab === 'works' && (isAdmin || access.canManageWorks) ? (
-        <div className="card">
-          <h3>Все загруженные работы</h3>
-          <div className="admin-table-wrap"><table className="works-table">
-            <thead><tr><th>ID</th><th>Конкурс</th><th>Направление</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
-            <tbody>
-              {state.works.map((work) => {
-                const editing = workEditId === work.id;
-                return (
-                  <tr key={work.id}>
-                    <td>{work.id}</td>
-                    <td>{work.contest}</td>
-                    <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
-                    <td>{editing ? <input value={workEditDraft.category} onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))} /> : work.category}</td>
-                    <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
-                    <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
-                    <td>
-                      <div className="row">
-                        {editing ? (
-                          <>
-                            <button onClick={saveWorkEdit}>Сохранить</button>
-                            <button onClick={() => setWorkEditId(null)}>Отмена</button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startWorkEdit(work)}>Редактировать</button>
-                            <button onClick={() => deleteWork(work.id)}>Удалить</button>
-                            <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table></div>
+  <div className="card">
+    <h3>Все загруженные работы</h3>
 
-          <div className="mobile-only-list">
-            {state.works.map((work) => (
-              <div key={`mobile-work-${work.id}`} className="card compact-card">
-                <h4>{work.title}</h4>
-                <p><strong>Номер:</strong> {work.id}</p>
-                <p><strong>Конкурс:</strong> {work.contest}</p>
-                <p><strong>Направление:</strong> {work.direction || '—'}</p>
-                <p><strong>Категория:</strong> {work.category}</p>
-                <p><strong>Участник:</strong> {work.participantName || '—'}</p>
-              </div>
-              ))}
-            </div>
-
-              <div className="card">
-                <h3>Создание судьи</h3>
-                <input placeholder="ФИО" value={judgeDraft.fullName} onChange={(e) => setJudgeDraft((p) => ({ ...p, fullName: e.target.value }))} />
-                <input placeholder="Логин" value={judgeDraft.login} onChange={(e) => setJudgeDraft((p) => ({ ...p, login: e.target.value }))} />
-                <input type="password" placeholder="Пароль" value={judgeDraft.password} onChange={(e) => setJudgeDraft((p) => ({ ...p, password: e.target.value }))} />
-                <button onClick={addJudge}>Добавить судью</button>
-              </div>
-
-              {isAdmin ? (
-                <div className="card">
-                  <h3>Создание модератора</h3>
-                  <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
-                  <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
-                  <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
-                  <div>
-                    {MODERATOR_PERMISSIONS.map((permission) => (
-                      <label key={permission.key} style={{ display: 'block' }}>
-                        <input
-                          type="checkbox"
-                          checked={moderatorDraft.permissions[permission.key]}
-                          onChange={() => toggleDraftPermission(permission.key)}
-                        />{' '}
-                        {permission.label}
-                      </label>
-                    ))}
+    <div className="admin-table-wrap">
+      <table className="works-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Конкурс</th>
+            <th>Направление</th>
+            <th>Категория</th>
+            <th>Участник</th>
+            <th>Название</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {state.works.map((work) => {
+            const editing = workEditId === work.id;
+            return (
+              <tr key={work.id}>
+                <td>{work.id}</td>
+                <td>{work.contest}</td>
+                <td>
+                  {editing ? (
+                    <input
+                      value={workEditDraft.direction}
+                      onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))}
+                    />
+                  ) : (
+                    work.direction || '—'
+                  )}
+                </td>
+                <td>
+                  {editing ? (
+                    <input
+                      value={workEditDraft.category}
+                      onChange={(e) => setWorkEditDraft((p) => ({ ...p, category: e.target.value }))}
+                    />
+                  ) : (
+                    work.category
+                  )}
+                </td>
+                <td>
+                  {editing ? (
+                    <input
+                      value={workEditDraft.participantName}
+                      onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))}
+                    />
+                  ) : (
+                    work.participantName || '—'
+                  )}
+                </td>
+                <td>
+                  {editing ? (
+                    <input
+                      value={workEditDraft.title}
+                      onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))}
+                    />
+                  ) : (
+                    work.title
+                  )}
+                </td>
+                <td>
+                  <div className="row">
+                    {editing ? (
+                      <>
+                        <button onClick={saveWorkEdit}>Сохранить</button>
+                        <button onClick={() => setWorkEditId(null)}>Отмена</button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => startWorkEdit(work)}>Редактировать</button>
+                        <button onClick={() => deleteWork(work.id)}>Удалить</button>
+                        <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
+                      </>
+                    )}
                   </div>
-                  <button onClick={addModerator}>Добавить модератора</button>
-                </div>
-              ) : null}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
 
-              <div className="card">
-                <h3>Назначение работ</h3>
-                <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
-                  <option value="">Выберите судью</option>
-                  {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} - {judge.fullName}</option>)}
-                </select>
-                <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
-                  <option value="">Выберите работу</option>
-                  {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} - {work.title}</option>)}
-                </select>
-                <button onClick={assignWork}>Назначить</button>
-              </div>
-            </>
-          ) : null}
+    <div className="mobile-only-list">
+      {state.works.map((work) => (
+        <div key={`mobile-work-${work.id}`} className="card compact-card">
+          <h4>{work.title}</h4>
+          <p><strong>Номер:</strong> {work.id}</p>
+          <p><strong>Конкурс:</strong> {work.contest}</p>
+          <p><strong>Направление:</strong> {work.direction || '—'}</p>
+          <p><strong>Категория:</strong> {work.category}</p>
+          <p><strong>Участник:</strong> {work.participantName || '—'}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+) : null}
+
 
           {access.canExportScores ? (
             <>
