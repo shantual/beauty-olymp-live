@@ -1889,7 +1889,7 @@ useEffect(() => {
             accept="image/jpeg,image/png,image/webp"
             fileKind="image"
             userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
-            submissionId={participantSubmissionId}
+            submissionId={participantDraft.submissionId}
             onUploaded={(record) => {
               setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
             }}
@@ -1900,7 +1900,7 @@ useEffect(() => {
             accept="video/mp4,video/quicktime"
             fileKind="video"
             userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
-            submissionId={participantSubmissionId}
+            submissionId={participantDraft.submissionId}
             onUploaded={(record) => {
               setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }));
             }}
