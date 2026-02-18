@@ -375,90 +375,9 @@ export default function Dashboard() {
   const [workEditDraft, setWorkEditDraft] = useState({ title: '', participantName: '', nomination: '', category: '', direction: '', status: 'Допущено' });
   const toastTimerRef = useRef(null);
 
-  const canOpenAdminTab = (tab) => {
-    if (tab === 'main') return true;
-    if (tab === 'moderators') return session.role === 'admin';
-    if (tab === 'judges') return session.role === 'admin' || access.canManageJudges;
-    if (tab === 'works' || tab === 'import') return session.role === 'admin' || access.canManageWorks;
-    return false;
-  };
+  
 
-  const handleAdminTabChange = (nextTab) => {
-    const allowed = canOpenAdminTab(nextTab);
-    console.log('[adminTab] change requested', {
-      from: adminTab,
-      to: nextTab,
-      role: session.role,
-      access,
-      allowed,
-    });
-
-    if (!allowed) return;
-    setAdminTab(nextTab);
-  };
-  const categoryOptions = useMemo(
-    () => CATEGORY_OPTIONS_BY_CONTEST[workDraft.contest] || ['Дебют'],
-    [workDraft.contest]
-  );
-  const directionOptions = useMemo(
-    () => DIRECTION_OPTIONS_BY_CONTEST[workDraft.contest] || ['Общий зачет'],
-    [workDraft.contest]
-  );
-  const nominationOptions = useMemo(
-    () => getNominationOptions(workDraft.contest, workDraft.direction),
-    [workDraft.contest, workDraft.direction]
-  );
-  const participantDirectionOptions = useMemo(
-    () => DIRECTION_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Общий зачет'],
-    [participantDraft.contest]
-  );
-  const participantNominationOptions = useMemo(
-    () => getNominationOptions(participantDraft.contest, participantDraft.direction),
-    [participantDraft.contest, participantDraft.direction]
-  );
-  const participantCategoryOptions = useMemo(
-    () => CATEGORY_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Дебют'],
-    [participantDraft.contest]
-  );
-
-
-  const [ratingFilter, setRatingFilter] = useState({ contest: 'all', direction: 'all', category: 'all' });
-
-  const [selectedWorkId, setSelectedWorkId] = useState(null);
-  const [judgeSelectedWorkId, setJudgeSelectedWorkId] = useState(null);
-  const [selectedJudgeWork, setSelectedJudgeWork] = useState(null);
-
-  const [adminTab, setAdminTab] = useState('main');
-
-  const [lightboxImage, setLightboxImage] = useState('');
-  const [lightboxVideo, setLightboxVideo] = useState('');
-
-  const [judgeViewId, setJudgeViewId] = useState(null);
-  const [judgeSubmissionFiles, setJudgeSubmissionFiles] = useState({});
-
-  const [moderatorEditId, setModeratorEditId] = useState(null);
-  const [moderatorEditDraft, setModeratorEditDraft] = useState({
-    fullName: '',
-    login: '',
-    password: '',
-    active: true,
-    permissions: normalizeModeratorPermissions({}),
-  });
-
-  const [judgeEditId, setJudgeEditId] = useState(null);
-  const [judgeEditDraft, setJudgeEditDraft] = useState({ fullName: '', email: '', login: '', password: '', active: true });
-
-  const [workEditId, setWorkEditId] = useState(null);
-  const [workEditDraft, setWorkEditDraft] = useState({
-    title: '',
-    participantName: '',
-    nomination: '',
-    category: '',
-    direction: '',
-    status: 'Допущено',
-  });
-
-  // -------------------- вычисления доступа (ВАЖНО: до хендлеров табов) --------------------
+// -------------------- вычисления доступа (ВАЖНО: до хендлеров табов) --------------------
   const currentModerator = useMemo(() => {
     if (session.role !== 'moderator') return null;
     return state.moderators.find((m) => m.id === session.id && m.active) || null;
@@ -804,27 +723,7 @@ export default function Dashboard() {
     [selectedWorkId, state.scores]
   );
 
-  const currentModerator = useMemo(() => {
-    if (session.role !== 'moderator') return null;
-    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
-  }, [session, state.moderators]);
-
-  const access = useMemo(() => {
-    let nextAccess;
-    if (session.role === 'admin') {
-      nextAccess = { canManageWorks: true, canManageJudges: true, canExportScores: true };
-      console.log('[access] computed', { role: session.role, currentModerator: null, access: nextAccess });
-      return nextAccess;
-    }
-    if (session.role === 'moderator') {
-      nextAccess = normalizeModeratorPermissions(currentModerator?.permissions);
-      console.log('[access] computed', { role: session.role, currentModerator, access: nextAccess });
-      return nextAccess;
-    }
-    nextAccess = { canManageWorks: false, canManageJudges: false, canExportScores: false };
-    console.log('[access] computed', { role: session.role, currentModerator: null, access: nextAccess });
-    return nextAccess;
-  }, [session.role, currentModerator]);
+;
 
   const ratings = useMemo(() => {
     const grouped = {};
@@ -1827,7 +1726,6 @@ export default function Dashboard() {
   const notStartedJudges = state.judges.filter((judge) =>
     state.assignments.some((a) => a.judgeId === judge.id && a.status !== 'оценено')
   );
-  const isAdmin = session.role === 'admin';
 
   return (
     <div className="layout">
