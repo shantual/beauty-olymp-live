@@ -2237,9 +2237,7 @@ export default function Dashboard() {
               </div>
             </>
           ) : null}
-        </>
-      ) : null}
-
+      
       {adminTab === 'import' && access.canManageWorks ? (
         <div className="card">
           <h3>Импорт работ из CSV (;)</h3>
