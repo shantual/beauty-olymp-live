@@ -690,22 +690,7 @@ export default function Dashboard() {
     return state.assignments.filter((item) => item.judgeId === session.id);
   }, [session, state.assignments]);
 
-  const judgeWorks = useMemo(
-    () =>
-      judgeAssignments
-        .map((a) => {
-          const work = state.works.find((w) => w.id === a.workId);
-          return work ? { ...work, assignmentStatus: a.status } : null;
-        })
-        .filter(Boolean)
-        .sort((a, b) => {
-          const aDone = a.assignmentStatus === 'оценено';
-          const bDone = b.assignmentStatus === 'оценено';
-          if (aDone === bDone) return a.id.localeCompare(b.id);
-          return aDone ? 1 : -1;
-        }),
-    [judgeAssignments, state.works]
-  );
+  
   const judgeWorkGroups = useMemo(() => {
     const grouped = {};
     judgeWorks.forEach((work) => {
