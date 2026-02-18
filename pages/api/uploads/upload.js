@@ -43,55 +43,65 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const originalFileName = String(file.originalFilename || 'file');
-const size = Number(file.size || 0);
+    const size = Number(file.size || 0);
 
-// 1) берем mimetype от formidable
-let mimeType = String(file.mimetype || '').trim();
+    const fallbackName = String(fields.originalFileName || '').trim();
+    const fallbackMime = String(fields.clientMimeType || '').trim();
 
-// 2) если он пустой или octet-stream - пробуем определить по расширению имени файла
-if (!mimeType || mimeType === 'application/octet-stream') {
-  const guessed = mime.lookup(originalFileName);
-  if (guessed) mimeType = String(guessed);
-}
+    const originalFileName = String(file.originalFilename || fallbackName || 'file');
+    let mimeType = String(file.mimetype || fallbackMime || '').trim();
 
-// 3) если все равно не нашли - оставляем octet-stream, но не валим загрузку,
-// а проверку делаем по kind + расширению
-if (!mimeType) {
-  mimeType = 'application/octet-stream';
-}
+    // Если mimetype пустой или octet-stream - пробуем определить по расширению
+    if (!mimeType || mimeType === 'application/octet-stream') {
+      const guessed = mime.lookup(originalFileName);
+      if (guessed) mimeType = String(guessed);
+    }
 
-// Определяем kind
-const kind =
-  fileKind ||
-  (mimeType.startsWith('image/') ? 'image' : mimeType.startsWith('video/') ? 'video' : 'file');
+    if (!mimeType) {
+      mimeType = 'application/octet-stream';
+    }
 
-// Проверяем допустимость
-const allowedList = cfg.allowedMime[kind] || [];
+    // Определяем kind
+    const kind =
+      fileKind ||
+      (mimeType.startsWith('image/')
+        ? 'image'
+        : mimeType.startsWith('video/')
+          ? 'video'
+          : 'file');
 
-// Если у тебя в cfg.allowedMime есть только image/video - для fileKind лучше принудить в image/video на фронте.
-// Но на всякий случай:
-if (allowedList.length && mimeType !== 'application/octet-stream' && !allowedList.includes(mimeType)) {
-  return res.status(400).json({ error: `Unsupported mimeType: ${mimeType}` });
-}
-
-// Если mimeType остался octet-stream - разрешаем, но можно ограничить расширениями
-if (mimeType === 'application/octet-stream') {
-  const ext = (originalFileName.split('.').pop() || '').toLowerCase();
-  const allowedExt = kind === 'image'
-    ? ['jpg', 'jpeg', 'png', 'webp']
-    : kind === 'video'
-      ? ['mp4', 'mov', 'webm']
-      : [];
-
-  if (allowedExt.length && !allowedExt.includes(ext)) {
-    return res.status(400).json({ error: `Unsupported file type: .${ext || '?'}` });
-  }
-}
-
-
-    if (Number(size) > cfg.maxFileSizeBytes) {
+    // Проверяем размер
+    if (size > cfg.maxFileSizeBytes) {
       return res.status(400).json({ error: `File too large: ${size}` });
+    }
+
+    // Проверяем допустимость mimeType
+    const allowedList = cfg.allowedMime[kind] || [];
+
+    // Если mimeType известен - проверяем по списку
+    if (
+      allowedList.length &&
+      mimeType !== 'application/octet-stream' &&
+      !allowedList.includes(mimeType)
+    ) {
+      return res.status(400).json({ error: `Unsupported mimeType: ${mimeType}` });
+    }
+
+    // Если mimeType остался octet-stream - проверяем по расширению
+    if (mimeType === 'application/octet-stream') {
+      const parts = originalFileName.split('.');
+      const ext = (parts.length > 1 ? parts.pop() : '').toLowerCase();
+
+      const allowedExt =
+        kind === 'image'
+          ? ['jpg', 'jpeg', 'png', 'webp']
+          : kind === 'video'
+            ? ['mp4', 'mov', 'webm']
+            : [];
+
+      if (allowedExt.length && (!ext || !allowedExt.includes(ext))) {
+        return res.status(400).json({ error: `Unsupported file type: .${ext || '?'}` });
+      }
     }
 
     // лимит файлов на submission (как в presign.js)
@@ -103,8 +113,11 @@ if (mimeType === 'application/octet-stream') {
       .eq('status', 'uploaded');
 
     if (countError) {
-      return res.status(500).json({ error: countError.message || 'Failed to validate submission limits' });
+      return res
+        .status(500)
+        .json({ error: countError.message || 'Failed to validate submission limits' });
     }
+
     if ((count || 0) >= cfg.maxFilesPerSubmission) {
       return res.status(400).json({ error: 'Submission file count limit exceeded' });
     }
@@ -131,8 +144,6 @@ if (mimeType === 'application/octet-stream') {
 
     const objectUrl = makeObjectUrl(cfg.bucket, cfg.endpoint, objectKey);
 
-    // запись в Supabase (по смыслу как complete.js)
-    // если у тебя в таблице поля называются чуть иначе - скажешь, подстроим
     const { data: inserted, error: insertError } = await supabase
       .from('uploads')
       .insert({
@@ -150,7 +161,9 @@ if (mimeType === 'application/octet-stream') {
       .single();
 
     if (insertError) {
-      return res.status(500).json({ error: insertError.message || 'Failed to save upload record' });
+      return res
+        .status(500)
+        .json({ error: insertError.message || 'Failed to save upload record' });
     }
 
     return res.status(200).json({
