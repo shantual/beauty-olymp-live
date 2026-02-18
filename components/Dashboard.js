@@ -2251,7 +2251,6 @@ export default function Dashboard() {
       <Styles />
     </div>
   </div>
-) : null}
 
       {adminTab === 'moderators' && isAdmin ? (
         <div className="card">
