@@ -41,6 +41,9 @@ export default function UploadWidget({
         form.append('userId', userId);
         form.append('submissionId', submissionId);
         form.append('fileKind', fileKind);
+        form.append('originalFileName', file.name);
+        form.append('clientMimeType', file.type || '');
+
 
         const uploadRes = await fetch('/api/uploads/upload', {
           method: 'POST',
