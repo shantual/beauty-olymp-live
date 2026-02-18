@@ -109,7 +109,7 @@ Request:
 ```
 
 ### GET `/api/uploads?submissionId=submission-1&withSignedGet=1`
-Reads from Supabase, filters by `submission_id`, sorts by `created_at desc`, and optionally includes short-lived `downloadUrl`.
+Reads from Supabase, filters by `submission_id`, sorts by `created_at desc`, and with `withSignedGet=1` returns temporary `signedGetUrl` (TTL clamped to 15-60 minutes).
 
 ## Run
 

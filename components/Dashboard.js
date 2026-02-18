@@ -257,6 +257,11 @@ function parseList(value) {
     .filter(Boolean);
 }
 
+function isEmbeddedVideoUrl(url) {
+  const value = String(url || '').toLowerCase();
+  return value.includes('youtube.com') || value.includes('youtu.be') || value.includes('vimeo.com');
+}
+
 function generateWorkId(existingWorks) {
   const next = existingWorks.length + 1;
   return `EO-${String(next).padStart(5, '0')}`;
@@ -355,6 +360,7 @@ export default function Dashboard() {
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
+  const [judgeSubmissionFiles, setJudgeSubmissionFiles] = useState({});
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
     fullName: '',
@@ -482,6 +488,129 @@ export default function Dashboard() {
     };
   }, []);
 
+  const judgeWorks = useMemo(
+    () =>
+      judgeAssignments
+        .map((a) => {
+          const work = state.works.find((w) => w.id === a.workId);
+          return work ? { ...work, assignmentStatus: a.status } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDone = a.assignmentStatus === 'оценено';
+          const bDone = b.assignmentStatus === 'оценено';
+          if (aDone === bDone) return a.id.localeCompare(b.id);
+          return aDone ? 1 : -1;
+        }),
+    [judgeAssignments, state.works]
+  );
+  const judgeWorkGroups = useMemo(() => {
+    const grouped = {};
+    judgeWorks.forEach((work) => {
+      const groupKey = [
+        work.contest || 'Без конкурса',
+        work.direction || 'Общий зачет',
+        work.nomination || 'Без номинации',
+        work.category || 'Без категории',
+      ].join(' | ');
+
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = {
+          contest: work.contest || 'Без конкурса',
+          direction: work.direction || 'Общий зачет',
+          nomination: work.nomination || 'Без номинации',
+          category: work.category || 'Без категории',
+          works: [],
+        };
+      }
+      grouped[groupKey].works.push(work);
+    });
+
+    return Object.values(grouped).map((group) => ({
+      ...group,
+      works: group.works.sort((a, b) => a.id.localeCompare(b.id)),
+    }));
+  }, [judgeWorks]);
+
+  const judgeSelectedWork = useMemo(
+    () => judgeWorks.find((work) => work.id === judgeSelectedWorkId) || null,
+    [judgeSelectedWorkId, judgeWorks]
+  );
+
+
+
+  const progress = useMemo(() => {
+    const total = state.assignments.length;
+    const done = state.assignments.filter((a) => a.status === 'оценено').length;
+    return total ? Math.round((done / total) * 100) : 0;
+  }, [state.assignments]);
+
+  const ratingFilterOptions = useMemo(() => {
+    const contests = [...new Set(state.works.map((w) => w.contest).filter(Boolean))];
+    const directions = [...new Set(state.works.map((w) => w.direction || 'Общий зачет').filter(Boolean))];
+    const categories = [...new Set(state.works.map((w) => w.category).filter(Boolean))];
+    return { contests, directions, categories };
+  }, [state.works]);
+
+  const selectedWork = useMemo(
+    () => state.works.find((work) => work.id === selectedWorkId) || null,
+    [selectedWorkId, state.works]
+  );
+
+  const selectedWorkScores = useMemo(
+    () => state.scores.filter((score) => score.workId === selectedWorkId),
+    [selectedWorkId, state.scores]
+  );
+
+  const currentModerator = useMemo(() => {
+    if (session.role !== 'moderator') return null;
+    return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
+  }, [session, state.moderators]);
+
+  const access = useMemo(() => {
+    if (session.role === 'admin') {
+      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
+    }
+    if (session.role === 'moderator') {
+      return normalizeModeratorPermissions(currentModerator?.permissions);
+    }
+    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
+  }, [session.role, currentModerator]);
+
+  const ratings = useMemo(() => {
+    const grouped = {};
+
+    state.works.forEach((work) => {
+      const scores = state.scores.filter((score) => score.workId === work.id);
+      if (!scores.length) return;
+      const totalAvg = scores.reduce((sum, s) => sum + s.avg, 0) / scores.length;
+      const key = `${work.contest} | ${work.direction || 'Общий зачет'} | ${work.nomination} | ${work.category}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ workId: work.id, title: work.title, avg: Number(totalAvg.toFixed(2)) });
+    });
+
+    Object.values(grouped).forEach((list) => {
+      list.sort((a, b) => b.avg - a.avg);
+      let rank = 1;
+      list.forEach((entry, index) => {
+        if (index > 0 && entry.avg < list[index - 1].avg) {
+          rank = index + 1;
+        }
+        entry.rank = rank;
+      });
+    });
+
+    const filtered = Object.entries(grouped).reduce((acc, [group, list]) => {
+      const [contest, direction, _nomination, category] = group.split(' | ');
+      if (ratingFilter.contest !== 'all' && contest !== ratingFilter.contest) return acc;
+      if (ratingFilter.direction !== 'all' && direction !== ratingFilter.direction) return acc;
+      if (ratingFilter.category !== 'all' && category !== ratingFilter.category) return acc;
+      acc[group] = list;
+      return acc;
+    }, {});
+
+    return filtered;
+  }, [state.scores, state.works, ratingFilter]);
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
@@ -610,7 +739,55 @@ export default function Dashboard() {
     [judgeSelectedWorkId, judgeWorks]
   );
 
+  useEffect(() => {
+    if (session.role !== 'judge') {
+      setJudgeSubmissionFiles({});
+      return;
+    }
 
+    const submissionIds = [...new Set(judgeWorks.map((work) => work.submissionId).filter(Boolean))];
+    if (!submissionIds.length) {
+      setJudgeSubmissionFiles({});
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadSignedFiles() {
+      const entries = await Promise.all(submissionIds.map(async (submissionId) => {
+        try {
+          const response = await fetch(`/api/uploads?submissionId=${encodeURIComponent(submissionId)}&withSignedGet=1`);
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || 'Failed to load signed files');
+          }
+
+          const records = payload.records || [];
+          const photos = records
+            .filter((item) => String(item.mime || '').startsWith('image/') && item.signedGetUrl)
+            .map((item) => item.signedGetUrl);
+          const videos = records
+            .filter((item) => String(item.mime || '').startsWith('video/') && item.signedGetUrl)
+            .map((item) => item.signedGetUrl);
+
+          return [submissionId, { photos, videos }];
+        } catch (error) {
+          console.error(error);
+          return [submissionId, { photos: [], videos: [] }];
+        }
+      }));
+
+      if (!cancelled) {
+        setJudgeSubmissionFiles(Object.fromEntries(entries));
+      }
+    }
+
+    loadSignedFiles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session.role, judgeWorks]);
 
   const progress = useMemo(() => {
     const total = state.assignments.length;
@@ -788,6 +965,7 @@ export default function Dashboard() {
       videos: participantDraft.videos,
       status: 'Допущено',
       author: 'Скрыт',
+      submissionId: participantSubmissionId,
     };
 
     setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
@@ -1526,7 +1704,7 @@ export default function Dashboard() {
               {group.works.map((work) => (
                 <button key={work.id} className="judge-preview-card" onClick={() => setJudgeSelectedWorkId(work.id)}>
                   <img
-                    src={work.photos?.[0] || 'https://via.placeholder.com/480x320?text=%D0%9D%D0%B5%D1%82+%D1%84%D0%BE%D1%82%D0%BE'}
+                    src={judgeSubmissionFiles[work.submissionId]?.photos?.[0] || work.photos?.[0] || 'https://via.placeholder.com/480x320?text=%D0%9D%D0%B5%D1%82+%D1%84%D0%BE%D1%82%D0%BE'}
                     alt={`Превью ${work.id}`}
                     className="judge-preview-image"
                   />
@@ -1549,15 +1727,19 @@ export default function Dashboard() {
               <p><strong>Описание:</strong> {selectedJudgeWork.description || '—'}</p>
 
               <div className="grid">
-                {(selectedJudgeWork.photos || []).map((photo, index) => (
+                {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.photos || selectedJudgeWork.photos || []).map((photo, index) => (
                   <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
                 ))}
               </div>
 
               <div className="grid judge-video-grid">
-                {(selectedJudgeWork.videos || []).map((video) => (
+                {(judgeSubmissionFiles[selectedJudgeWork.submissionId]?.videos || selectedJudgeWork.videos || []).map((video) => (
                   <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
-                    <iframe src={video} title={selectedJudgeWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                    {isEmbeddedVideoUrl(video) ? (
+                      <iframe src={video} title={selectedJudgeWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                    ) : (
+                      <video src={video} className="media" controls playsInline preload="metadata" />
+                    )}
                   </div>
                 ))}
               </div>
@@ -1625,7 +1807,11 @@ export default function Dashboard() {
             <div className="modal video-modal" onClick={(e) => e.stopPropagation()}>
               <button className="icon-close" onClick={() => setLightboxVideo('')} aria-label="Закрыть">×</button>
               <div className="video-frame video-expanded">
-                <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                {isEmbeddedVideoUrl(lightboxVideo) ? (
+                  <iframe src={lightboxVideo} title="Увеличенное видео" className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                ) : (
+                  <video src={lightboxVideo} title="Увеличенное видео" className="media" controls autoPlay playsInline />
+                )}
               </div>
             </div>
           </div>

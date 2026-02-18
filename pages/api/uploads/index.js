@@ -33,16 +33,17 @@ export default async function handler(req, res) {
       return res.status(200).json({ records: rows });
     }
 
+    const signedGetExpiresSeconds = Math.min(Math.max(cfg.getExpiresSeconds || 900, 900), 3600);
     const client = getStorageClient();
     const signedRecords = await Promise.all(rows.map(async (record) => {
       const command = new GetObjectCommand({
         Bucket: cfg.bucket,
         Key: record.object_key,
       });
-      const downloadUrl = await getSignedUrl(client, command, {
-        expiresIn: cfg.getExpiresSeconds,
+      const signedGetUrl = await getSignedUrl(client, command, {
+        expiresIn: signedGetExpiresSeconds,
       });
-      return { ...record, downloadUrl };
+      return { ...record, signedGetUrl };
     }));
 
     return res.status(200).json({ records: signedRecords });
