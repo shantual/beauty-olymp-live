@@ -609,6 +609,16 @@ export default function Dashboard({ forcedRole = null }) {
     localStorage.removeItem(SESSION_KEY);
   }, [session, sessionReady]);
 
+useEffect(() => {
+  if (!forcedRole) return;
+  if (!session.role) return;
+
+  if (session.role !== forcedRole) {
+    setSession({ role: null, id: null, login: null });
+    showToast('Этот вход предназначен для другой роли');
+  }
+}, [forcedRole, session.role, session.id, session.login]);
+  
   useEffect(() => () => {
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current);
