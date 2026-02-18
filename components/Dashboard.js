@@ -1610,7 +1610,7 @@ useEffect(() => {
         <BrandHeader />
         <div className="card narrow">
           <h1>Beauty Olymp — система судейства</h1>
-          <p>Вход для администратора, модератора или судьи.</p>
+          <p>Вход в личный кабинет.</p>
           {forcedRole ? (
   <div style={{ marginBottom: 12, fontWeight: 500 }}>
     Роль: {
