@@ -34,10 +34,13 @@ export default async function handler(req, res) {
     const cfg = assertStorageConfig();
     const { fields, files } = await parseForm(req);
 
-    const file = files.file;
-    const userId = String(fields.userId || '').trim();
-    const submissionId = String(fields.submissionId || '').trim();
-    const fileKind = String(fields.fileKind || '').trim();
+    // Formidable иногда возвращает массив, даже если multiples:false
+    const rawFile = files?.file;
+    const file = Array.isArray(rawFile) ? rawFile[0] : rawFile;
+
+    const userId = String(fields?.userId || '').trim();
+    const submissionId = String(fields?.submissionId || '').trim();
+    const fileKind = String(fields?.fileKind || '').trim();
 
     if (!file || !userId || !submissionId) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -45,8 +48,9 @@ export default async function handler(req, res) {
 
     const size = Number(file.size || 0);
 
-    const fallbackName = String(fields.originalFileName || '').trim();
-    const fallbackMime = String(fields.clientMimeType || '').trim();
+    // Фоллбеки от клиента (на случай, если formidable не передал имя/тип)
+    const fallbackName = String(fields?.originalFileName || '').trim();
+    const fallbackMime = String(fields?.clientMimeType || '').trim();
 
     const originalFileName = String(file.originalFilename || fallbackName || 'file');
     let mimeType = String(file.mimetype || fallbackMime || '').trim();
@@ -76,7 +80,7 @@ export default async function handler(req, res) {
     }
 
     // Проверяем допустимость mimeType
-    const allowedList = cfg.allowedMime[kind] || [];
+    const allowedList = cfg.allowedMime?.[kind] || [];
 
     // Если mimeType известен - проверяем по списку
     if (
@@ -113,9 +117,9 @@ export default async function handler(req, res) {
       .eq('status', 'uploaded');
 
     if (countError) {
-      return res
-        .status(500)
-        .json({ error: countError.message || 'Failed to validate submission limits' });
+      return res.status(500).json({
+        error: countError.message || 'Failed to validate submission limits',
+      });
     }
 
     if ((count || 0) >= cfg.maxFilesPerSubmission) {
@@ -131,7 +135,14 @@ export default async function handler(req, res) {
     });
 
     const client = getStorageClient();
-    const body = fs.readFileSync(file.filepath);
+
+    // В зависимости от версии formidable это может быть filepath или path
+    const tempPath = file.filepath || file.path;
+    if (!tempPath) {
+      return res.status(500).json({ error: 'Upload temp file path is missing' });
+    }
+
+    const body = fs.readFileSync(tempPath);
 
     await client.send(
       new PutObjectCommand({
@@ -161,9 +172,9 @@ export default async function handler(req, res) {
       .single();
 
     if (insertError) {
-      return res
-        .status(500)
-        .json({ error: insertError.message || 'Failed to save upload record' });
+      return res.status(500).json({
+        error: insertError.message || 'Failed to save upload record',
+      });
     }
 
     return res.status(200).json({
@@ -172,6 +183,6 @@ export default async function handler(req, res) {
       key: objectKey,
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message || 'Failed to upload' });
+    return res.status(500).json({ error: error?.message || 'Failed to upload' });
   }
 }
