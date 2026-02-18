@@ -1832,6 +1832,49 @@ useEffect(() => {
     return (
       <div className="layout">
         <BrandHeader />
+
+      {myWorks.length ? (
+  <div className="card">
+    <h2>Загрузите следующую работу</h2>
+
+    {myWorks.map((work) => (
+      <div key={work.id} className="card" style={{ marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <strong>{work.title}</strong>
+          <span style={{ opacity: 0.7 }}>{work.status || 'Отправлено'}</span>
+        </div>
+
+        <div style={{ marginTop: 6, opacity: 0.8 }}>
+          {work.contest} · {work.direction} · {work.category}
+        </div>
+
+        {work.photos?.length ? (
+          <div className="grid" style={{ marginTop: 10 }}>
+            {work.photos.map((src, idx) => (
+              <img
+                key={idx}
+                src={src}
+                alt=""
+                className="media clickable"
+                onClick={() => setLightboxImage(src)}
+              />
+            ))}
+          </div>
+        ) : null}
+
+        {work.videos?.length ? (
+          <div className="grid" style={{ marginTop: 10 }}>
+            {work.videos.map((video, idx) => (
+              <video key={idx} src={video} className="media" controls />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    ))}
+  </div>
+) : null}
+
+      
         <div className="toolbar">
           <strong>Участник: {participantProfile?.fullName || session.login}</strong>
           <button className="top-logout" onClick={() => setSession({ role: null, id: null, login: null })}>Выйти</button>
