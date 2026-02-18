@@ -39,17 +39,17 @@ const DIRECTION_OPTIONS_BY_CONTEST = {
 const NOMINATION_OPTIONS_BY_CONTEST_AND_DIRECTION = {
   'Эстетика Олимпа': {
     'Роспись на салонных типсах': [
-      '200.1 Художественная роспись на типсах, салонный дизайн. Тема - Свободная',
-      '200.2 Художественная роспись на типсах, салонный дизайн. Тема - Детское пространство',
-      '200.3 Акварель на маникюрных типсах, салонный дизайн. Тема - Свободная',
-      '200.4 Художественная роспись на педикюрных типсах (краски, гель-краски, гель-лаки). Тема - Свободная',
-      '200.5 Роспись на педикюрных типсах. Тема - Детское пространство',
-      '200.6 Роспись на педикюрных типсах. Тема - Цветочная фантазия',
-      '200.7 Монохромная роспись на педикюрных типсах. Тема - Свободная',
-      '200.8 Китайская роспись на педикюрных типсах. Тема - Свободная',
+      '200.1 Художественная роспись на типсах, салонный дизайн. Тема — Свободная',
+      '200.2 Художественная роспись на типсах, салонный дизайн. Тема — Детское пространство',
+      '200.3 Акварель на маникюрных типсах, салонный дизайн. Тема — Свободная',
+      '200.4 Художественная роспись на педикюрных типсах (краски, гель-краски, гель-лаки). Тема — Свободная',
+      '200.5 Роспись на педикюрных типсах. Тема — Детское пространство',
+      '200.6 Роспись на педикюрных типсах. Тема — Цветочная фантазия',
+      '200.7 Монохромная роспись на педикюрных типсах. Тема — Свободная',
+      '200.8 Китайская роспись на педикюрных типсах. Тема — Свободная',
       '200.9 Жостовская роспись на педикюрных типсах',
-      '200.10 Акварель на педикюрных типсах. Тема - Свободная',
-      '200.11 Роспись на педикюрных типсах. Тема - Абстракция и геометрия',
+      '200.10 Акварель на педикюрных типсах. Тема — Свободная',
+      '200.11 Роспись на педикюрных типсах. Тема — Абстракция и геометрия',
     ],
     Маникюр: [
       '201.1 Маникюр и покрытие в один тон на натуральных ногтях (гель-лак)',
@@ -73,20 +73,20 @@ const NOMINATION_OPTIONS_BY_CONTEST_AND_DIRECTION = {
     Перманент: [
       '220.1 Пудровое напыление бровей (до/после)',
       '220.2 Брови в аппаратной волосковой технике (до/после)',
-      '220.3 Глаза - классическая стрелка (до/после)',
-      '220.4 Глаза - стрелка с растушевкой (до/после)',
+      '220.3 Глаза — классическая стрелка (до/после)',
+      '220.4 Глаза — стрелка с растушёвкой (до/после)',
       '220.5 Перманентный макияж: губы в акварельной технике (до/после)',
-      '220.6 Перманентный макияж: губы - помадный прокрас (до/после)',
+      '220.6 Перманентный макияж: губы — помадный прокрас (до/после)',
     ],
     Макияж: [
-      '230.1 Преображение модели - модный трендовый образ (до/после)',
-      '230.2 Свадебный макияж - современный клиентский образ невесты',
-      '230.3 Smoky-eyes - современный клиентский вечерний образ',
+      '230.1 Преображение модели — модный трендовый образ (до/после)',
+      '230.2 Свадебный макияж — современный клиентский образ невесты',
+      '230.3 Smoky-eyes — современный клиентский вечерний образ',
     ],
     'Ресницы и брови': [
       '240.1 Классическое наращивание ресниц (до/после)',
       '240.2 Объемное наращивание ресниц 2-4D (до/после)',
-      '240.3 Гиперобъем - наращивание ресниц 6-10D (до/после)',
+      '240.3 Гиперобъем — наращивание ресниц 6-10D (до/после)',
       '240.4 Наращивание ресниц с современным эффектом (до/после)',
       '240.5 Колорирование ресниц (до/после)',
       '240.6 Оформление бровей краской (до/после)',
@@ -135,13 +135,15 @@ const DEFAULT_WORKS = [
   {
     id: 'EO-00001',
     contest: 'Эстетика Олимпа',
-    nomination: '200.1 Художественная роспись на типсах, салонный дизайн. Тема - Свободная',
+    nomination: '200.1 Художественная роспись на типсах, салонный дизайн. Тема — Свободная',
     category: 'Дебют',
     direction: 'Роспись на салонных типсах',
     participantName: 'Иванова Мария',
     title: 'Северное сияние',
     description: 'Градиентный дизайн с ручной прорисовкой.',
-    photos: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=60'],
+    photos: [
+      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=60',
+    ],
     videos: ['https://www.youtube.com/embed/NpEaa2P7qZI'],
     status: 'Допущено',
     author: 'Скрыт',
@@ -271,9 +273,14 @@ async function sha256(text) {
 
 function toCsv(rows) {
   return rows
-    .map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(','))
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
+        .join(',')
+    )
     .join('\n');
 }
+
 
 function isUuidInputError(message) {
   const text = String(message || '').toLowerCase();
@@ -487,29 +494,103 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // --- assignments/judgeWorks group (no duplicates) ---
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  useEffect(() => {
+    if (!sessionReady || !cloudReady || !supabase) return;
+
+    const serializedState = JSON.stringify(state);
+    if (lastCloudWriteRef.current === serializedState) return;
+
+    const timer = window.setTimeout(async () => {
+      setCloudSyncing(true);
+      const payload = { id: cloudRowId, state };
+      const requestPreview = buildCloudRequestPreview(CLOUD_TABLE, payload);
+      setCloudDebug((prev) => ({ ...prev, lastRequest: requestPreview }));
+
+      try {
+        let { error } = await supabase
+          .from(CLOUD_TABLE)
+          .upsert(payload, { onConflict: 'id' });
+
+        if (error && isUuidInputError(error.message)) {
+          const fallbackId = crypto.randomUUID();
+          const fallbackPayload = { id: fallbackId, state };
+          const fallbackPreview = buildCloudRequestPreview(CLOUD_TABLE, fallbackPayload);
+          setCloudDebug((prev) => ({ ...prev, lastRequest: fallbackPreview }));
+          const retry = await supabase
+            .from(CLOUD_TABLE)
+            .upsert(fallbackPayload, { onConflict: 'id' });
+          error = retry.error;
+          if (!error) {
+            setCloudRowId(fallbackId);
+          }
+        }
+
+        if (error) {
+          const message = error.message || 'unknown error';
+          setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+          setCloudDebug((prev) => ({ ...prev, lastError: message }));
+          console.error('[cloud-sync:auto] upsert failed', { requestPreview, error });
+        } else {
+          lastCloudWriteRef.current = serializedState;
+          setCloudError('');
+          setCloudDebug((prev) => ({ ...prev, lastError: '' }));
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setCloudError(`Не удалось сохранить состояние в облако: ${message}`);
+        setCloudDebug((prev) => ({ ...prev, lastError: message }));
+        console.error('[cloud-sync:auto] upsert exception', { requestPreview, err });
+      }
+
+      setCloudSyncing(false);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [state, sessionReady, cloudReady, cloudRowId]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    if (session.role) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
+  }, [session, sessionReady]);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+  }, []);
+
   const judgeAssignments = useMemo(() => {
     if (session.role !== 'judge') return [];
     return state.assignments.filter((item) => item.judgeId === session.id);
-  }, [session.role, session.id, state.assignments]);
+  }, [session, state.assignments]);
 
-  const judgeWorks = useMemo(() => {
-    return judgeAssignments
-      .map((a) => {
-        const work = state.works.find((w) => w.id === a.workId);
-        return work ? { ...work, assignmentStatus: a.status } : null;
-      })
-      .filter(Boolean)
-      .sort((a, b) => {
-        const aDone = a.assignmentStatus === 'оценено';
-        const bDone = b.assignmentStatus === 'оценено';
-        if (aDone === bDone) return a.id.localeCompare(b.id);
-        return aDone ? 1 : -1;
-      });
-  }, [judgeAssignments, state.works]);
-
+  const judgeWorks = useMemo(
+    () =>
+      judgeAssignments
+        .map((a) => {
+          const work = state.works.find((w) => w.id === a.workId);
+          return work ? { ...work, assignmentStatus: a.status } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDone = a.assignmentStatus === 'оценено';
+          const bDone = b.assignmentStatus === 'оценено';
+          if (aDone === bDone) return a.id.localeCompare(b.id);
+          return aDone ? 1 : -1;
+        }),
+    [judgeAssignments, state.works]
+  );
   const judgeWorkGroups = useMemo(() => {
     const grouped = {};
     judgeWorks.forEach((work) => {
@@ -531,6 +612,13 @@ export default function Dashboard() {
       }
       grouped[groupKey].works.push(work);
     });
+
+    return Object.values(grouped).map((group) => ({
+      ...group,
+      works: group.works.sort((a, b) => a.id.localeCompare(b.id)),
+    }));
+  }, [judgeWorks]);
+
 
     return Object.values(grouped).map((group) => ({
       ...group,
