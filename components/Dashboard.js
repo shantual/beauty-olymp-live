@@ -913,23 +913,24 @@ useEffect(() => {
     }
 
     const newWork = {
-      id: generateWorkId(state.works),
-      contest: participantDraft.contest,
-      nomination: participantDraft.nomination,
-      category: participantDraft.category,
-      direction: participantDraft.direction,
-      participantName: participantProfile.fullName.trim(),
-      participantId: participantProfile.id,
-      title: participantDraft.title.trim(),
-      description: participantDraft.description.trim(),
-      photos: participantDraft.photos,
-      videos: participantDraft.videos,
-      status: 'Допущено',
-      author: 'Скрыт',
-      submissionId: participantSubmissionId,
-    };
+  id: generateWorkId(state.works),
+  contest: participantDraft.contest,
+  nomination: participantDraft.nomination,
+  category: participantDraft.category,
+  direction: participantDraft.direction,
+  participantName: participantDraft.fullName.trim(),
+  participantId: session.id,
+  title: participantDraft.title.trim(),
+  description: participantDraft.description.trim(),
+  photos: participantDraft.photos,
+  videos: participantDraft.videos,
+  status: 'Отправлено',
+  author: 'Скрыт',
+  submissionId: participantDraft.submissionId,
+  createdAt: new Date().toISOString(),
+};
 
-    setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
+    setState((prev) => ({ ...prev, works: [newWork, ...prev.works] }));
     setParticipantDraft({
       fullName: '',
       contest: 'Эстетика Олимпа',
