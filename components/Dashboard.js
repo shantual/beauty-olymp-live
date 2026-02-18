@@ -325,7 +325,7 @@ function safeParseJson(value) {
   }
 }
 
-export default function Dashboard() {
+export default function Dashboard({ forcedRole = null }) {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
@@ -609,6 +609,16 @@ export default function Dashboard() {
     localStorage.removeItem(SESSION_KEY);
   }, [session, sessionReady]);
 
+useEffect(() => {
+  if (!forcedRole) return;
+  if (!session.role) return;
+
+  if (session.role !== forcedRole) {
+    setSession({ role: null, id: null, login: null });
+    showToast('Этот вход предназначен для другой роли');
+  }
+}, [forcedRole, session.role, session.id, session.login]);
+  
   useEffect(() => () => {
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current);
@@ -802,50 +812,51 @@ export default function Dashboard() {
 
 
   async function login() {
-    const normalizedLogin = loginForm.login.trim();
-    const passwordHash = await sha256(loginForm.password);
+  const normalizedLogin = loginForm.login.trim();
+  const role = forcedRole || loginForm.role;
 
-    if (loginForm.role === 'admin') {
-      const admin = state.adminUsers.find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
-      if (admin) {
-        setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
-        return;
-      }
-    }
-
-    if (loginForm.role === 'judge') {
-      const judge = state.judges.find(
-        (j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active
-      );
-      if (judge) {
-        setSession({ role: 'judge', id: judge.id, login: judge.login });
-        return;
-      }
-    }
-
-    if (loginForm.role === 'moderator') {
-      const moderator = state.moderators.find(
-        (m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active
-      );
-      if (moderator) {
-        setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
-        return;
-      }
-    }
-
-    
-
-    if (loginForm.role === 'participant') {
-      const participant = state.participants.find(
-        (p) => p.login === normalizedLogin && p.passwordHash === passwordHash && p.active
-      );
-      if (participant) {
-        setSession({ role: 'participant', id: participant.id, login: participant.login });
-        return;
-      }
-    }
-alert('Неверные данные для входа.');
+  if (!normalizedLogin || !loginForm.password) {
+    alert('Введите логин и пароль.');
+    return;
   }
+
+  const passwordHash = await sha256(loginForm.password);
+
+  if (role === 'admin') {
+    const admin = (state.adminUsers || []).find((a) => a.login === normalizedLogin && a.passwordHash === passwordHash);
+    if (admin) {
+      setSession({ role: 'admin', id: 'ADMIN', login: admin.login });
+      return;
+    }
+  }
+
+  if (role === 'judge') {
+    const judge = (state.judges || []).find((j) => j.login === normalizedLogin && j.passwordHash === passwordHash && j.active);
+    if (judge) {
+      setSession({ role: 'judge', id: judge.id, login: judge.login });
+      return;
+    }
+  }
+
+  if (role === 'moderator') {
+    const moderator = (state.moderators || []).find((m) => m.login === normalizedLogin && m.passwordHash === passwordHash && m.active);
+    if (moderator) {
+      setSession({ role: 'moderator', id: moderator.id, login: moderator.login });
+      return;
+    }
+  }
+
+  if (role === 'participant') {
+    const participant = (state.participants || []).find((p) => p.login === normalizedLogin && p.passwordHash === passwordHash && p.active);
+    if (participant) {
+      setSession({ role: 'participant', id: participant.id, login: participant.login });
+      return;
+    }
+  }
+
+  alert('Неверные данные для входа.');
+}
+
 
 
   function showToast(message) {
@@ -1599,13 +1610,31 @@ alert('Неверные данные для входа.');
         <BrandHeader />
         <div className="card narrow">
           <h1>Beauty Olymp — система судейства</h1>
-          <p>Вход для администратора, модератора или судьи.</p>
-          <select value={loginForm.role} onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}>
-            <option value="judge">Судья</option>
-            <option value="admin">Администратор</option>
-            <option value="moderator">Модератор</option>
-            <option value="participant">Участник</option>
-          </select>
+          <p>Вход в личный кабинет.</p>
+          {forcedRole ? (
+  <div style={{ marginBottom: 12, fontWeight: 500 }}>
+    Роль: {
+      forcedRole === 'admin'
+        ? 'Администратор'
+        : forcedRole === 'judge'
+        ? 'Судья'
+        : forcedRole === 'moderator'
+        ? 'Модератор'
+        : 'Участник'
+    }
+  </div>
+) : (
+  <select
+    value={loginForm.role}
+    onChange={(e) => setLoginForm((p) => ({ ...p, role: e.target.value }))}
+  >
+    <option value="judge">Судья</option>
+    <option value="admin">Администратор</option>
+    <option value="moderator">Модератор</option>
+    <option value="participant">Участник</option>
+  </select>
+)}
+
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
           <button onClick={login}>Войти</button>
