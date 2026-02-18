@@ -2187,56 +2187,6 @@ export default function Dashboard() {
     </div>
   </div>
 ) : null}
-
-
-          {access.canExportScores ? (
-            <>
-              <div className="card">
-                <h3>Рейтинг по номинациям и категориям</h3>
-                <div className="row rating-filters">
-                  <label>Конкурсы</label>
-                  <select value={ratingFilter.contest} onChange={(e) => setRatingFilter((prev) => ({ ...prev, contest: e.target.value }))}>
-                    <option value="all">Все конкурсы</option>
-                    {ratingFilterOptions.contests.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
-                  </select>
-                  <label>Направления</label>
-                  <select value={ratingFilter.direction} onChange={(e) => setRatingFilter((prev) => ({ ...prev, direction: e.target.value }))}>
-                    <option value="all">Все направления</option>
-                    {ratingFilterOptions.directions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
-                  </select>
-                  <label>Категории</label>
-                  <select value={ratingFilter.category} onChange={(e) => setRatingFilter((prev) => ({ ...prev, category: e.target.value }))}>
-                    <option value="all">Все категории</option>
-                    {ratingFilterOptions.categories.map((category) => <option key={category} value={category}>{category}</option>)}
-                  </select>
-                </div>
-
-                {Object.entries(ratings).map(([group, list]) => (
-                  <div key={group}>
-                    <h4>{group}</h4>
-                    <table>
-                      <thead>
-                        <tr><th>Место</th><th>Номер работы</th><th>Название</th><th>Средний балл</th><th>Действие</th></tr>
-                      </thead>
-                      <tbody>
-                        {list.map((item) => (
-                          <tr key={item.workId}>
-                            <td>{item.rank}</td><td>{item.workId}</td><td>{item.title}</td><td>{item.avg}</td>
-                            <td><button onClick={() => setSelectedWorkId(item.workId)}>Открыть</button></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-
-              <div className="card row">
-                <button onClick={exportScores}>Экспорт всех оценок CSV</button>
-                <button onClick={exportRatings}>Экспорт рейтинга CSV</button>
-              </div>
-            </>
-          ) : null}
       
       {adminTab === 'import' && access.canManageWorks ? (
         <div className="card">
