@@ -619,13 +619,6 @@ export default function Dashboard() {
     }));
   }, [judgeWorks]);
 
-
-    return Object.values(grouped).map((group) => ({
-      ...group,
-      works: group.works.sort((a, b) => a.id.localeCompare(b.id)),
-    }));
-  }, [judgeWorks]);
-
   const judgeSelectedWork = useMemo(
     () => judgeWorks.find((work) => work.id === judgeSelectedWorkId) || null,
     [judgeSelectedWorkId, judgeWorks]
