@@ -425,6 +425,12 @@ export default function Dashboard({ forcedRole = null }) {
     return state.participants.find((p) => p.id === session.id && p.active) || null;
   }, [session, state.participants]);
 
+  const myWorks = useMemo(() => {
+  return (state.works || [])
+    .filter((w) => w.participantId === session.id)
+    .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+}, [state.works, session.id]);
+
   const canOpenAdminTab = (tab) => {
     if (tab === 'main') return true;
     if (tab === 'moderators') return isAdmin;
