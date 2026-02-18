@@ -289,6 +289,10 @@ function generateWorkId(existingWorks) {
   return `EO-${String(next).padStart(5, '0')}`;
 }
 
+function makeSubmissionId() {
+  return `submission-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 async function sha256(text) {
   const msgUint8 = new TextEncoder().encode(text);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -360,6 +364,7 @@ export default function Dashboard({ forcedRole = null }) {
     description: '',
     photos: [],
     videos: [],
+    submissionId: makeSubmissionId(),
   });
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
