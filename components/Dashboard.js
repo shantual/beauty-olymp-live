@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import UploadWidget from './upload/UploadWidget';
 
 const STORAGE_KEY = 'beauty-olymp-v2';
 const SESSION_KEY = 'beauty-olymp-session-v1';
@@ -288,6 +289,7 @@ function buildCloudRequestPreview(table, payload) {
   return `supabase.from('${table}').upsert({ id: '${payload.id}', state: <json> }, { onConflict: 'id' })`;
 }
 
+
 function safeParseJson(value) {
   try {
     return JSON.parse(value);
@@ -299,6 +301,8 @@ function safeParseJson(value) {
 export default function Dashboard() {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
+  const [participantMode, setParticipantMode] = useState(false);
+  const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
   const [sessionReady, setSessionReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
   const [cloudSyncing, setCloudSyncing] = useState(false);
@@ -320,6 +324,17 @@ export default function Dashboard() {
     status: 'Допущено',
   });
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [participantDraft, setParticipantDraft] = useState({
+    fullName: '',
+    contest: 'Эстетика Олимпа',
+    direction: 'Роспись на салонных типсах',
+    nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
+    category: 'Дебют',
+    title: '',
+    description: '',
+    photos: [],
+    videos: [],
+  });
   const [moderatorDraft, setModeratorDraft] = useState({
     fullName: '',
     login: '',
@@ -364,6 +379,18 @@ export default function Dashboard() {
   const nominationOptions = useMemo(
     () => getNominationOptions(workDraft.contest, workDraft.direction),
     [workDraft.contest, workDraft.direction]
+  );
+  const participantDirectionOptions = useMemo(
+    () => DIRECTION_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Общий зачет'],
+    [participantDraft.contest]
+  );
+  const participantNominationOptions = useMemo(
+    () => getNominationOptions(participantDraft.contest, participantDraft.direction),
+    [participantDraft.contest, participantDraft.direction]
+  );
+  const participantCategoryOptions = useMemo(
+    () => CATEGORY_OPTIONS_BY_CONTEST[participantDraft.contest] || ['Дебют'],
+    [participantDraft.contest]
   );
 
 
@@ -739,6 +766,44 @@ export default function Dashboard() {
       contest: 'Эстетика Олимпа', nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '', category: 'Дебют', direction: 'Роспись на салонных типсах', participantName: '', title: '', description: '', photosText: '', videosText: '', status: 'Допущено',
     });
     showToast('Добавлено');
+  }
+
+
+  async function submitParticipantWork() {
+    if (!participantDraft.fullName.trim() || !participantDraft.title.trim() || !participantDraft.nomination.trim()) {
+      showToast('Заполните ФИО, номинацию и название работы');
+      return;
+    }
+
+    const newWork = {
+      id: generateWorkId(state.works),
+      contest: participantDraft.contest,
+      nomination: participantDraft.nomination,
+      category: participantDraft.category,
+      direction: participantDraft.direction,
+      participantName: participantDraft.fullName.trim(),
+      title: participantDraft.title.trim(),
+      description: participantDraft.description.trim(),
+      photos: participantDraft.photos,
+      videos: participantDraft.videos,
+      status: 'Допущено',
+      author: 'Скрыт',
+    };
+
+    setState((prev) => ({ ...prev, works: [...prev.works, newWork] }));
+    setParticipantDraft({
+      fullName: '',
+      contest: 'Эстетика Олимпа',
+      direction: 'Роспись на салонных типсах',
+      nomination: getNominationOptions('Эстетика Олимпа', 'Роспись на салонных типсах')[0] || '',
+      category: 'Дебют',
+      title: '',
+      description: '',
+      photos: [],
+      videos: [],
+    });
+    setParticipantSubmissionId(`submission-${Date.now()}`);
+    showToast('Работа отправлена');
   }
 
   async function addJudge() {
@@ -1299,6 +1364,91 @@ export default function Dashboard() {
   }
 
   if (!session.role) {
+    if (participantMode) {
+      return (
+        <div className="layout">
+          <BrandHeader />
+          <div className="card">
+            <h1>Личный кабинет участника</h1>
+            <input placeholder="Фамилия Имя Отчество" value={participantDraft.fullName} onChange={(e) => setParticipantDraft((p) => ({ ...p, fullName: e.target.value }))} />
+
+            <select
+              value={participantDraft.contest}
+              onChange={(e) => {
+                const nextContest = e.target.value;
+                const nextDirections = DIRECTION_OPTIONS_BY_CONTEST[nextContest] || ['Общий зачет'];
+                const nextDirection = nextDirections[0];
+                const nextNominations = getNominationOptions(nextContest, nextDirection);
+                const nextCategories = CATEGORY_OPTIONS_BY_CONTEST[nextContest] || ['Дебют'];
+                setParticipantDraft((p) => ({
+                  ...p,
+                  contest: nextContest,
+                  direction: nextDirection,
+                  nomination: nextNominations[0] || '',
+                  category: nextCategories[0],
+                }));
+              }}
+            >
+              {CONTEST_OPTIONS.map((contest) => <option key={contest} value={contest}>{contest}</option>)}
+            </select>
+
+            <select
+              value={participantDraft.direction}
+              onChange={(e) => {
+                const nextDirection = e.target.value;
+                const nextNominations = getNominationOptions(participantDraft.contest, nextDirection);
+                setParticipantDraft((p) => ({ ...p, direction: nextDirection, nomination: nextNominations[0] || '' }));
+              }}
+            >
+              {participantDirectionOptions.map((direction) => <option key={direction} value={direction}>{direction}</option>)}
+            </select>
+
+            {participantNominationOptions.length ? (
+              <select value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))}>
+                {participantNominationOptions.map((nomination) => <option key={nomination} value={nomination}>{nomination}</option>)}
+              </select>
+            ) : (
+              <input placeholder="Номинация" value={participantDraft.nomination} onChange={(e) => setParticipantDraft((p) => ({ ...p, nomination: e.target.value }))} />
+            )}
+
+            <select value={participantDraft.category} onChange={(e) => setParticipantDraft((p) => ({ ...p, category: e.target.value }))}>
+              {participantCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
+            </select>
+
+            <input placeholder="Название работы" value={participantDraft.title} onChange={(e) => setParticipantDraft((p) => ({ ...p, title: e.target.value }))} />
+            <textarea placeholder="Описание работы" value={participantDraft.description} onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))} />
+
+            <UploadWidget
+              label="Загрузка фото"
+              accept="image/jpeg,image/png,image/webp"
+              fileKind="image"
+              userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
+              submissionId={participantSubmissionId}
+              onUploaded={(record) => {
+                setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
+              }}
+            />
+
+            <UploadWidget
+              label="Загрузка видео"
+              accept="video/mp4,video/quicktime"
+              fileKind="video"
+              userId={(participantDraft.fullName || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
+              submissionId={participantSubmissionId}
+              onUploaded={(record) => {
+                setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }));
+              }}
+            />
+
+            <button onClick={submitParticipantWork}>Отправить работу</button>
+            <button onClick={() => setParticipantMode(false)}>Назад ко входу</button>
+          </div>
+          {toast ? <div className="toast">{toast}</div> : null}
+          <Styles />
+        </div>
+      );
+    }
+
     return (
       <div className="layout">
         <BrandHeader />
@@ -1313,6 +1463,7 @@ export default function Dashboard() {
           <input placeholder="Логин" value={loginForm.login} onChange={(e) => setLoginForm((p) => ({ ...p, login: e.target.value }))} />
           <input type="password" placeholder="Пароль" value={loginForm.password} onChange={(e) => setLoginForm((p) => ({ ...p, password: e.target.value }))} />
           <button onClick={login}>Войти</button>
+          <button onClick={() => setParticipantMode(true)}>Личный кабинет участника</button>
           <small>Демо: admin/admin или judge1/password</small>
         </div>
         {lightboxImage ? (
@@ -1341,6 +1492,7 @@ export default function Dashboard() {
       </div>
     );
   }
+
 
   if (session.role === 'judge') {
     const done = judgeAssignments.filter((a) => a.status === 'оценено').length;
@@ -1891,21 +2043,41 @@ export default function Dashboard() {
               const score = state.scores.find((s) => s.workId === selectedJudgeWork.workId && s.judgeId === selectedJudgeWork.judgeId);
               const judge = state.judges.find((j) => j.id === selectedJudgeWork.judgeId);
               const work = state.works.find((w) => w.id === selectedJudgeWork.workId);
-              if (!score) return <p>По этой связке судья-работа оценка пока не отправлена.</p>;
               return (
                 <div>
                   <p><strong>Судья:</strong> {judge?.fullName || selectedJudgeWork.judgeId}</p>
                   <p><strong>Номер работы:</strong> {work?.id}</p>
-                  <table>
-                    <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
-                    <tbody>
-                      {state.criteria.map((criterion) => (
-                        <tr key={criterion.id}><td>{criterion.title}</td><td>{score.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <p><strong>Комментарий:</strong> {score.comment}</p>
-                  <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
+                  <p><strong>Название:</strong> {work?.title || '—'}</p>
+                  <p><strong>Описание:</strong> {work?.description || '—'}</p>
+
+                  <div className="grid">
+                    {(work?.photos || []).map((photo, index) => (
+                      <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+                    ))}
+                  </div>
+
+                  <div className="grid judge-video-grid">
+                    {(work?.videos || []).map((video) => (
+                      <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                        <iframe src={video} title={work?.id || 'video'} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                      </div>
+                    ))}
+                  </div>
+
+                  {!score ? <p>По этой связке судья-работа оценка пока не отправлена.</p> : (
+                    <>
+                      <table>
+                        <thead><tr><th>Критерий</th><th>Оценка</th></tr></thead>
+                        <tbody>
+                          {state.criteria.map((criterion) => (
+                            <tr key={criterion.id}><td>{criterion.title}</td><td>{score.criteriaScores?.[criterion.id] ?? '-'}</td></tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <p><strong>Комментарий:</strong> {score.comment}</p>
+                      <p><strong>Итого:</strong> {score.total} / <strong>Среднее:</strong> {Number(score.avg).toFixed(2)}</p>
+                    </>
+                  )}
                 </div>
               );
             })()}
@@ -1923,6 +2095,22 @@ export default function Dashboard() {
             </div>
             <p>{selectedWork.contest} / {selectedWork.direction || 'Общий зачет'} / {selectedWork.nomination} / {selectedWork.category}</p>
             <p><strong>Участник:</strong> {selectedWork.participantName || 'не указан'}</p>
+            <p><strong>Название:</strong> {selectedWork.title || '—'}</p>
+            <p><strong>Описание:</strong> {selectedWork.description || '—'}</p>
+            <h4>Фото работы</h4>
+            <div className="grid">
+              {(selectedWork.photos || []).map((photo, index) => (
+                <img key={photo} src={photo} alt={`Фото ${index + 1}`} className="media clickable" onClick={() => setLightboxImage(photo)} />
+              ))}
+            </div>
+            <h4>Видео работы</h4>
+            <div className="grid judge-video-grid">
+              {(selectedWork.videos || []).map((video) => (
+                <div key={video} className="video-frame judge-video-thumb" onClick={() => setLightboxVideo(video)}>
+                  <iframe src={video} title={selectedWork.id} className="media" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
+                </div>
+              ))}
+            </div>
             {selectedWorkScores.length === 0 ? (
               <p>По этой работе пока нет отправленных оценок.</p>
             ) : (
