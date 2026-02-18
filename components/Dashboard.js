@@ -817,17 +817,7 @@ export default function Dashboard() {
     return state.moderators.find((moderator) => moderator.id === session.id && moderator.active) || null;
   }, [session, state.moderators]);
 
-  const access = useMemo(() => {
-    if (session.role === 'admin') {
-      return { canManageWorks: true, canManageJudges: true, canExportScores: true };
-    }
-    if (session.role === 'moderator') {
-      return normalizeModeratorPermissions(currentModerator?.permissions);
-    }
-    return { canManageWorks: false, canManageJudges: false, canExportScores: false };
-  }, [session.role, currentModerator]);
-
-  
+   
   useEffect(() => {
     if (session.role === 'judge') return;
     const allowedTabs = ['main'];
