@@ -1,50 +1,48 @@
 import Dashboard from '../components/Dashboard';
-
-export default function ParticipantPage() {
-  return <Dashboard forcedRole="participant" />;
-}
-import { getUserByToken } from '../../lib/db';        // твоя функция поиска пользователя
-import { setLoginSession } from '../../lib/auth';     // создание сессии
+import { supabaseServer } from '../lib/supabaseServer';
 
 export async function getServerSideProps({ query, req, res }) {
   const token = query.token;
 
+  // 1. Проверяем токен
   if (!token) {
     return {
       redirect: {
-        destination: '/login?error=no_token',
+        destination: '/?error=no_token',
         permanent: false
       }
     };
   }
 
-  // ищем пользователя в базе
-  const user = await getUserByToken(token);
+  // 2. Ищем пользователя по токену
+  const { data: user, error } = await supabaseServer
+    .from('users')                 // ТАБЛИЦА users (если иначе – скажи)
+    .select('*')
+    .eq('olymp_token', token)      // ПОЛЕ olymp_token (если иначе – скажи)
+    .single();
 
-  if (!user) {
+  if (error || !user) {
     return {
       redirect: {
-        destination: '/login?error=user_not_found',
+        destination: '/?error=user_not_found',
         permanent: false
       }
     };
   }
 
-  // создаём сессию
-  await setLoginSession(res, {
-    id: user.id,
-    email: user.email,
-    role: user.role
-  });
+  // 3. Создаём cookie сессии (простейший вариант)
+  res.setHeader(
+    'Set-Cookie',
+    `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000`
+  );
 
-  // пользователь авторизован, рендерим кабинет
+  // 4. Передаём user компоненту Dashboard
   return {
     props: { user }
   };
 }
 
+// 5. Основной компонент
 export default function ParticipantPage({ user }) {
-  return (
-    <YourParticipantComponent user={user} />
-  );
+  return <Dashboard forcedRole="participant" user={user} />;
 }
