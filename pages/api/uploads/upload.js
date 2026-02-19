@@ -178,6 +178,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       record: inserted,
+      objectUrl: objectUrl,  
       url: objectUrl,
       key: objectKey,
     });
