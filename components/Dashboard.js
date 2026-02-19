@@ -329,9 +329,52 @@ function safeParseJson(value) {
   }
 }
 
-export default function Dashboard({ forcedRole, user = null }) {
+export default function Dashboard({ forcedRole = null, user = null }) {
+
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
+  useEffect(() => {
+  if (forcedRole !== 'participant') return;
+  if (!user?.id) return;
+
+  const fullName =
+    user.full_name ||
+    user.fullName ||
+    user.name ||
+    '';
+
+  const login = user.email || String(user.id);
+
+  // 1) фиксируем сессию участника
+  setSession({
+    role: 'participant',
+    id: user.id,
+    login,
+  });
+
+  // 2) гарантируем, что участник есть в state.participants
+  //    иначе participantProfile будет null и отправка работ/привязка загрузок развалится
+  setState((prev) => {
+    const participants = Array.isArray(prev.participants) ? prev.participants : [];
+    const already = participants.some((p) => p.id === user.id);
+
+    if (already) return prev;
+
+    return {
+      ...prev,
+      participants: [
+        ...participants,
+        {
+          id: user.id,
+          fullName,
+          login,
+          active: true,
+        },
+      ],
+    };
+  });
+}, [forcedRole, user?.id]);
+
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
   const [sessionReady, setSessionReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
