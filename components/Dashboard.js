@@ -1845,30 +1845,41 @@ useEffect(() => {
         </div>
 
         <div style={{ marginTop: 6, opacity: 0.8 }}>
-          {work.contest} · {work.direction} · {work.category}
-        </div>
+  {work.contest} · {work.direction} · {work.category}
+</div>
 
-        {work.photos?.length ? (
-          <div className="grid" style={{ marginTop: 10 }}>
-            {work.photos.map((src, idx) => (
-              <img
-                key={idx}
-                src={src}
-                alt=""
-                className="media clickable"
-                onClick={() => setLightboxImage(src)}
-              />
-            ))}
-          </div>
-        ) : null}
+<div style={{ marginTop: 4 }}>
+  <strong>Номинация:</strong> {work.nomination || '—'}
+</div>
 
-        {work.videos?.length ? (
-          <div className="grid" style={{ marginTop: 10 }}>
-            {work.videos.map((video, idx) => (
-              <video key={idx} src={video} className="media" controls />
-            ))}
-          </div>
-        ) : null}
+{work.description ? (
+  <div style={{ marginTop: 4, opacity: 0.9 }}>
+    {work.description}
+  </div>
+) : null}
+
+{work.photos?.length ? (
+  <div className="grid" style={{ marginTop: 10 }}>
+    {work.photos.map((src, idx) => (
+      <img
+        key={idx}
+        src={src}
+        alt=""
+        className="media clickable"
+        onClick={() => setLightboxImage(src)}
+      />
+    ))}
+  </div>
+) : null}
+
+{work.videos?.length ? (
+  <div className="grid" style={{ marginTop: 10 }}>
+    {work.videos.map((video, idx) => (
+      <video key={idx} src={video} className="media" controls />
+    ))}
+  </div>
+) : null}
+
       </div>
     ))}
   </div>
