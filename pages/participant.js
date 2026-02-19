@@ -1,48 +1,37 @@
 import Dashboard from '../components/Dashboard';
-import { supabaseServer } from '../lib/supabaseServer';
+import { getSupabaseServerClient } from '../lib/supabaseServer';
 
 export async function getServerSideProps({ query, req, res }) {
   const token = query.token;
 
-  // 1. Проверяем токен
   if (!token) {
     return {
-      redirect: {
-        destination: '/?error=no_token',
-        permanent: false
-      }
+      redirect: { destination: '/?error=no_token', permanent: false },
     };
   }
 
-  // 2. Ищем пользователя по токену
-  const { data: user, error } = await supabaseServer
-    .from('users')                 // ТАБЛИЦА users (если иначе – скажи)
+  const supabase = getSupabaseServerClient();
+
+  const { data: user, error } = await supabase
+    .from('users')
     .select('*')
-    .eq('olymp_token', token)      // ПОЛЕ olymp_token (если иначе – скажи)
+    .eq('olymp_token', token)
     .single();
 
   if (error || !user) {
     return {
-      redirect: {
-        destination: '/?error=user_not_found',
-        permanent: false
-      }
+      redirect: { destination: '/?error=user_not_found', permanent: false },
     };
   }
 
-  // 3. Создаём cookie сессии (простейший вариант)
   res.setHeader(
     'Set-Cookie',
-    `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000`
+    `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
   );
 
-  // 4. Передаём user компоненту Dashboard
-  return {
-    props: { user }
-  };
+  return { props: { user } };
 }
 
-// 5. Основной компонент
 export default function ParticipantPage({ user }) {
   return <Dashboard forcedRole="participant" user={user} />;
 }
