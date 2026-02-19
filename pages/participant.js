@@ -29,17 +29,7 @@ const token =
 const gcUserId = gcUserIdRaw ? String(gcUserIdRaw).replace(/\D/g, '') : null;
 
 
-  // 1) Если есть cookie — логиним по ней
-  if (!token && cookieUserId) {
-    const { data: user } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', cookieUserId)
-      .single();
-
-    if (user) return { props: { user } };
-  }
-// 1.5) Если нет token, но есть gc_user_id — пробуем логин по gc_user_id
+ // 1.5) Если нет token, но есть gc_user_id — пробуем логин по gc_user_id
 if (!token && gcUserId) {
   const { data: user } = await supabase
     .from('users')
