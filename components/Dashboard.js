@@ -372,7 +372,7 @@ export default function Dashboard({ forcedRole = null, user = null }) {
     participants: [...without, nextParticipant],
   };
 });
-}, [forcedRole, user?.id]);
+}, [forcedRole, user]);
 
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
   const [sessionReady, setSessionReady] = useState(false);
