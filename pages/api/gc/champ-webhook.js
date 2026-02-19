@@ -1,7 +1,7 @@
 // pages/api/gc/champ-webhook.js
 
 import crypto from 'crypto';
-import { supabaseServerClient } from '../../../lib/supabaseServer';
+import { getSupabaseServerClient } from '../../../lib/supabaseServer';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       console.error('GC update failed:', gcData);
       return res.status(500).json({ ok: false, error: 'gc_update_failed', gcData });
     }
-
+const supabase = getSupabaseServerClient();
     // 5. Save user in Supabase
     const { data, error } = await supabaseServerClient
       .from('users')
