@@ -1943,49 +1943,63 @@ useEffect(() => {
           <textarea placeholder="Описание работы" value={participantDraft.description} onChange={(e) => setParticipantDraft((p) => ({ ...p, description: e.target.value }))} />
 
           <UploadWidget
-            label="Загрузка фото"
-            accept="image/jpeg,image/png,image/webp"
-            fileKind="image"
-            userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
-            submissionId={participantDraft.submissionId}
-            onUploaded={(record) => {
-  // достаем ссылку на файл с учетом всех вариантов
-  const src =
-    record.objectUrl ||
-    record.object_url ||
-    record.url ||
-    null;
+  label="Загрузка фото"
+  accept="image/jpeg,image/png,image/webp"
+  fileKind="image"
+  userId={(participantProfile?.login || 'participant')
+    .trim()
+    .replace(/\s+/g, '_')
+    .toLowerCase()}
+  submissionId={participantDraft.submissionId}
+  onUploaded={(record) => {
+    // достаем ссылку на файл из всех возможных полей
+    const src =
+      record.objectUrl ||      // то, что мы формируем в UploadWidget
+      record.object_url ||     // вдруг придет в snake_case
+      record.url ||            // общий url из ответа бэкенда
+      null;
 
-  if (!src) {
-    console.error('Нет ссылки на файл в record', record);
-    return;
-  }
+    if (!src) {
+      console.error('Нет ссылки на файл в record', record);
+      return;
+    }
 
-  setParticipantDraft((prev) => ({
-    ...prev,
-    photos: [...(prev.photos || []), src],
-  }));
-}}
+    setParticipantDraft((p) => ({
+      ...p,
+      photos: [...p.photos, src],
+    }));
+  }}
+/>
 
-          />
 
           <UploadWidget
-            label="Загрузка видео"
-            accept="video/mp4,video/quicktime"
-            fileKind="video"
-            userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
-            submissionId={participantDraft.submissionId}
-            onUploaded={(record) => {
-  const src = record.objectUrl || record.object_url || record.url;
-  if (!src) return;
+  label="Загрузка видео"
+  accept="video/mp4,video/quicktime"
+  fileKind="video"
+  userId={(participantProfile?.login || 'participant')
+    .trim()
+    .replace(/\s+/g, '_')
+    .toLowerCase()}
+  submissionId={participantDraft.submissionId}
+  onUploaded={(record) => {
+    const src =
+      record.objectUrl ||
+      record.object_url ||
+      record.url ||
+      null;
 
-  setParticipantDraft((p) => ({
-    ...p,
-    videos: [...p.videos, src],
-  }));
-}}
+    if (!src) {
+      console.error('Нет ссылки на видео в record', record);
+      return;
+    }
 
-          />
+    setParticipantDraft((p) => ({
+      ...p,
+      videos: [...p.videos, src],
+    }));
+  }}
+/>
+
 
           <button onClick={submitParticipantWork}>Отправить работу</button>
         </div>
