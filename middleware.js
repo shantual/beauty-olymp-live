@@ -32,7 +32,7 @@ if (host === '1olymp.ru' || host === 'www.1olymp.ru') {
   // остальные пути на основном домене оставляем как есть
   return NextResponse.next();
 }
-
+}
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };
