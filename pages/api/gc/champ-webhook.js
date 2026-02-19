@@ -65,7 +65,7 @@ const supabase = getSupabaseServerClient();
           olymp_token: olympToken,
           role: 'participant',
         },
-        { onConflict: 'email' }
+{ onConflict: 'gc_user_id' }
       );
 
     if (error) {
