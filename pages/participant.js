@@ -3,21 +3,25 @@ import { getSupabaseServerClient } from '../lib/supabaseServer';
 
 function parseCookies(cookieHeader = '') {
   return Object.fromEntries(
-    cookieHeader.split(';').map(v => v.trim()).filter(Boolean).map(v => {
-      const idx = v.indexOf('=');
-      return [v.slice(0, idx), decodeURIComponent(v.slice(idx + 1))];
-    })
+    cookieHeader
+      .split(';')
+      .map((v) => v.trim())
+      .filter(Boolean)
+      .map((v) => {
+        const idx = v.indexOf('=');
+        return [v.slice(0, idx), decodeURIComponent(v.slice(idx + 1))];
+      })
   );
 }
 
 export async function getServerSideProps({ query, req, res }) {
   const supabase = getSupabaseServerClient();
-  const token = query.token || null;
 
+  const token = query.token || null;
   const cookies = parseCookies(req.headers.cookie || '');
   const cookieUserId = cookies.olymp_user || null;
 
-  // 1) если есть cookie — пробуем по нему
+  // 1) Если есть cookie — логиним по ней
   if (!token && cookieUserId) {
     const { data: user } = await supabase
       .from('users')
@@ -28,7 +32,7 @@ export async function getServerSideProps({ query, req, res }) {
     if (user) return { props: { user } };
   }
 
-  // 2) если нет cookie, но есть token — логиним по token
+  // 2) Если есть token — логиним по token и ставим cookie
   if (token) {
     const { data: user } = await supabase
       .from('users')
@@ -37,18 +41,19 @@ export async function getServerSideProps({ query, req, res }) {
       .single();
 
     if (user) {
+      // cookie для iframe: SameSite=None + Secure обязательно
       res.setHeader(
         'Set-Cookie',
         `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
       );
       return { props: { user } };
     }
+
+    return { props: { user: null, authError: 'user_not_found' } };
   }
 
-  // 3) иначе — показываем понятную страницу ошибки (лучше чем редирект в iframe)
-  return {
-    props: { user: null, authError: token ? 'user_not_found' : 'no_token' }
-  };
+  // 3) Нет token и нет cookie
+  return { props: { user: null, authError: 'no_token' } };
 }
 
 export default function ParticipantPage({ user, authError }) {
