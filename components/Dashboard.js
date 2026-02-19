@@ -532,13 +532,35 @@ export default function Dashboard({ forcedRole = null, user = null }) {
       }
 
       if (cancelled) return;
+// ✅ если это вход участника из GetCourse — гарантируем запись участника в nextState
+if (forcedRole === 'participant' && user?.id) {
+  const fullName =
+    (user.full_name || user.fullName || user.name || '').toString().trim();
 
+  const login = (user.email || String(user.id)).toString().trim();
+
+  const participants = Array.isArray(nextState.participants) ? nextState.participants : [];
+  const nextParticipant = {
+    id: user.id,
+    fullName,
+    email: (user.email || '').toString().trim(),
+    login,
+    active: true,
+  };
+
+  nextState = {
+    ...nextState,
+    participants: [...participants.filter((p) => p.id !== user.id), nextParticipant],
+  };
+}
+
+      
       setState(nextState);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
 
     // если это вход участника из GetCourse — НЕ берём сессию из localStorage
 if (forcedRole === 'participant' && user?.id) {
-  const login = user.email || String(user.id);
+  const login = (user.email || String(user.id)).toString().trim();
   setSession({ role: 'participant', id: user.id, login });
 } else if (rawSession) {
   const parsedSession = safeParseJson(rawSession);
