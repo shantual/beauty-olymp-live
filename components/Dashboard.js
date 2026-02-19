@@ -1949,12 +1949,21 @@ useEffect(() => {
             userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
             submissionId={participantDraft.submissionId}
             onUploaded={(record) => {
-  const src = record.objectUrl || record.object_url || record.url;
-  if (!src) return; // если вдруг вообще нет ссылки
+  // достаем ссылку на файл с учетом всех вариантов
+  const src =
+    record.objectUrl ||
+    record.object_url ||
+    record.url ||
+    null;
 
-  setParticipantDraft((p) => ({
-    ...p,
-    photos: [...p.photos, src],
+  if (!src) {
+    console.error('Нет ссылки на файл в record', record);
+    return;
+  }
+
+  setParticipantDraft((prev) => ({
+    ...prev,
+    photos: [...(prev.photos || []), src],
   }));
 }}
 
