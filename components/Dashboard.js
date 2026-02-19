@@ -1897,7 +1897,7 @@ useEffect(() => {
         </div>
 
         <div className="card">
-          <h1>Личный кабинет участника</h1>
+          <h1>Загрузите работу</h1>
 
           <p><strong>ФИО:</strong> {participantProfile?.fullName || '—'}</p>
 
