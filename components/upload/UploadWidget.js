@@ -63,16 +63,29 @@ export default function UploadWidget({
           throw new Error(errMsg);
         }
 
-        const record = uploadData?.record || {
-          url: uploadData?.url,
-          key: uploadData?.key,
-          originalFileName: file.name,
-          size: file.size,
-          mimeType: file.type,
-          userId,
-          submissionId,
-          fileKind,
-        };
+        const rawRecord = uploadData?.record || {};
+
+const record = {
+  ...rawRecord,
+  // гарантируем, что есть ссылка на файл
+  objectUrl:
+    rawRecord.objectUrl ||          // если бэкенд вернул camelCase
+    rawRecord.object_url ||         // если вдруг snake_case
+    uploadData?.url ||              // fallback на url из ответа
+    null,
+  url: rawRecord.url || uploadData?.url || null,
+  key: rawRecord.key || uploadData?.key || null,
+  originalFileName:
+    rawRecord.originalFileName ||
+    rawRecord.original_name ||
+    file.name,
+  size: rawRecord.size ?? file.size,
+  mimeType: rawRecord.mimeType || rawRecord.mime || file.type,
+  userId,
+  submissionId,
+  fileKind,
+};
+
 
         setItems((prev) =>
           prev.map((item) =>
