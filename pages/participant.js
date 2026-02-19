@@ -17,7 +17,12 @@ function parseCookies(cookieHeader = '') {
 export async function getServerSideProps({ query, req, res }) {
   const supabase = getSupabaseServerClient();
 
-  const token = query.token || null;
+  const rawToken = query.token || null;
+const token =
+  rawToken && String(rawToken).includes('{{')
+    ? null
+    : (rawToken ? String(rawToken).trim() : null);
+
   const cookies = parseCookies(req.headers.cookie || '');
   const cookieUserId = cookies.olymp_user || null;
 
