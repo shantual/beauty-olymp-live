@@ -25,6 +25,9 @@ const token =
 
   const cookies = parseCookies(req.headers.cookie || '');
   const cookieUserId = cookies.olymp_user || null;
+  const gcUserIdRaw = query.gc_user_id || null;
+const gcUserId = gcUserIdRaw ? String(gcUserIdRaw).replace(/\D/g, '') : null;
+
 
   // 1) Если есть cookie — логиним по ней
   if (!token && cookieUserId) {
@@ -36,6 +39,22 @@ const token =
 
     if (user) return { props: { user } };
   }
+// 1.5) Если нет token, но есть gc_user_id — пробуем логин по gc_user_id
+if (!token && gcUserId) {
+  const { data: user } = await supabase
+    .from('users')
+    .select('*')
+    .or(`gc_user_id.eq.${gcUserId},gc_user_id.eq.{${gcUserId}}`)
+    .single();
+
+  if (user) {
+    res.setHeader(
+      'Set-Cookie',
+      `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+    );
+    return { props: { user } };
+  }
+}
 
   // 2) Если есть token — логиним по token и ставим cookie
   if (token) {
