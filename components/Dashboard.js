@@ -336,8 +336,8 @@ export default function Dashboard({ forcedRole, user = null }) {
   if (forcedRole === 'participant' && user?.id) {
     setSession({
       role: 'participant',
-      id: user.id,
-      login: user.email || String(user.id),
+      id: user?.id,
+      login: user?.email || String(user?.id),
     });
   }
 }, [forcedRole, user?.id]);
