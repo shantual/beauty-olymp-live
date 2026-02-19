@@ -1938,8 +1938,15 @@ useEffect(() => {
             userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
             submissionId={participantDraft.submissionId}
             onUploaded={(record) => {
-              setParticipantDraft((p) => ({ ...p, photos: [...p.photos, record.objectUrl] }));
-            }}
+  const src = record.objectUrl || record.object_url || record.url;
+  if (!src) return; // если вдруг вообще нет ссылки
+
+  setParticipantDraft((p) => ({
+    ...p,
+    photos: [...p.photos, src],
+  }));
+}}
+
           />
 
           <UploadWidget
@@ -1949,8 +1956,15 @@ useEffect(() => {
             userId={(participantProfile?.login || 'participant').trim().replace(/\s+/g, '_').toLowerCase()}
             submissionId={participantDraft.submissionId}
             onUploaded={(record) => {
-              setParticipantDraft((p) => ({ ...p, videos: [...p.videos, record.objectUrl] }));
-            }}
+  const src = record.objectUrl || record.object_url || record.url;
+  if (!src) return;
+
+  setParticipantDraft((p) => ({
+    ...p,
+    videos: [...p.videos, src],
+  }));
+}}
+
           />
 
           <button onClick={submitParticipantWork}>Отправить работу</button>
