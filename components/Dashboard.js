@@ -333,46 +333,7 @@ export default function Dashboard({ forcedRole = null, user = null }) {
 
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
-  useEffect(() => {
-  if (forcedRole !== 'participant') return;
-  if (!user?.id) return;
-
-  const fullName =
-    user.full_name ||
-    user.fullName ||
-    user.name ||
-    '';
-
-  const login = user.email || String(user.id);
-
-  // 1) фиксируем сессию участника
-  setSession({
-    role: 'participant',
-    id: user.id,
-    login,
-  });
-
-  // 2) гарантируем, что участник есть в state.participants
-  //    иначе participantProfile будет null и отправка работ/привязка загрузок развалится
-  setState((prev) => {
-  const participants = Array.isArray(prev.participants) ? prev.participants : [];
-
-  const nextParticipant = {
-    id: user.id,
-    fullName,
-    email: user.email || '',
-    login,
-    active: true,
-  };
-
-  const without = participants.filter((p) => p.id !== user.id);
-
-  return {
-    ...prev,
-    participants: [...without, nextParticipant],
-  };
-});
-}, [forcedRole, user]);
+  
 
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
   const [sessionReady, setSessionReady] = useState(false);
