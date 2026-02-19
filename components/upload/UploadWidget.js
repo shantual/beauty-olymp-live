@@ -70,8 +70,9 @@ const record = {
   // гарантируем, что есть ссылка на файл
   objectUrl:
     rawRecord.objectUrl ||          // если бэкенд вернул camelCase
-    rawRecord.object_url ||         // если вдруг snake_case
-    uploadData?.url ||              // fallback на url из ответа
+    rawRecord.object_url ||         // если snake_case из Supabase
+    uploadData?.objectUrl ||        // поле из upload.js
+    uploadData?.url ||              // ещё fallback
     null,
   url: rawRecord.url || uploadData?.url || null,
   key: rawRecord.key || uploadData?.key || null,
@@ -85,6 +86,7 @@ const record = {
   submissionId,
   fileKind,
 };
+
 
 
         setItems((prev) =>
