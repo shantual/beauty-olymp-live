@@ -355,24 +355,23 @@ export default function Dashboard({ forcedRole = null, user = null }) {
   // 2) гарантируем, что участник есть в state.participants
   //    иначе participantProfile будет null и отправка работ/привязка загрузок развалится
   setState((prev) => {
-    const participants = Array.isArray(prev.participants) ? prev.participants : [];
-    const already = participants.some((p) => p.id === user.id);
+  const participants = Array.isArray(prev.participants) ? prev.participants : [];
 
-    if (already) return prev;
+  const nextParticipant = {
+    id: user.id,
+    fullName,
+    email: user.email || '',
+    login,
+    active: true,
+  };
 
-    return {
-      ...prev,
-      participants: [
-        ...participants,
-        {
-          id: user.id,
-          fullName,
-          login,
-          active: true,
-        },
-      ],
-    };
-  });
+  const without = participants.filter((p) => p.id !== user.id);
+
+  return {
+    ...prev,
+    participants: [...without, nextParticipant],
+  };
+});
 }, [forcedRole, user?.id]);
 
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
@@ -576,14 +575,19 @@ export default function Dashboard({ forcedRole = null, user = null }) {
       setState(nextState);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
 
-      if (rawSession) {
-        const parsedSession = safeParseJson(rawSession);
-        if (parsedSession) {
-          setSession(normalizeSession(parsedSession, nextState));
-        } else {
-          localStorage.removeItem(SESSION_KEY);
-        }
-      }
+    // если это вход участника из GetCourse — НЕ берём сессию из localStorage
+if (forcedRole === 'participant' && user?.id) {
+  const login = user.email || String(user.id);
+  setSession({ role: 'participant', id: user.id, login });
+} else if (rawSession) {
+  const parsedSession = safeParseJson(rawSession);
+  if (parsedSession) {
+    setSession(normalizeSession(parsedSession, nextState));
+  } else {
+    localStorage.removeItem(SESSION_KEY);
+  }
+}
+
 
       setCloudReady(true);
       setSessionReady(true);
