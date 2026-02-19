@@ -50,7 +50,7 @@ if (!token && gcUserId) {
   if (user) {
     res.setHeader(
       'Set-Cookie',
-      `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+      `olymp_user=${user.id}; Path=/; Domain=.1olymp.ru; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
     );
     return { props: { user } };
   }
@@ -68,7 +68,7 @@ if (!token && gcUserId) {
       // cookie для iframe: SameSite=None + Secure обязательно
       res.setHeader(
         'Set-Cookie',
-        `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+        `olymp_user=${user.id}; Path=/; Domain=.1olymp.ru; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
       );
       return { props: { user } };
     }
