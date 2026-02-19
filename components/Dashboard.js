@@ -1839,7 +1839,7 @@ useEffect(() => {
 
             {myWorks.length ? (
         <div className="card">
-          <h2>Загрузите следующую работу</h2>
+          <h2>Ваши работы</h2>
 
           {myWorks.map((work) => {
             const media = getWorkMedia(work);
