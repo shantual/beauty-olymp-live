@@ -18,13 +18,10 @@ export default async function handler(req, res) {
     }
 
     // 2. Check that this is the correct training
-    if (
-      process.env.CHAMP_TRAINING_ID &&
-      String(training_id) !== String(process.env.CHAMP_TRAINING_ID)
-    ) {
-      console.log('Skipping, training ID mismatch');
-      return res.status(200).json({ ok: true, skipped: true });
-    }
+    // if (process.env.CHAMP_TRAINING_ID &&
+//     String(training_id) !== String(process.env.CHAMP_TRAINING_ID)) {
+//   return res.status(200).json({ ok: true, skipped: true });
+// }
 
     if (!user_id) {
       return res.status(400).json({ ok: false, error: 'no_user_id' });
