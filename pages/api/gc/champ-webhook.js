@@ -1,6 +1,7 @@
 // pages/api/gc/champ-webhook.js
 
 import crypto from 'crypto';
+import { supabaseServerClient } from '../../../lib/supabaseServer';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,18 +11,18 @@ export default async function handler(req, res) {
   try {
     const { user_id, email, full_name, training_id, secret } = req.body || {};
 
-    // 1. Проверяем секрет
+    // 1. Check secret
     if (!secret || secret !== process.env.GC_WEBHOOK_SECRET) {
       console.error('Invalid secret', { received: secret });
       return res.status(403).json({ ok: false, error: 'invalid_secret' });
     }
 
-    // 2. Проверяем, что это нужный тренинг (если указан)
+    // 2. Check that this is the correct training
     if (
       process.env.CHAMP_TRAINING_ID &&
       String(training_id) !== String(process.env.CHAMP_TRAINING_ID)
     ) {
-      console.log('Skipping, training ID does not match');
+      console.log('Skipping, training ID mismatch');
       return res.status(200).json({ ok: true, skipped: true });
     }
 
@@ -29,10 +30,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'no_user_id' });
     }
 
-    // 3. Генерируем токен
+    // 3. Generate token
     const olympToken = crypto.randomUUID();
 
-    // 4. Сохраняем токен в GetCourse (доп. поле olymp_token)
+    // 4. Save token in GetCourse
     const params = new URLSearchParams();
     params.append('key', process.env.GC_API_KEY);
     params.append('user[id]', String(user_id));
@@ -46,11 +47,30 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await gcResponse.json().catch(() => ({}));
+    const gcData = await gcResponse.json().catch(() => ({}));
 
-    if (!data || data.success === false) {
-      console.error('GC update failed:', data);
-      return res.status(500).json({ ok: false, error: 'gc_update_failed', data });
+    if (!gcData || gcData.success === false) {
+      console.error('GC update failed:', gcData);
+      return res.status(500).json({ ok: false, error: 'gc_update_failed', gcData });
+    }
+
+    // 5. Save user in Supabase
+    const { data, error } = await supabaseServerClient
+      .from('users')
+      .upsert(
+        {
+          email,
+          full_name,
+          gc_user_id: user_id,
+          olymp_token: olympToken,
+          role: 'participant',
+        },
+        { onConflict: 'email' }
+      );
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ ok: false, error: 'supabase_error', details: error });
     }
 
     return res.status(200).json({ ok: true, olympToken });
