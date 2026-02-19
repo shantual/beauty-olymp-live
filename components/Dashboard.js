@@ -1837,57 +1837,58 @@ useEffect(() => {
       <div className="layout">
         <BrandHeader />
 
-      {myWorks.length ? (
-  <div className="card">
-    <h2>Загрузите следующую работу</h2>
+            {myWorks.length ? (
+        <div className="card">
+          <h2>Загрузите следующую работу</h2>
 
-    {myWorks.map((work) => (
-      <div key={work.id} className="card" style={{ marginTop: 12 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <strong>{work.title}</strong>
-          <span style={{ opacity: 0.7 }}>{work.status || 'Отправлено'}</span>
+          {myWorks.map((work) => {
+            const media = getWorkMedia(work);
+
+            return (
+              <div key={work.id} className="card" style={{ marginTop: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <strong>{work.title}</strong>
+                  <span style={{ opacity: 0.7 }}>{work.status || 'Отправлено'}</span>
+                </div>
+
+                <div style={{ marginTop: 6, opacity: 0.8 }}>
+                  {work.contest} · {work.direction} · {work.category}
+                </div>
+
+                <div style={{ marginTop: 4 }}>
+                  <strong>Номинация:</strong> {work.nomination || '—'}
+                </div>
+
+                {work.description ? (
+                  <div style={{ marginTop: 4, opacity: 0.9 }}>{work.description}</div>
+                ) : null}
+
+                {media.photos.length ? (
+                  <div className="grid" style={{ marginTop: 10 }}>
+                    {media.photos.map((src, idx) => (
+                      <img
+                        key={idx}
+                        src={src}
+                        alt=""
+                        className="media clickable"
+                        onClick={() => setLightboxImage(src)}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+
+                {media.videos.length ? (
+                  <div className="grid" style={{ marginTop: 10 }}>
+                    {media.videos.map((video, idx) => (
+                      <video key={idx} src={video} className="media" controls />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
-
-        <div style={{ marginTop: 6, opacity: 0.8 }}>
-  {work.contest} · {work.direction} · {work.category}
-</div>
-
-<div style={{ marginTop: 4 }}>
-  <strong>Номинация:</strong> {work.nomination || '—'}
-</div>
-
-{work.description ? (
-  <div style={{ marginTop: 4, opacity: 0.9 }}>
-    {work.description}
-  </div>
-) : null}
-
-{work.photos?.length ? (
-  <div className="grid" style={{ marginTop: 10 }}>
-    {work.photos.map((src, idx) => (
-      <img
-        key={idx}
-        src={src}
-        alt=""
-        className="media clickable"
-        onClick={() => setLightboxImage(src)}
-      />
-    ))}
-  </div>
-) : null}
-
-{work.videos?.length ? (
-  <div className="grid" style={{ marginTop: 10 }}>
-    {work.videos.map((video, idx) => (
-      <video key={idx} src={video} className="media" controls />
-    ))}
-  </div>
-) : null}
-
-      </div>
-    ))}
-  </div>
-) : null}
+      ) : null}
 
       
         <div className="toolbar">
