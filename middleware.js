@@ -20,11 +20,16 @@ export function middleware(request) {
     return NextResponse.rewrite(new URL('/participant', request.url));
   }
 
-  // 🔵 Основной домен -> участник
-  if (host === '1olymp.ru' || host === 'www.1olymp.ru') {
-    return NextResponse.rewrite(new URL('/participant', request.url));
+  // 🔵 Основной домен: не трогаем главную, кроме случаев когда токен уже есть
+if (host === '1olymp.ru' || host === 'www.1olymp.ru') {
+  const url = request.nextUrl;
+
+  // если человек открыл именно "/", не переписываем на /participant
+  if (url.pathname === '/') {
+    return NextResponse.next();
   }
 
+  // остальные пути на основном домене оставляем как есть
   return NextResponse.next();
 }
 
