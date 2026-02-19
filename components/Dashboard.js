@@ -928,7 +928,7 @@ useEffect(() => {
   nomination: participantDraft.nomination,
   category: participantDraft.category,
   direction: participantDraft.direction,
-  participantName: participantDraft.fullName.trim(),
+  participantName: (participantProfile.fullName || session.login || '').trim(),
   participantId: session.id,
   title: participantDraft.title.trim(),
   description: participantDraft.description.trim(),
