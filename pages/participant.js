@@ -1,31 +1,17 @@
 import Dashboard from '../components/Dashboard';
 import { getSupabaseServerClient } from '../lib/supabaseServer';
 
-function parseCookies(cookieHeader = '') {
-  return Object.fromEntries(
-    cookieHeader
-      .split(';')
-      .map((v) => v.trim())
-      .filter(Boolean)
-      .map((v) => {
-        const idx = v.indexOf('=');
-        return [v.slice(0, idx), decodeURIComponent(v.slice(idx + 1))];
-      })
-  );
-}
-
 export async function getServerSideProps({ query, req, res }) {
   const supabase = getSupabaseServerClient();
 
-  const rawToken = query.token || null;
-const token =
-  rawToken && String(rawToken).includes('{{')
-    ? null
-    : (rawToken ? String(rawToken).trim() : null);
+  const rawToken = Array.isArray(query.token) ? query.token[0] : query.token;
+const tokenRaw = rawToken ? String(rawToken).trim() : null;
 
-  const cookies = parseCookies(req.headers.cookie || '');
-  const cookieUserId = cookies.olymp_user || null;
-  const gcUserIdRaw = query.gc_user_id || null;
+// если в iframe прилетает не подставленный шаблон {{...}} — считаем токен отсутствующим
+const token = tokenRaw && tokenRaw.includes('{{') ? null : tokenRaw;
+
+
+    const gcUserIdRaw = query.gc_user_id || null;
 const gcUserId = gcUserIdRaw ? String(gcUserIdRaw).replace(/\D/g, '') : null;
 
 
@@ -35,13 +21,17 @@ if (!token && gcUserId) {
     .from('users')
     .select('*')
     .or(`gc_user_id.eq.${gcUserId},gc_user_id.eq.{${gcUserId}}`)
-    .single();
+    .maybeSingle();
 
   if (user) {
-    res.setHeader(
-      'Set-Cookie',
-      `olymp_user=${user.id}; Path=/; Domain=.1olymp.ru; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
-    );
+    const host = req.headers.host || '';
+const domainPart = host.endsWith('1olymp.ru') ? 'Domain=.1olymp.ru; ' : '';
+
+res.setHeader(
+  'Set-Cookie',
+  `olymp_user=${user.id}; Path=/; ${domainPart}HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+);
+
     return { props: { user } };
   }
 }
@@ -52,14 +42,18 @@ if (!token && gcUserId) {
       .from('users')
       .select('*')
       .eq('olymp_token', token)
-      .single();
+      .maybeSingle();
 
     if (user) {
       // cookie для iframe: SameSite=None + Secure обязательно
-      res.setHeader(
-        'Set-Cookie',
-        `olymp_user=${user.id}; Path=/; Domain=.1olymp.ru; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
-      );
+      const host = req.headers.host || '';
+const domainPart = host.endsWith('1olymp.ru') ? 'Domain=.1olymp.ru; ' : '';
+
+res.setHeader(
+  'Set-Cookie',
+  `olymp_user=${user.id}; Path=/; ${domainPart}HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+);
+
       return { props: { user } };
     }
 
