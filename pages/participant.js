@@ -1,37 +1,66 @@
 import Dashboard from '../components/Dashboard';
 import { getSupabaseServerClient } from '../lib/supabaseServer';
 
-export async function getServerSideProps({ query, req, res }) {
-  const token = query.token;
-
-  if (!token) {
-    return {
-      redirect: { destination: '/?error=no_token', permanent: false },
-    };
-  }
-
-  const supabase = getSupabaseServerClient();
-
-  const { data: user, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('olymp_token', token)
-    .single();
-
-  if (error || !user) {
-    return {
-      redirect: { destination: '/?error=user_not_found', permanent: false },
-    };
-  }
-
-  res.setHeader(
-    'Set-Cookie',
-    `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+function parseCookies(cookieHeader = '') {
+  return Object.fromEntries(
+    cookieHeader.split(';').map(v => v.trim()).filter(Boolean).map(v => {
+      const idx = v.indexOf('=');
+      return [v.slice(0, idx), decodeURIComponent(v.slice(idx + 1))];
+    })
   );
-
-  return { props: { user } };
 }
 
-export default function ParticipantPage({ user }) {
+export async function getServerSideProps({ query, req, res }) {
+  const supabase = getSupabaseServerClient();
+  const token = query.token || null;
+
+  const cookies = parseCookies(req.headers.cookie || '');
+  const cookieUserId = cookies.olymp_user || null;
+
+  // 1) если есть cookie — пробуем по нему
+  if (!token && cookieUserId) {
+    const { data: user } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', cookieUserId)
+      .single();
+
+    if (user) return { props: { user } };
+  }
+
+  // 2) если нет cookie, но есть token — логиним по token
+  if (token) {
+    const { data: user } = await supabase
+      .from('users')
+      .select('*')
+      .eq('olymp_token', token)
+      .single();
+
+    if (user) {
+      res.setHeader(
+        'Set-Cookie',
+        `olymp_user=${user.id}; Path=/; HttpOnly; Max-Age=2592000; SameSite=None; Secure`
+      );
+      return { props: { user } };
+    }
+  }
+
+  // 3) иначе — показываем понятную страницу ошибки (лучше чем редирект в iframe)
+  return {
+    props: { user: null, authError: token ? 'user_not_found' : 'no_token' }
+  };
+}
+
+export default function ParticipantPage({ user, authError }) {
+  if (!user) {
+    return (
+      <div style={{ padding: 24, fontFamily: 'sans-serif' }}>
+        <h2>Не удалось открыть кабинет</h2>
+        <p>Ошибка: {authError}</p>
+        <p>Откройте кабинет из GetCourse ещё раз или напишите в поддержку.</p>
+      </div>
+    );
+  }
+
   return <Dashboard forcedRole="participant" user={user} />;
 }
