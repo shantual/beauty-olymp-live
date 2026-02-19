@@ -332,15 +332,6 @@ function safeParseJson(value) {
 export default function Dashboard({ forcedRole, user = null }) {
   const [state, setState] = useState(createDefaultState);
   const [session, setSession] = useState({ role: null, id: null, login: null });
-  useEffect(() => {
-  if (forcedRole === 'participant' && user?.id) {
-    setSession({
-      role: 'participant',
-      id: user?.id,
-      login: user?.email || String(user?.id),
-    });
-  }
-}, [forcedRole, user?.id]);
   const [participantSubmissionId, setParticipantSubmissionId] = useState(() => `submission-${Date.now()}`);
   const [sessionReady, setSessionReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
