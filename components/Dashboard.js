@@ -691,7 +691,11 @@ useEffect(() => {
   );
 
   useEffect(() => {
-    const shouldLoadSignedFiles = session.role === 'judge' || session.role === 'admin' || session.role === 'moderator';
+    const shouldLoadSignedFiles =
+    session.role === 'judge' ||
+    session.role === 'admin' ||
+    session.role === 'moderator' ||
+    session.role === 'participant';
     if (!shouldLoadSignedFiles) {
       setJudgeSubmissionFiles({});
       return;
