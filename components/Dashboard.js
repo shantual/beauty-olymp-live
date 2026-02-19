@@ -1981,10 +1981,8 @@ useEffect(() => {
   label="Загрузка фото"
   accept="image/jpeg,image/png,image/webp"
   fileKind="image"
-  userId={(participantProfile?.login || 'participant')
-    .trim()
-    .replace(/\s+/g, '_')
-    .toLowerCase()}
+  userId={String(session.id)}
+
   submissionId={participantDraft.submissionId}
   onUploaded={(record) => {
     // достаем ссылку на файл из всех возможных полей
@@ -2011,10 +2009,8 @@ useEffect(() => {
   label="Загрузка видео"
   accept="video/mp4,video/quicktime"
   fileKind="video"
-  userId={(participantProfile?.login || 'participant')
-    .trim()
-    .replace(/\s+/g, '_')
-    .toLowerCase()}
+  userId={String(session.id)}
+
   submissionId={participantDraft.submissionId}
   onUploaded={(record) => {
     const src =
