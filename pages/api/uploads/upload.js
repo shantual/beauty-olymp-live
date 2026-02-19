@@ -164,7 +164,6 @@ export default async function handler(req, res) {
         original_file_name: originalFileName,
         mime_type: mimeType,
         size,
-        kind,
         status: 'uploaded',
         object_url: objectUrl,
       })
