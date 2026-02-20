@@ -121,28 +121,41 @@ function removeItem(localId) {
       <small>Загружено: {uploaded.length}</small>
       <ul>
         {items.map((item) => (
-          <li key={item.localId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-  <span style={{ flex: 1 }}>
+          <li
+  key={item.localId}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '6px 0',
+  }}
+>
+  <span>
     {item.name} - {item.status}
-    {item.status === 'uploading' || item.status === 'done' ? ` (${item.progress}%)` : ''}
-    {item.error ? ` - ${item.error}` : ''}
+    {(item.status === 'uploading' || item.status === 'done') &&
+      ` (${item.progress}%)`}
+    {item.error && ` - ${item.error}`}
   </span>
 
   {item.status !== 'uploading' && (
     <button
       type="button"
       onClick={() => removeItem(item.localId)}
-      aria-label={`Удалить ${item.name}`}
-      title="Удалить"
       style={{
+        marginLeft: 12,
         border: 'none',
-        background: 'transparent',
+        background: '#ff4d4f',
+        color: 'white',
+        borderRadius: '50%',
+        width: 22,
+        height: 22,
         cursor: 'pointer',
-        fontSize: 18,
-        lineHeight: 1,
+        fontSize: 14,
+        lineHeight: '22px',
+        textAlign: 'center',
       }}
     >
-      ✕
+      ×
     </button>
   )}
 </li>
