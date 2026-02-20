@@ -2304,8 +2304,7 @@ useEffect(() => {
                   <tr key={work.id}>
                     <td>{work.id}</td>
                     <td>{work.contest}</td>
-                    <td>{editing ? <input value={workEditDraft.direction} onChange={(e) => setWorkEditDraft((p) => ({ ...p, direction: e.target.value }))} /> : (work.direction || '—')}</td>
-                    <td>{editing ? <input value={workEditDraft.nomination} onChange={(e) => setWorkEditDraft((p) => ({ ...p, nomination: e.target.value }))} /> : work.nomination}</td>
+                                        <td>{editing ? <input value={workEditDraft.nomination} onChange={(e) => setWorkEditDraft((p) => ({ ...p, nomination: e.target.value }))} /> : work.nomination}</td>
                     <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
                     <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
                     <td>
