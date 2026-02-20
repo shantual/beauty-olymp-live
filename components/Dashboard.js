@@ -1620,7 +1620,15 @@ useEffect(() => {
       status: work.status || 'Допущено',
     });
   }
-
+function toggleJudgePick(workId, judgeId) {
+  setJudgePicksByWorkId((prev) => {
+    const current = prev[workId] || [];
+    const exists = current.includes(judgeId);
+    const next = exists ? current.filter((id) => id !== judgeId) : [...current, judgeId];
+    return { ...prev, [workId]: next };
+  });
+}
+  
   function saveWorkEdit() {
     if (!workEditId) return;
     setState((prev) => ({
@@ -2297,7 +2305,7 @@ useEffect(() => {
         <div className="card">
           <h3>Все загруженные работы</h3>
           <div className="admin-table-wrap"><table className="works-table">
-            <thead><tr><th>ID</th><th>Конкурс</th><th>Номинация</th><th>Категория</th><th>Участник</th><th>Название</th><th>Действия</th></tr></thead>
+            <thead><tr><th>ID</th><th>Конкурс</th><th>Номинация</th><th>Категория</th><th>Участник</th><th>Название</th>th>Судьи</th><th>Действия</th></tr></thead>
             <tbody>
               {state.works.map((work) => {
                 const editing = workEditId === work.id;
@@ -2319,6 +2327,35 @@ useEffect(() => {
                     <td>{editing ? <input value={workEditDraft.participantName} onChange={(e) => setWorkEditDraft((p) => ({ ...p, participantName: e.target.value }))} /> : (work.participantName || '—')}</td>
                     <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
                     <td>
+  <div style={{ display: 'grid', gap: 8 }}>
+    <div style={{ maxHeight: 140, overflow: 'auto', border: '1px solid #e6e6f2', borderRadius: 12, padding: '8px 10px' }}>
+      {state.judges.map((j) => {
+        const picked = (judgePicksByWorkId[work.id] || []).includes(j.id);
+        return (
+          <label key={j.id} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '6px 0' }}>
+            <input
+              type="checkbox"
+              checked={picked}
+              onChange={() => toggleJudgePick(work.id, j.id)}
+            />
+            <span>{j.fullName}</span>
+          </label>
+        );
+      })}
+    </div>
+
+    <button
+      type="button"
+      onClick={() => {
+        const judgeIds = judgePicksByWorkId[work.id] || [];
+        alert(`Для работы ${work.id} выбраны судьи: ${judgeIds.join(', ') || 'никто'}`);
+      }}
+    >
+      Назначить
+    </button>
+  </div>
+</td>
+                               <td>
                       <div className="row">     
                         {editing ? (
                           <>
@@ -2330,15 +2367,7 @@ useEffect(() => {
                             <button onClick={() => startWorkEdit(work)}>Редактировать</button>
                             <button onClick={() => deleteWork(work.id)}>Удалить</button>
                             <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
-        function toggleJudgePick(workId, judgeId) {
-  setJudgePicksByWorkId((prev) => {
-    const current = prev[workId] || [];
-    const exists = current.includes(judgeId);
-    const next = exists ? current.filter((id) => id !== judgeId) : [...current, judgeId];
-    return { ...prev, [workId]: next };
-  });
-}
-                          </>
+                           </>
                         )}
                       </div>
                     </td>
