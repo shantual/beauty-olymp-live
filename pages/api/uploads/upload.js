@@ -183,6 +183,12 @@ export default async function handler(req, res) {
       key: objectKey,
     });
   } catch (error) {
-    return res.status(500).json({ error: error?.message || 'Failed to upload' });
-  }
+  console.error('UPLOAD_FATAL', {
+    name: error?.name,
+    message: error?.message,
+    stack: error?.stack,
+    $metadata: error?.$metadata,
+  });
+
+  return res.status(500).json({ error: error?.message || 'Failed to upload' });
 }
