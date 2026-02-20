@@ -2305,7 +2305,7 @@ function toggleJudgePick(workId, judgeId) {
         <div className="card">
           <h3>Все загруженные работы</h3>
           <div className="admin-table-wrap"><table className="works-table">
-            <thead><tr><th>ID</th><th>Конкурс</th><th>Номинация</th><th>Категория</th><th>Участник</th><th>Название</th>th>Судьи</th><th>Действия</th></tr></thead>
+            <thead><tr><th>ID</th><th>Конкурс</th><th>Номинация</th><th>Категория</th><th>Участник</th><th>Название</th><th>Судьи</th><th>Действия</th></tr></thead>
             <tbody>
               {state.works.map((work) => {
                 const editing = workEditId === work.id;
