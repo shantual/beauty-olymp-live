@@ -32,6 +32,15 @@ export default async function handler(req, res) {
 
   try {
     const cfg = assertStorageConfig();
+    console.log('UPLOAD_CFG', {
+  bucket: cfg.bucket,
+  region: cfg.region,
+  endpoint: cfg.endpoint,
+  season: cfg.season,
+  accessKeyId_prefix: String(cfg.accessKeyId || '').slice(0, 6),
+  accessKeyId_len: String(cfg.accessKeyId || '').length,
+  secretKey_len: String(cfg.secretAccessKey || '').length,
+});
     const { fields, files } = await parseForm(req);
 
     // Formidable иногда возвращает массив, даже если multiples:false
