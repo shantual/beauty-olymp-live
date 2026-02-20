@@ -111,7 +111,9 @@ const record = {
 
     event.target.value = '';
   }
-
+function removeItem(localId) {
+  setItems((prev) => prev.filter((x) => x.localId !== localId));
+}
   return (
     <div className="card">
       <h4>{label}</h4>
@@ -119,11 +121,31 @@ const record = {
       <small>Загружено: {uploaded.length}</small>
       <ul>
         {items.map((item) => (
-          <li key={item.localId}>
-            {item.name} - {item.status}
-            {item.status === 'uploading' || item.status === 'done' ? ` (${item.progress}%)` : ''}
-            {item.error ? ` - ${item.error}` : ''}
-          </li>
+          <li key={item.localId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+  <span style={{ flex: 1 }}>
+    {item.name} - {item.status}
+    {item.status === 'uploading' || item.status === 'done' ? ` (${item.progress}%)` : ''}
+    {item.error ? ` - ${item.error}` : ''}
+  </span>
+
+  {item.status !== 'uploading' && (
+    <button
+      type="button"
+      onClick={() => removeItem(item.localId)}
+      aria-label={`Удалить ${item.name}`}
+      title="Удалить"
+      style={{
+        border: 'none',
+        background: 'transparent',
+        cursor: 'pointer',
+        fontSize: 18,
+        lineHeight: 1,
+      }}
+    >
+      ✕
+    </button>
+  )}
+</li>
         ))}
       </ul>
     </div>
