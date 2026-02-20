@@ -357,6 +357,7 @@ export default function Dashboard({ forcedRole = null, user = null }) {
     status: 'Допущено',
   });
   const [judgeDraft, setJudgeDraft] = useState({ fullName: '', email: '', login: '', password: '' });
+  const [judgePicksByWorkId, setJudgePicksByWorkId] = useState({});
   const [participantDraft, setParticipantDraft] = useState({
     fullName: '',
     contest: 'Эстетика Олимпа',
