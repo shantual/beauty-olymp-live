@@ -2756,6 +2756,43 @@ function Styles() {
       .works-table th { text-align: center; }
       .works-table td { text-align: left; }
       .works-table td > .row { justify-content: flex-start; }
+      /* Таблица "Работы" — зафиксируем ширины колонок */
+.works-table {
+  width: 100%;
+  table-layout: fixed; /* важно: фиксированная сетка колонок */
+}
+
+/* чтобы текст мог переноситься */
+.works-table th,
+.works-table td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+/* 1) ID (1-я колонка) — узкая */
+.works-table th:nth-child(1),
+.works-table td:nth-child(1) {
+  width: 110px;
+}
+
+/* 2) Конкурс (2-я колонка) — поуже */
+.works-table th:nth-child(2),
+.works-table td:nth-child(2) {
+  width: 170px;
+}
+
+/* 4) Категория (4-я колонка) — узкая */
+.works-table th:nth-child(4),
+.works-table td:nth-child(4) {
+  width: 130px;
+}
+
+/* 7) Судьи (7-я колонка) — пошире */
+.works-table th:nth-child(7),
+.works-table td:nth-child(7) {
+  width: 260px;
+}
       .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
       .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
       .judge-preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; border: 1px solid #d8deea; }
