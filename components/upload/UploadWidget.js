@@ -142,18 +142,15 @@ function removeItem(localId) {
       type="button"
       onClick={() => removeItem(item.localId)}
       style={{
-        marginLeft: 12,
-        border: 'none',
-        background: '#ff4d4f',
-        color: 'white',
-        borderRadius: '50%',
-        width: 22,
-        height: 22,
-        cursor: 'pointer',
-        fontSize: 14,
-        lineHeight: '22px',
-        textAlign: 'center',
-      }}
+  marginLeft: 12,
+  border: 'none',
+  background: 'transparent',
+  color: '#281C68',
+  cursor: 'pointer',
+  fontSize: 22,
+  fontWeight: 600,
+  padding: 0,
+}}
     >
       ×
     </button>
