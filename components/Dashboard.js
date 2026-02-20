@@ -2348,6 +2348,52 @@ useEffect(() => {
       {adminTab === 'moderators' && isAdmin ? (
         <div className="card">
           <h3>Модераторы</h3>
+        {/* Создание модератора */}
+<div className="card" style={{ marginTop: 16 }}>
+  <h3>Создание модератора</h3>
+
+  <input
+    placeholder="ФИО"
+    value={moderatorDraft.fullName}
+    onChange={(e) =>
+      setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))
+    }
+  />
+
+  <input
+    placeholder="Логин"
+    value={moderatorDraft.login}
+    onChange={(e) =>
+      setModeratorDraft((p) => ({ ...p, login: e.target.value }))
+    }
+  />
+
+  <input
+    type="password"
+    placeholder="Пароль"
+    value={moderatorDraft.password}
+    onChange={(e) =>
+      setModeratorDraft((p) => ({ ...p, password: e.target.value }))
+    }
+  />
+
+  <div style={{ marginTop: 8 }}>
+    {MODERATOR_PERMISSIONS.map((permission) => (
+      <label key={permission.key} style={{ display: 'block' }}>
+        <input
+          type="checkbox"
+          checked={moderatorDraft.permissions[permission.key]}
+          onChange={() => toggleDraftPermission(permission.key)}
+        />{' '}
+        {permission.label}
+      </label>
+    ))}
+  </div>
+
+  <button style={{ marginTop: 12 }} onClick={addModerator}>
+    Добавить модератора
+  </button>
+</div>
           <div className="admin-table-wrap"><table>
             <thead><tr><th>ID</th><th>ФИО</th><th>Логин</th><th>Права</th><th>Статус</th><th>Действия</th></tr></thead>
             <tbody>
