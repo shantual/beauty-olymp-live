@@ -2144,40 +2144,7 @@ useEffect(() => {
         <button onClick={addJudge}>Добавить судью</button>
       </div>
 
-      {isAdmin ? (
-      <div className="card">
-        <h3>Создание модератора</h3>
-        <input placeholder="ФИО" value={moderatorDraft.fullName} onChange={(e) => setModeratorDraft((p) => ({ ...p, fullName: e.target.value }))} />
-        <input placeholder="Логин" value={moderatorDraft.login} onChange={(e) => setModeratorDraft((p) => ({ ...p, login: e.target.value }))} />
-        <input type="password" placeholder="Пароль" value={moderatorDraft.password} onChange={(e) => setModeratorDraft((p) => ({ ...p, password: e.target.value }))} />
-        <div>
-          {MODERATOR_PERMISSIONS.map((permission) => (
-            <label key={permission.key} style={{ display: 'block' }}>
-              <input
-                type="checkbox"
-                checked={moderatorDraft.permissions[permission.key]}
-                onChange={() => toggleDraftPermission(permission.key)}
-              />{' '}
-              {permission.label}
-            </label>
-          ))}
-        </div>
-        <button onClick={addModerator}>Добавить модератора</button>
-      </div>
-      ) : null}
-
-      <div className="card">
-        <h3>Назначение работ</h3>
-        <select value={assignmentDraft.judgeId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, judgeId: e.target.value }))}>
-          <option value="">Выберите судью</option>
-          {state.judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.id} — {judge.fullName}</option>)}
-        </select>
-        <select value={assignmentDraft.workId} onChange={(e) => setAssignmentDraft((p) => ({ ...p, workId: e.target.value }))}>
-          <option value="">Выберите работу</option>
-          {state.works.map((work) => <option key={work.id} value={work.id}>{work.id} — {work.title}</option>)}
-        </select>
-        <button onClick={assignWork}>Назначить</button>
-      </div>
+           
       </>
       ) : null}
 
