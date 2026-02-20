@@ -2330,6 +2330,14 @@ useEffect(() => {
                             <button onClick={() => startWorkEdit(work)}>Редактировать</button>
                             <button onClick={() => deleteWork(work.id)}>Удалить</button>
                             <button onClick={() => setSelectedWorkId(work.id)}>Просмотр оценок</button>
+        function toggleJudgePick(workId, judgeId) {
+  setJudgePicksByWorkId((prev) => {
+    const current = prev[workId] || [];
+    const exists = current.includes(judgeId);
+    const next = exists ? current.filter((id) => id !== judgeId) : [...current, judgeId];
+    return { ...prev, [workId]: next };
+  });
+}
                           </>
                         )}
                       </div>
