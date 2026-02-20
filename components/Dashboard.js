@@ -2328,21 +2328,28 @@ function toggleJudgePick(workId, judgeId) {
                     <td>{editing ? <input value={workEditDraft.title} onChange={(e) => setWorkEditDraft((p) => ({ ...p, title: e.target.value }))} /> : work.title}</td>
                     <td>
   <div style={{ display: 'grid', gap: 8 }}>
-    <div style={{ maxHeight: 140, overflow: 'auto', border: '1px solid #e6e6f2', borderRadius: 12, padding: '8px 10px' }}>
-      {state.judges.map((j) => {
-        const picked = (judgePicksByWorkId[work.id] || []).includes(j.id);
-        return (
-          <label key={j.id} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '6px 0' }}>
-            <input
-              type="checkbox"
-              checked={picked}
-              onChange={() => toggleJudgePick(work.id, j.id)}
-            />
-            <span>{j.fullName}</span>
-          </label>
-        );
-      })}
-    </div>
+    <select
+  multiple
+  value={judgePicksByWorkId[work.id] || []}
+  onChange={(e) => {
+    const selectedIds = Array.from(e.target.selectedOptions).map((opt) => opt.value);
+    setJudgePicksByWorkId((prev) => ({ ...prev, [work.id]: selectedIds }));
+  }}
+  style={{
+    width: '100%',
+    minHeight: 110,
+    border: '1px solid #d6d6f0',
+    borderRadius: 12,
+    padding: '10px',
+    outline: 'none',
+  }}
+>
+  {state.judges.map((j) => (
+    <option key={j.id} value={j.id}>
+      {j.fullName}
+    </option>
+  ))}
+</select>
 
     <button
       type="button"
