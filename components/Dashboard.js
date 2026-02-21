@@ -2364,7 +2364,62 @@ function toggleJudgePick(workId, judgeId) {
         <option value="Перманент">Перманент</option>
       </select>
     </div>
+{criteriaContest && criteriaDirection && (
+  <div style={{ marginTop: 20 }}>
 
+    <h4>Критерии для выбранного направления</h4>
+
+    {(state.criteria || [])
+      .filter(
+        (c) =>
+          c.contest === criteriaContest &&
+          c.direction === criteriaDirection
+      )
+      .map((c) => (
+        <div key={c.id} className="row" style={{ marginBottom: 8 }}>
+          <div style={{ flex: 1 }}>{c.title}</div>
+          <div>от {c.min} до {c.max}</div>
+        </div>
+      ))}
+
+    <hr style={{ margin: '20px 0' }} />
+
+    <h4>Добавить критерий</h4>
+
+    <input
+      placeholder="Название критерия"
+      value={newCriterionTitle}
+      onChange={(e) => setNewCriterionTitle(e.target.value)}
+    />
+
+    <button
+      onClick={() => {
+        if (!newCriterionTitle.trim()) return;
+
+        const newId = `CR-${Date.now()}`;
+
+        const newCriterion = {
+          id: newId,
+          contest: criteriaContest,
+          direction: criteriaDirection,
+          title: newCriterionTitle,
+          min: 1,
+          max: 10,
+        };
+
+        setState((prev) => ({
+          ...prev,
+          criteria: [...prev.criteria, newCriterion],
+        }));
+
+        setNewCriterionTitle('');
+      }}
+    >
+      Добавить
+    </button>
+
+  </div>
+)}
     <div>
       {(state.criteria || [])
         .filter(
