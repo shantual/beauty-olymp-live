@@ -2803,7 +2803,7 @@ function Styles() {
 /* 6 — Название */
 .works-table th:nth-child(6),
 .works-table td:nth-child(6) {
-  width: 150px;
+  width: 120px;
 }
 
 /* 7 — Судьи */
@@ -2815,7 +2815,7 @@ function Styles() {
 /* 8 — Действия */
 .works-table th:nth-child(8),
 .works-table td:nth-child(8) {
-  width: 140px;
+  width: 120px;
 }
       .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
       .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
