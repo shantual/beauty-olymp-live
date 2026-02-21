@@ -2420,20 +2420,7 @@ function toggleJudgePick(workId, judgeId) {
 
   </div>
 )}
-    <div>
-      {(state.criteria || [])
-        .filter(
-          (c) =>
-            c.contest === criteriaContest &&
-            c.direction === criteriaDirection
-        )
-        .map((c) => (
-          <div key={c.id} className="row" style={{ marginBottom: 8 }}>
-            <div style={{ flex: 1 }}>{c.title}</div>
-            <div>от {c.min} до {c.max}</div>
-          </div>
-        ))}
-    </div>
+   
   </div>
 )}
 
