@@ -2797,7 +2797,7 @@ function Styles() {
 /* 5 — Участник (шире) */
 .works-table th:nth-child(5),
 .works-table td:nth-child(5) {
-  width: 110px;
+  width: 90px;
 }
 
 /* 6 — Название */
