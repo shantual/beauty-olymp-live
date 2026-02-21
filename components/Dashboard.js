@@ -1013,7 +1013,13 @@ useEffect(() => {
 
     const passwordHash = await sha256(judgeDraft.password);
     const judge = {
-      id: `J-${String(state.judges.length + 1).padStart(3, '0')}`,
+      const maxNum = state.judges
+  .map((j) => String(j.id || '').match(/^J-(\d+)$/))
+  .filter(Boolean)
+  .map((m) => Number(m[1]))
+  .reduce((a, b) => Math.max(a, b), 0);
+
+id: `J-${String(maxNum + 1).padStart(3, '0')}`,
       fullName: judgeDraft.fullName,
       email: judgeDraft.email,
       login,
