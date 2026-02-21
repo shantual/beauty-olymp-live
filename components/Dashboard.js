@@ -200,8 +200,15 @@ function normalizeState(rawState) {
     return { ...judge, active: judge.active ?? true };
   });
 
-  // Гарантируем наличие рабочего demo-судьи для входа в любом локальном состоянии.
+  // Демо-судья нужен только для локальной разработки.
+// В проде (1olymp.ru) он НЕ должен сам появляться после обновления страницы.
+const isLocalhost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+if (isLocalhost) {
   const demoIndex = next.judges.findIndex((judge) => judge.login === 'judge1');
+
   const demoJudge = {
     id: 'J-001',
     fullName: 'Судья Демонстрационный',
@@ -216,6 +223,10 @@ function normalizeState(rawState) {
   } else {
     next.judges[demoIndex] = { ...next.judges[demoIndex], ...demoJudge };
   }
+} else {
+  // если вдруг демо-судья уже попал в прод-данные — вычищаем его
+  next.judges = (next.judges || []).filter((j) => j.login !== 'judge1');
+}
 
   next.moderators = (next.moderators || []).map((moderator, index) => ({
     id: moderator.id || `M-${String(index + 1).padStart(3, '0')}`,
