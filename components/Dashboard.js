@@ -2756,42 +2756,66 @@ function Styles() {
       .works-table th { text-align: center; }
       .works-table td { text-align: left; }
       .works-table td > .row { justify-content: flex-start; }
-      /* Таблица "Работы" — зафиксируем ширины колонок */
+     /* Таблица фиксированной ширины */
 .works-table {
   width: 100%;
-  table-layout: fixed; /* важно: фиксированная сетка колонок */
+  table-layout: fixed;
 }
 
-/* чтобы текст мог переноситься */
+/* перенос слов аккуратно */
 .works-table th,
 .works-table td {
-  overflow-wrap: anywhere;
   word-break: break-word;
+  overflow-wrap: break-word;
   vertical-align: top;
 }
 
-/* 1) ID (1-я колонка) — узкая */
+/* 1 — ID */
 .works-table th:nth-child(1),
 .works-table td:nth-child(1) {
+  width: 90px;
+}
+
+/* 2 — Конкурс */
+.works-table th:nth-child(2),
+.works-table td:nth-child(2) {
+  width: 150px;
+}
+
+/* 3 — Номинация (шире!) */
+.works-table th:nth-child(3),
+.works-table td:nth-child(3) {
+  width: 260px;
+}
+
+/* 4 — Категория */
+.works-table th:nth-child(4),
+.works-table td:nth-child(4) {
   width: 110px;
 }
 
-/* 2) Конкурс (2-я колонка) — поуже */
-.works-table th:nth-child(2),
-.works-table td:nth-child(2) {
+/* 5 — Участник (шире) */
+.works-table th:nth-child(5),
+.works-table td:nth-child(5) {
   width: 170px;
 }
 
-/* 4) Категория (4-я колонка) — узкая */
-.works-table th:nth-child(4),
-.works-table td:nth-child(4) {
-  width: 130px;
+/* 6 — Название */
+.works-table th:nth-child(6),
+.works-table td:nth-child(6) {
+  width: 170px;
 }
 
-/* 7) Судьи (7-я колонка) — пошире */
+/* 7 — Судьи */
 .works-table th:nth-child(7),
 .works-table td:nth-child(7) {
-  width: 260px;
+  width: 280px;
+}
+
+/* 8 — Действия */
+.works-table th:nth-child(8),
+.works-table td:nth-child(8) {
+  width: 160px;
 }
       .judge-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
       .judge-preview-card { display: grid; gap: 6px; padding: 8px; background: rgba(255,255,255,0.9); border: 1px solid #e4e8f1; border-radius: 10px; text-align: left; color: #000; text-transform: none; letter-spacing: 0; font-family: 'Open Sans', Arial, sans-serif; }
