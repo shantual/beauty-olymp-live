@@ -115,9 +115,33 @@ function getNominationOptions(contest, direction) {
 }
 
 const DEFAULT_CRITERIA = [
-  { id: 'c1', title: 'Креативность', min: 1, max: 10 },
-  { id: 'c2', title: 'Качество исполнения', min: 1, max: 10 },
-  { id: 'c3', title: 'Техническая сложность', min: 1, max: 10 },
+  // Эстетика Олимпа — Маникюр
+  {
+    id: 'EO-M-1',
+    contest: 'Эстетика Олимпа',
+    direction: 'Маникюр',
+    title: 'Техника исполнения',
+    min: 1,
+    max: 10,
+  },
+  {
+    id: 'EO-M-2',
+    contest: 'Эстетика Олимпа',
+    direction: 'Маникюр',
+    title: 'Чистота работы',
+    min: 1,
+    max: 10,
+  },
+
+  // Эстетика Олимпа — Перманент
+  {
+    id: 'EO-P-1',
+    contest: 'Эстетика Олимпа',
+    direction: 'Перманент',
+    title: 'Глубина цвета',
+    min: 1,
+    max: 10,
+  },
 ];
 
 const DEFAULT_JUDGES = [
