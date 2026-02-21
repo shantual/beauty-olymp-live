@@ -995,42 +995,46 @@ useEffect(() => {
     showToast('Работа отправлена');
   }
 
-  async function addJudge() {
-    if (!judgeDraft.fullName.trim() || !judgeDraft.login.trim() || !judgeDraft.password) {
-      showToast('Заполните ФИО, логин и пароль судьи');
-      return;
-    }
-
-    const login = judgeDraft.login.trim();
-    const duplicateLogin =
-      state.judges.some((judge) => judge.login === login) ||
-      state.adminUsers.some((admin) => admin.login === login) ||
-      state.moderators.some((moderator) => moderator.login === login);
-    if (duplicateLogin) {
-      showToast('Судья с таким логином уже существует');
-      return;
-    }
-
-    const passwordHash = await sha256(judgeDraft.password);
-    const judge = {
-      const maxNum = state.judges
-  .map((j) => String(j.id || '').match(/^J-(\d+)$/))
-  .filter(Boolean)
-  .map((m) => Number(m[1]))
-  .reduce((a, b) => Math.max(a, b), 0);
-
-id: `J-${String(maxNum + 1).padStart(3, '0')}`,
-      fullName: judgeDraft.fullName,
-      email: judgeDraft.email,
-      login,
-      passwordHash,
-      active: true,
-    };
-    setState((prev) => ({ ...prev, judges: [...prev.judges, judge] }));
-    setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
-    showToast('Добавлено');
+ async function addJudge() {
+  if (!judgeDraft.fullName.trim() || !judgeDraft.login.trim() || !judgeDraft.password) {
+    showToast('Заполните ФИО, логин и пароль судьи');
+    return;
   }
 
+  const login = judgeDraft.login.trim();
+  const duplicateLogin =
+    state.judges.some((judge) => judge.login === login) ||
+    state.adminUsers.some((admin) => admin.login === login) ||
+    state.moderators.some((moderator) => moderator.login === login);
+
+  if (duplicateLogin) {
+    showToast('Судья с таким логином уже существует');
+    return;
+  }
+
+  const passwordHash = await sha256(judgeDraft.password);
+
+  // 🔹 вычисляем максимальный номер ID
+  const maxNum = state.judges
+    .map((j) => String(j.id || '').match(/^J-(\d+)$/))
+    .filter(Boolean)
+    .map((m) => Number(m[1]))
+    .reduce((a, b) => Math.max(a, b), 0);
+
+  // 🔹 создаём нового судью
+  const judge = {
+    id: `J-${String(maxNum + 1).padStart(3, '0')}`,
+    fullName: judgeDraft.fullName,
+    email: judgeDraft.email,
+    login,
+    passwordHash,
+    active: true,
+  };
+
+  setState((prev) => ({ ...prev, judges: [...prev.judges, judge] }));
+  setJudgeDraft({ fullName: '', email: '', login: '', password: '' });
+  showToast('Добавлено');
+}
   function toggleDraftPermission(key) {
     setModeratorDraft((prev) => ({
       ...prev,
