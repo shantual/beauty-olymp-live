@@ -476,7 +476,7 @@ const [criteriaDirection, setCriteriaDirection] = useState('');
     if (tab === 'main') return true;
     if (tab === 'moderators') return isAdmin;
     if (tab === 'judges') return isAdmin || access.canManageJudges;
-    if (tab === 'works' || tab === 'import') return isAdmin || access.canManageWorks;
+    if (tab === 'works' || tab === 'criteria' || tab === 'import') return isAdmin || access.canManageWorks;
     if (tab === 'participants') return isAdmin;
     return false;
   };
