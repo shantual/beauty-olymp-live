@@ -428,6 +428,8 @@ export default function Dashboard({ forcedRole = null, user = null }) {
   const [lightboxImage, setLightboxImage] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState('');
   const [judgeViewId, setJudgeViewId] = useState(null);
+  const [criteriaContest, setCriteriaContest] = useState('');
+const [criteriaDirection, setCriteriaDirection] = useState('');
   const [judgeSubmissionFiles, setJudgeSubmissionFiles] = useState({});
   const [moderatorEditId, setModeratorEditId] = useState(null);
   const [moderatorEditDraft, setModeratorEditDraft] = useState({
@@ -2338,6 +2340,47 @@ function toggleJudgePick(workId, judgeId) {
           </div>
         </div>
       ) : null}
+
+{adminTab === 'criteria' && (
+  <div className="card">
+    <h3>Управление критериями</h3>
+
+    <div className="row" style={{ marginBottom: 12 }}>
+      <select
+        value={criteriaContest || ''}
+        onChange={(e) => setCriteriaContest(e.target.value)}
+      >
+        <option value="">Выберите конкурс</option>
+        <option value="Эстетика Олимпа">Эстетика Олимпа</option>
+        <option value="Креатив Олимпа">Креатив Олимпа</option>
+      </select>
+
+      <select
+        value={criteriaDirection || ''}
+        onChange={(e) => setCriteriaDirection(e.target.value)}
+      >
+        <option value="">Выберите направление</option>
+        <option value="Маникюр">Маникюр</option>
+        <option value="Перманент">Перманент</option>
+      </select>
+    </div>
+
+    <div>
+      {(state.criteria || [])
+        .filter(
+          (c) =>
+            c.contest === criteriaContest &&
+            c.direction === criteriaDirection
+        )
+        .map((c) => (
+          <div key={c.id} className="row" style={{ marginBottom: 8 }}>
+            <div style={{ flex: 1 }}>{c.title}</div>
+            <div>от {c.min} до {c.max}</div>
+          </div>
+        ))}
+    </div>
+  </div>
+)}
 
       {adminTab === 'import' && (isAdmin || access.canManageWorks) ? (
         <div className="card">
