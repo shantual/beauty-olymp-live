@@ -2773,31 +2773,31 @@ function Styles() {
 /* 1 — ID */
 .works-table th:nth-child(1),
 .works-table td:nth-child(1) {
-  width: 90px;
+  width: 70px;
 }
 
 /* 2 — Конкурс */
 .works-table th:nth-child(2),
 .works-table td:nth-child(2) {
-  width: 150px;
+  width: 90px;
 }
 
 /* 3 — Номинация (шире!) */
 .works-table th:nth-child(3),
 .works-table td:nth-child(3) {
-  width: 260px;
+  width: 170px;
 }
 
 /* 4 — Категория */
 .works-table th:nth-child(4),
 .works-table td:nth-child(4) {
-  width: 110px;
+  width: 90px;
 }
 
 /* 5 — Участник (шире) */
 .works-table th:nth-child(5),
 .works-table td:nth-child(5) {
-  width: 170px;
+  width: 110px;
 }
 
 /* 6 — Название */
