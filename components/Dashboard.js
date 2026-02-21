@@ -2087,13 +2087,34 @@ function toggleJudgePick(workId, judgeId) {
       </div>
 
       <div className="card row">
-        <button onClick={() => handleAdminTabChange('main')}>Админка</button>
-        {(isAdmin || access.canManageJudges) ? <button onClick={() => handleAdminTabChange('judges')}>Судьи</button> : null}
-        {(isAdmin || access.canManageWorks) ? <button onClick={() => handleAdminTabChange('works')}>Работы</button> : null}
-        {(isAdmin || access.canManageWorks) ? <button onClick={() => handleAdminTabChange('import')}>Импорт</button> : null}
-        {isAdmin ? <button onClick={() => handleAdminTabChange('moderators')}>Модераторы</button> : null}
-        {isAdmin ? <button onClick={() => handleAdminTabChange('participants')}>Участники</button> : null}
-      </div>
+  <button onClick={() => handleAdminTabChange('main')}>Админка</button>
+
+  {(isAdmin || access.canManageJudges) ? (
+    <button onClick={() => handleAdminTabChange('judges')}>Судьи</button>
+  ) : null}
+
+  {(isAdmin || access.canManageWorks) ? (
+    <button onClick={() => handleAdminTabChange('works')}>Работы</button>
+  ) : null}
+
+  {/* 🔹 Новая вкладка Критерии */}
+  {(isAdmin || access.canManageWorks) ? (
+    <button onClick={() => handleAdminTabChange('criteria')}>Критерии</button>
+  ) : null}
+
+  {isAdmin ? (
+    <button onClick={() => handleAdminTabChange('moderators')}>Модераторы</button>
+  ) : null}
+
+  {isAdmin ? (
+    <button onClick={() => handleAdminTabChange('participants')}>Участники</button>
+  ) : null}
+
+  {/* 🔹 Импорт переносим в конец */}
+  {(isAdmin || access.canManageWorks) ? (
+    <button onClick={() => handleAdminTabChange('import')}>Импорт</button>
+  ) : null}
+</div>
 
       {adminTab === 'main' ? (
         <>
